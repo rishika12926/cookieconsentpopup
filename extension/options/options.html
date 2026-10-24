@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CookieShield Dashboard</title>
+  <link rel="stylesheet" href="../shared/theme.css">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="side">
+      <div class="side-brand">
+        <div id="side-pip" aria-hidden="true"></div>
+        <div>
+          <div class="name">CookieShield</div>
+          <div class="tag">Rejects optional cookies. Never accepts for you.</div>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Dashboard sections">
+        <a href="#history" data-tab="history">History</a>
+        <a href="#metrics" data-tab="metrics">My stats</a>
+        <a href="#sites" data-tab="sites">Sites</a>
+        <a href="#coverage" data-tab="coverage">Supported platforms</a>
+        <a href="#reports" data-tab="reports">Reports</a>
+        <a href="#settings" data-tab="settings">Settings</a>
+        <a href="#about" data-tab="about">How it works &amp; privacy</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <!-- HISTORY -->
+      <section id="tab-history" class="tab" aria-labelledby="h-history">
+        <header class="tab-head">
+          <div>
+            <h1 id="h-history">History</h1>
+            <p class="lead">Every cookie banner CookieShield met, what it did and how sure it is.</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn" id="export-csv">Export CSV</button>
+            <button class="btn danger" id="clear-history">Clear</button>
+          </div>
+        </header>
+        <div class="summary-row" id="history-summary"></div>
+        <div class="filters">
+          <input type="search" id="history-search" placeholder="Search sites or platforms…" aria-label="Search history">
+          <div class="chips" role="group" aria-label="Filter">
+            <button class="chip active" data-filter="all">All</button>
+            <button class="chip" data-filter="rejected">Rejected</button>
+            <button class="chip" data-filter="needs">Needed you</button>
+            <button class="chip" data-filter="problem">Problems</button>
+          </div>
+        </div>
+        <div id="history-list" class="history-list"></div>
+      </section>
+
+      <!-- METRICS -->
+      <section id="tab-metrics" class="tab" hidden aria-labelledby="h-metrics">
+        <header class="tab-head">
+          <div>
+            <h1 id="h-metrics">My stats</h1>
+            <p class="lead">The three promises, measured on <b>your</b> browsing. Stored only on this computer. <span id="metrics-since"></span></p>
+          </div>
+          <div class="head-actions"><button class="btn" id="reset-metrics">Reset</button></div>
+        </header>
+        <div class="kpis" id="kpis"></div>
+        <div class="grid2">
+          <div class="card pad">
+            <h2>Handled correctly, by platform</h2>
+            <p class="small muted">“Correct” = rejected (confirmed or clicked). Needs-you and failures count against.</p>
+            <table class="tbl" id="by-platform"><thead><tr><th>Platform</th><th>Seen</th><th>Handled</th><th></th></tr></thead><tbody></tbody></table>
+          </div>
+          <div class="card pad">
+            <h2>Handled correctly, by type of website</h2>
+            <p class="small muted">Website type is guessed locally from the page (news, shopping, government…).</p>
+            <table class="tbl" id="by-sitetype"><thead><tr><th>Website type</th><th>Seen</th><th>Handled</th><th></th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SITES -->
+      <section id="tab-sites" class="tab" hidden aria-labelledby="h-sites">
+        <header class="tab-head"><div><h1 id="h-sites">Sites</h1><p class="lead">Paused sites, banners you chose to hide, and sites CookieShield remembers.</p></div></header>
+        <div class="card pad">
+          <h2>Paused</h2>
+          <p class="small muted">CookieShield leaves these sites alone. Use it if a site misbehaves.</p>
+          <form id="pause-form" class="inline-form"><input id="pause-input" placeholder="example.com" aria-label="Site to pause"><button class="btn">Pause site</button></form>
+          <ul id="paused-list" class="site-list"></ul>
+        </div>
+        <div class="card pad">
+          <h2>Remembered</h2>
+          <p class="small muted">Sites where CookieShield already rejected. If the banner comes back, it’s handled instantly and invisibly. “Forget” removes the memory (not the site’s own cookies).</p>
+          <ul id="memory-list" class="site-list"></ul>
+        </div>
+      </section>
+
+      <!-- COVERAGE -->
+      <section id="tab-coverage" class="tab" hidden aria-labelledby="h-coverage">
+        <header class="tab-head">
+          <div><h1 id="h-coverage">Supported platforms</h1><p class="lead">Consent platforms with dedicated rules. Anything else is handled by the multilingual reader (25+ languages), which looks for “reject” buttons by meaning.</p></div>
+          <div class="head-actions"><button class="btn" id="refresh-rules">Check for rule updates</button></div>
+        </header>
+        <p class="small muted" id="rules-status"></p>
+        <div class="card pad">
+          <table class="tbl" id="matrix"><thead><tr><th>Platform</th><th>Type</th><th>Reject path</th><th>Proof source</th><th>Test</th></tr></thead><tbody></tbody></table>
+        </div>
+      </section>
+
+      <!-- REPORTS -->
+      <section id="tab-reports" class="tab" hidden aria-labelledby="h-reports">
+        <header class="tab-head"><div><h1 id="h-reports">Reports</h1><p class="lead">Problems you reported. Only sent anywhere if you switched on sharing.</p></div></header>
+        <div id="reports-list" class="history-list"></div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="tab-settings" class="tab" hidden aria-labelledby="h-settings">
+        <header class="tab-head"><div><h1 id="h-settings">Settings</h1></div></header>
+        <form id="settings-form" class="card pad settings">
+          <div class="row">
+            <div><b>CookieShield on</b><p class="small muted">Turn off to stop handling banners everywhere.</p></div>
+            <label class="switch"><input type="checkbox" name="enabled"><span></span></label>
+          </div>
+          <div class="row">
+            <div><b>Show a little note after each rejection</b><p class="small muted">Off by default — the toolbar badge already shows ✓. Exceptions are always shown.</p></div>
+            <label class="switch"><input type="checkbox" name="showSuccess"><span></span></label>
+          </div>
+          <h2>Reading other languages</h2>
+          <div class="row">
+            <div><b>When a page isn’t in my language</b><p class="small muted">Translation runs on your device with Chrome’s built-in translator. Page text is never sent anywhere.</p></div>
+            <select name="translateMode" aria-label="Translation mode">
+              <option value="offer">Offer to translate</option>
+              <option value="auto">Translate automatically</option>
+              <option value="off">Don’t offer</option>
+            </select>
+          </div>
+          <div class="row">
+            <div><b>My language</b></div>
+            <select name="targetLang" id="target-lang" aria-label="Target language"></select>
+          </div>
+          <h2>Helping CookieShield learn new sites</h2>
+          <div class="row">
+            <div><b>Share anonymized problem reports</b><p class="small muted">Off by default. Only when you press “Report”. Sends the site name (no full address), the platform, button labels and what went wrong — never cookies, page content or anything about you.</p></div>
+            <label class="switch"><input type="checkbox" name="shareReports"><span></span></label>
+          </div>
+          <label class="field">Report server <input name="reportEndpoint" placeholder="https://your-project.vercel.app/api/report" inputmode="url"></label>
+          <label class="field">Rule updates <input name="rulesEndpoint" placeholder="https://your-project.vercel.app/rules/cmp-rules.json" inputmode="url"></label>
+          <label class="field">GitHub repository (for “open as issue”) <input name="repoUrl" placeholder="https://github.com/you/cookieshield" inputmode="url"></label>
+          <div class="save-row"><button class="btn primary" type="submit">Save settings</button><span id="settings-saved" class="small muted" role="status"></span></div>
+        </form>
+      </section>
+
+      <!-- ABOUT -->
+      <section id="tab-about" class="tab" hidden aria-labelledby="h-about">
+        <header class="tab-head"><div><h1 id="h-about">How it works &amp; privacy</h1></div></header>
+        <div class="grid3">
+          <div class="card pad promise"><div class="num">1</div><h2>Finds the banner</h2><p>Dedicated rules for 30 consent platforms (OneTrust, Cookiebot, Didomi, Usercentrics, Quantcast, Sourcepoint…), including ones hidden in Shadow DOM or iframes. Anything else is read by meaning in 25+ languages.</p></div>
+          <div class="card pad promise"><div class="num">2</div><h2>Only ever says “no”</h2><p>It clicks reject / “necessary only”, or switches every optional category off and saves. It never clicks Accept, OK or Subscribe. Then it checks the site’s own consent record. If it can’t reject safely, it tells you.</p></div>
+          <div class="card pad promise"><div class="num">3</div><h2>Keeps sites working</h2><p>After handling it checks scrolling, clicking, links and forms. It only repairs leftovers of the banner itself (like a stuck scroll lock), and you can undo or pause per site.</p></div>
+        </div>
+        <div class="card pad">
+          <h2>What the statuses mean</h2>
+          <dl class="legend" id="legend"></dl>
+        </div>
+        <div class="card pad">
+          <h2>Privacy</h2>
+          <ul class="plain">
+            <li>History, stats and site memory are stored only in this browser.</li>
+            <li>No analytics, no tracking, no account. Nothing is sent unless you report a problem with sharing switched on.</li>
+            <li>Necessary cookies (sign-in, basket, security) are never touched. CookieShield never deletes cookies.</li>
+            <li>Translation uses Chrome’s on-device translator; page text stays on your computer.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../shared/pip.js"></script>
+  <script src="../shared/explain.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

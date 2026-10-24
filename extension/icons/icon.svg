@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6f4ff"/><stop offset="1" stop-color="#b9dcf5"/></linearGradient>
+    <radialGradient id="body" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#2c4a72"/><stop offset="1" stop-color="#16294a"/></radialGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="30" fill="url(#bg)"/>
+  <ellipse cx="64" cy="116" rx="34" ry="6" fill="#0b2a4a" opacity=".12"/>
+  <ellipse cx="64" cy="74" rx="40" ry="42" fill="url(#body)"/>
+  <path d="M64 46c-17 0-28 12-28 30 0 18 12 34 28 34s28-16 28-34c0-18-11-30-28-30z" fill="#fdfcf7"/>
+  <circle cx="52" cy="68" r="7" fill="#fff"/><circle cx="76" cy="68" r="7" fill="#fff"/>
+  <circle cx="53.5" cy="69.5" r="4" fill="#0b1b2b"/><circle cx="77.5" cy="69.5" r="4" fill="#0b1b2b"/>
+  <circle cx="55" cy="67.5" r="1.4" fill="#fff"/><circle cx="79" cy="67.5" r="1.4" fill="#fff"/>
+  <path d="M57 79 L64 88 L71 79 Q64 76 57 79Z" fill="#f4a259"/>
+  <circle cx="44" cy="82" r="4.5" fill="#f28482" opacity=".5"/><circle cx="84" cy="82" r="4.5" fill="#f28482" opacity=".5"/>
+  <path d="M22 50 Q64 2 106 50 Q108 56 101 56 L27 56 Q20 56 22 50Z" fill="#5fa8d3"/>
+  <rect x="21" y="48" width="86" height="12" rx="6" fill="#cae9ff"/>
+  <circle cx="64" cy="16" r="9" fill="#cae9ff"/>
+</svg>

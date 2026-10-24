@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>SP Consent Message</title>
+<style>body{margin:0;font:15px/1.5 system-ui,sans-serif;padding:22px;color:#1d2a38}button{font:inherit;padding:9px 14px;margin:4px;border-radius:8px;border:1px solid #9ab}</style></head>
+<body>
+<div class="message-container"><div class="message-component message-row">
+  <p class="message-component">We and our partners store and access information on your device, such as cookies, and process personal data for personalised ads and content, measurement and audience research.</p>
+  <div class="message-component message-row" id="buttons"></div>
+</div></div>
+<script>
+  const v = new URLSearchParams(location.search).get('variant');
+  const b = document.getElementById('buttons');
+  const btn = (cls, label, choice) => { const x = document.createElement('button'); x.className = 'message-component message-button no-children focusable ' + cls; x.title = label; x.textContent = label; x.onclick = () => parent.postMessage({ sp: 'choice', choice }, '*'); b.appendChild(x); };
+  if (v === 'pay') {
+    btn('sp_choice_type_11', 'Akzeptieren und weiter', 11);
+    btn('sp_choice_type_9', 'Jetzt Pur-Abo abschließen', 9);
+  } else {
+    btn('sp_choice_type_12', 'Settings', 12);
+    btn('sp_choice_type_13', 'Reject', 13);
+    btn('sp_choice_type_11', 'Accept', 11);
+  }
+</script>
+</body></html>

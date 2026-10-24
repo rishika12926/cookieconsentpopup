@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CookieShield — cookie pop-ups, politely declined</title>
+  <meta name="description" content="A Chrome extension that rejects optional cookies on cookie pop-ups, verifies the choice, tells you when it can't, and never clicks Accept for you.">
+  <link rel="icon" href="/icon.png">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="wrap">
+      <a class="logo" href="/"><img src="/icon.png" alt="">CookieShield</a>
+      <a class="link opt" href="#promises">How it works</a>
+      <a class="link" href="/playground/">Test bench</a>
+      <a class="link opt" href="/report">Report a site</a>
+      <a class="btn small primary" href="#install">Install</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">Chrome extension · free &amp; open source</span>
+        <h1>Cookie pop-ups, <em>politely declined.</em></h1>
+        <p class="lead">CookieShield clicks “Reject” for you, checks that the site actually recorded your “no”, and tells you when it can’t. It never clicks “Accept” just to make a banner go away.</p>
+        <div class="cta">
+          <a class="btn primary" href="/download/cookieshield-extension.zip" download>Download the extension</a>
+          <a class="btn" href="/playground/">Try the test bench</a>
+        </div>
+      </div>
+      <div class="hero-art">
+        <div class="floe"></div>
+        <div class="pip-big" id="hero-pip"></div>
+        <div class="speech">“No thanks” — sent, and double-checked.</div>
+      </div>
+    </div>
+  </header>
+
+  <section class="block" id="survey">
+    <div class="wrap">
+      <h2>Built from what people told us</h2>
+      <p class="sub">We surveyed 17 people about cookie pop-ups on their laptops. Here’s what they said, and what CookieShield does about each point.</p>
+      <div class="quote-grid">
+        <div class="stat"><div class="n">5 / 17</div><div class="l">said the biggest problem is not knowing what happens when they accept or reject</div><div class="f">→ Every result is explained in plain words</div></div>
+        <div class="stat"><div class="n">4 / 17</div><div class="l">struggle most to find the option to reject</div><div class="f">→ Finds it in 25+ languages, even in hidden menus</div></div>
+        <div class="stat"><div class="n">5</div><div class="l">people gave up and clicked “Accept all” the last time rejecting was hard</div><div class="f">→ Never accepts; flags walls and accept-only banners</div></div>
+        <div class="stat"><div class="n">3 / 17</div><div class="l">said pop-ups keep coming back or break the website</div><div class="f">→ Remembers each site; checks the page still works</div></div>
+      </div>
+      <blockquote>“I feel accepting all is quicker and that’s how people are tricked into accepting them all, when they are in a rush.” — survey respondent</blockquote>
+    </div>
+  </section>
+
+  <section class="block" id="promises">
+    <div class="wrap">
+      <h2>Three promises, measured</h2>
+      <p class="sub">Each promise has a success measure. The numbers below come from the latest automated run of the extension in a real Chrome browser against <span id="fx-count">50</span> simulated consent platforms and custom banners. The extension also tracks the same three numbers on your own browsing, privately, under <b>My stats</b>.</p>
+      <div class="grid3">
+        <div class="card">
+          <span class="tag">Priority 1 · Coverage</span>
+          <h3>Works on the banners you actually meet</h3>
+          <div class="big" id="m-p1">—</div>
+          <p>of test banners handled correctly. Dedicated rules for 30 consent platforms (OneTrust, Cookiebot, Didomi, Usercentrics, Quantcast, Sourcepoint…), including Shadow DOM and iframes; everything else is read by meaning in 25+ languages. New site patterns come from opt-in, anonymised reports.</p>
+          <div class="metric-line" id="m-p1-sub"></div>
+        </div>
+        <div class="card">
+          <span class="tag">Priority 2 · Never accept</span>
+          <h3>Only ever says “no”</h3>
+          <div class="big" id="m-p2">—</div>
+          <p>accept clicks, silent acceptances or false “rejected” reports. After every rejection it reads the site’s own consent record (IAB TCF, OneTrust, Cookiebot, Didomi, Google Consent Mode…). If it can’t reject safely, it says so.</p>
+          <div class="metric-line" id="m-p2-sub"></div>
+        </div>
+        <div class="card">
+          <span class="tag">Priority 3 · Don’t break sites</span>
+          <h3>The site keeps working</h3>
+          <div class="big" id="m-p3">—</div>
+          <p>regressions per 100 handled visits. After each banner it checks scrolling, links, forms, sign-in and in-page navigation. It only repairs the banner’s own leftovers, and you can pause any site or undo fixes.</p>
+          <div class="metric-line" id="m-p3-sub"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="statuses">
+    <div class="wrap grid2">
+      <div>
+        <h2>Honest about what happened</h2>
+        <p class="sub">Most banner blockers just hide the pop-up, or quietly click whatever makes it disappear. CookieShield gives every visit one of these results, and keeps a history you can search.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><span class="pill ok">✓ Rejected · confirmed</span></td><td>Reject clicked, and the site’s own consent record agrees.</td></tr>
+            <tr><td><span class="pill calm">✓ Rejected · not double-checked</span></td><td>Reject clicked and the banner closed; the site publishes no record to verify.</td></tr>
+            <tr><td><span class="pill warn">! Needs your choice</span></td><td>Only “Accept”, a “pay or accept” wall, or an unclear banner. Nothing was accepted.</td></tr>
+            <tr><td><span class="pill bad">! Site still allows extras</span></td><td>We said no, but the site still records optional cookies as allowed. Reported, never hidden.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="matrix">
+    <div class="wrap">
+      <h2>Supported consent platforms</h2>
+      <p class="sub">This list is loaded live from the rule file the extension uses (<a href="/rules/cmp-rules.json">/rules/cmp-rules.json</a>). “Automated test” means a simulator for it runs in every test run.</p>
+      <div class="table-wrap">
+        <table id="matrix-table">
+          <thead><tr><th>Platform</th><th>Type</th><th>Proof read after rejecting</th><th>Status</th></tr></thead>
+          <tbody><tr><td colspan="4">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="install">
+    <div class="wrap grid2">
+      <div>
+        <h2>Install in two minutes</h2>
+        <p class="sub">CookieShield isn’t in the Chrome Web Store yet, so you load it yourself. It also works in Edge, Brave, Arc and other Chromium browsers.</p>
+        <a class="btn primary" href="/download/cookieshield-extension.zip" download>Download cookieshield-extension.zip</a>
+      </div>
+      <ol class="steps">
+        <li>Unzip the download. You’ll get a folder called <code>cookieshield-extension</code>.</li>
+        <li>Open <code>chrome://extensions</code> and switch on <b>Developer mode</b> (top right).</li>
+        <li>Click <b>Load unpacked</b> and choose the <code>cookieshield-extension</code> folder.</li>
+        <li>Pin Pip from the puzzle-piece menu. A ✓ on the icon means a banner was rejected; a ! means it needs you.</li>
+        <li>Open the <a href="/playground/">test bench</a> to see it handle 30+ kinds of banner.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block" id="privacy">
+    <div class="wrap grid3">
+      <div class="card"><h3>Stays on your computer</h3><p>History, stats and site memory live only in your browser. No account, no analytics, no tracking.</p></div>
+      <div class="card"><h3>Translation on your device</h3><p>“Read this page in English” uses Chrome’s built-in on-device translator. Page text never leaves your computer.</p></div>
+      <div class="card"><h3>Reports only if you choose</h3><p>Problem reports are off by default. When you send one, it contains the site name and button labels — never the full address, cookies or page content.</p></div>
+    </div>
+  </section>
+
+  <footer class="site">
+    <div class="wrap">
+      <span>CookieShield · MIT licence · Pip is an original character.</span>
+      <span><a href="/playground/">Test bench</a> · <a href="/report">Report a site</a> · <a href="/rules/cmp-rules.json">Rules feed</a> · <a href="https://github.com/" id="gh-link">GitHub</a></span>
+    </div>
+  </footer>
+
+  <script src="/pip.js"></script>
+  <script>
+    document.getElementById('hero-pip').innerHTML = PipArt('happy');
+
+    fetch('/results.json').then(r => r.ok ? r.json() : null).then(m => {
+      if (!m) return;
+      document.getElementById('fx-count').textContent = m.fixtures;
+      document.getElementById('m-p1').textContent = m.p1.correctlyHandledPct + '%';
+      document.getElementById('m-p1-sub').textContent = `${m.p1.correct}/${m.p1.total} test banners · ${m.p1.verified} confirmed against the site's consent record · run ${new Date(m.runAt).toLocaleDateString()}`;
+      const p2 = m.p2.acceptButtonClicks + m.p2.silentOptionalAcceptances + m.p2.falseSuccessReports;
+      document.getElementById('m-p2').textContent = String(p2);
+      document.getElementById('m-p2-sub').textContent = `${m.p2.exceptionsReportedCorrectly}/${m.p2.exceptionFixtures} trick banners (accept-only, pay-or-accept, mislabelled buttons) correctly reported to the user`;
+      document.getElementById('m-p3').textContent = String(m.p3.regressionsPer100);
+      document.getElementById('m-p3-sub').textContent = `${m.p3.regressions} regressions in ${m.p3.handledVisits} handled visits · checks: scroll, forms, sign-in, SPA navigation, links`;
+    }).catch(() => {});
+
+    fetch('/rules/cmp-rules.json').then(r => r.json()).then(doc => {
+      const proof = { tcf: 'IAB TCF', onetrust: 'OneTrust API', cookiebot: 'Cookiebot API', didomi: 'Didomi API', usercentrics: 'Usercentrics API', osano: 'Osano API', klaro: 'Klaro API', consentmode: 'Google Consent Mode' };
+      const tb = document.querySelector('#matrix-table tbody');
+      tb.innerHTML = '';
+      for (const p of doc.platforms) {
+        const tr = document.createElement('tr');
+        const cells = [p.name, p.type + (p.shadow ? ' · Shadow DOM' : '') + ((p.frameHosts || []).length ? ' · iframe' : ''), (p.state || []).map(s => proof[s] || s).join(', ') || 'Banner closes + consent cookie'];
+        for (const c of cells) { const td = document.createElement('td'); td.textContent = c; tr.appendChild(td); }
+        const td = document.createElement('td');
+        td.innerHTML = p.tested ? '<span class="pill ok">Automated test</span>' : '<span class="pill calm">Rule only</span>';
+        tr.appendChild(td);
+        tb.appendChild(tr);
+      }
+    }).catch(() => {});
+
+    fetch('/site.json').then(r => r.ok ? r.json() : null).then(s => { if (s && s.repoUrl) document.getElementById('gh-link').href = s.repoUrl; }).catch(() => {});
+  </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "cookieshield",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Chrome extension that rejects optional cookies on cookie pop-ups, verifies the choice, reports when it can't, and never clicks Accept for you.",
+  "license": "MIT",
+  "scripts": {
+    "test": "node tests/unit.test.js && node tests/api.test.js",
+    "test:e2e": "node tests/e2e.js",
+    "test:all": "npm test && npm run test:e2e",
+    "screens": "node tests/ui-screens.js",
+    "build": "node scripts/build-web.js",
+    "package": "node scripts/build-web.js && echo 'Extension zip: public/download/cookieshield-extension.zip'"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

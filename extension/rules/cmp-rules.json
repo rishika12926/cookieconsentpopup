@@ -1,0 +1,1071 @@
+{
+  "schema": 2,
+  "version": "2.0.0",
+  "updatedAt": "2026-10-24T00:00:00Z",
+  "policy": "Rules are data only (selectors). Every click is still checked by the multilingual classifier; accept-all and pay buttons are never clicked even if a rule names them.",
+  "platforms": [
+    {
+      "id": "onetrust",
+      "name": "OneTrust",
+      "type": "enterprise",
+      "detect": [
+        "#onetrust-banner-sdk",
+        "#onetrust-pc-sdk"
+      ],
+      "container": [
+        "#onetrust-banner-sdk",
+        "#onetrust-pc-sdk"
+      ],
+      "reject": [
+        "#onetrust-reject-all-handler",
+        "button.ot-pc-refuse-all-handler"
+      ],
+      "settings": [
+        "#onetrust-pc-btn-handler",
+        "button.ot-sdk-show-settings"
+      ],
+      "settingsReject": [
+        "#onetrust-pc-sdk button.ot-pc-refuse-all-handler"
+      ],
+      "toggles": "#onetrust-pc-sdk input.category-switch-handler, #onetrust-pc-sdk .ot-tgl input[type=checkbox]",
+      "save": [
+        "#onetrust-pc-sdk button.save-preference-btn-handler"
+      ],
+      "state": [
+        "onetrust",
+        "tcf",
+        "consentmode"
+      ],
+      "lockClasses": [
+        "ot-overflow-hidden"
+      ],
+      "backdrops": [
+        ".onetrust-pc-dark-filter"
+      ],
+      "fixture": "onetrust",
+      "frameHosts": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": true,
+      "frameDetect": []
+    },
+    {
+      "id": "cookiebot",
+      "name": "Cookiebot (Usercentrics)",
+      "type": "commercial",
+      "detect": [
+        "#CybotCookiebotDialog"
+      ],
+      "container": [
+        "#CybotCookiebotDialog"
+      ],
+      "reject": [
+        "#CybotCookiebotDialogBodyButtonDecline",
+        "#CybotCookiebotDialogBodyLevelButtonLevelOptinDeclineAll"
+      ],
+      "settings": [
+        "#CybotCookiebotDialogBodyLevelButtonCustomize",
+        "#CybotCookiebotDialogNavDetails"
+      ],
+      "settingsReject": [
+        "#CybotCookiebotDialogBodyButtonDecline"
+      ],
+      "toggles": "#CybotCookiebotDialog input[type=checkbox]",
+      "save": [
+        "#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection",
+        "#CybotCookiebotDialogBodyButtonAcceptSelected"
+      ],
+      "state": [
+        "cookiebot",
+        "tcf",
+        "consentmode"
+      ],
+      "lockClasses": [
+        "CybotCookiebotDialogActive"
+      ],
+      "backdrops": [
+        "#CybotCookiebotDialogBodyUnderlay"
+      ],
+      "fixture": "cookiebot",
+      "frameHosts": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": true,
+      "frameDetect": []
+    },
+    {
+      "id": "didomi",
+      "name": "Didomi",
+      "type": "commercial",
+      "detect": [
+        "#didomi-notice",
+        "#didomi-popup",
+        ".didomi-popup-container"
+      ],
+      "container": [
+        "#didomi-notice",
+        "#didomi-popup"
+      ],
+      "reject": [
+        "#didomi-notice-disagree-button",
+        ".didomi-continue-without-agreeing"
+      ],
+      "settings": [
+        "#didomi-notice-learn-more-button"
+      ],
+      "settingsReject": [
+        "#didomi-popup button[aria-describedby='didomi-consent-popup-disagree-all']",
+        "#didomi-popup .didomi-consent-popup-actions button:first-child"
+      ],
+      "toggles": "#didomi-popup input[type=checkbox], #didomi-popup [role=switch]",
+      "save": [
+        "#didomi-popup .didomi-consent-popup-actions .didomi-components-button--color"
+      ],
+      "state": [
+        "didomi",
+        "tcf"
+      ],
+      "lockClasses": [
+        "didomi-popup-open"
+      ],
+      "backdrops": [
+        ".didomi-popup-backdrop"
+      ],
+      "fixture": "didomi",
+      "frameHosts": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": true,
+      "frameDetect": []
+    },
+    {
+      "id": "usercentrics",
+      "name": "Usercentrics",
+      "type": "commercial",
+      "detect": [
+        "#usercentrics-root",
+        "#usercentrics-cmp-ui"
+      ],
+      "container": [
+        "#usercentrics-root",
+        "#usercentrics-cmp-ui"
+      ],
+      "shadow": true,
+      "reject": [
+        "button[data-testid='uc-deny-all-button']",
+        "button#deny",
+        "button.deny",
+        "button[data-action-type='deny']"
+      ],
+      "settings": [
+        "button[data-testid='uc-more-button']",
+        "button#more",
+        "button[data-action-type='more']"
+      ],
+      "settingsReject": [
+        "button[data-testid='uc-deny-all-button']",
+        "button#deny"
+      ],
+      "toggles": "input[type=checkbox], [role=switch]",
+      "save": [
+        "button[data-testid='uc-save-button']",
+        "button#save"
+      ],
+      "state": [
+        "usercentrics",
+        "tcf",
+        "consentmode"
+      ],
+      "fixture": "usercentrics",
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "delegatesToFrame": false,
+      "tested": true,
+      "frameDetect": []
+    },
+    {
+      "id": "quantcast",
+      "name": "Quantcast Choice (InMobi)",
+      "type": "commercial",
+      "detect": [
+        ".qc-cmp2-container",
+        "#qc-cmp2-ui"
+      ],
+      "container": [
+        "#qc-cmp2-ui",
+        ".qc-cmp2-container"
+      ],
+      "reject": [
+        ".qc-cmp2-summary-buttons button[mode='secondary']:not(:first-child)"
+      ],
+      "settings": [
+        ".qc-cmp2-summary-buttons button[mode='secondary']:first-child"
+      ],
+      "settingsReject": [
+        ".qc-cmp2-header-links button:first-child"
+      ],
+      "toggles": "#qc-cmp2-ui [role=switch], #qc-cmp2-ui input[type=checkbox]",
+      "save": [
+        ".qc-cmp2-footer button[mode='primary']"
+      ],
+      "state": [
+        "tcf"
+      ],
+      "lockClasses": [
+        "qc-cmp-ui-showing"
+      ],
+      "fixture": "quantcast",
+      "frameHosts": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": true,
+      "frameDetect": []
+    },
+    {
+      "id": "googlefc",
+      "name": "Google Funding Choices",
+      "type": "platform",
+      "detect": [
+        ".fc-consent-root"
+      ],
+      "container": [
+        ".fc-consent-root"
+      ],
+      "reject": [
+        ".fc-cta-do-not-consent"
+      ],
+      "settings": [
+        ".fc-cta-manage-options"
+      ],
+      "settingsReject": [],
+      "toggles": ".fc-consent-root input[type=checkbox].fc-preference-consent, .fc-consent-root .fc-preference-slider input",
+      "save": [
+        ".fc-confirm-choices"
+      ],
+      "state": [
+        "tcf",
+        "consentmode"
+      ],
+      "fixture": "googlefc",
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": true,
+      "frameDetect": []
+    },
+    {
+      "id": "sourcepoint",
+      "name": "Sourcepoint",
+      "type": "enterprise",
+      "detect": [
+        "div[id^='sp_message_container_']"
+      ],
+      "frameHosts": [
+        "privacy-mgmt.com",
+        "sp-prod.net",
+        "sourcepoint.com"
+      ],
+      "container": [
+        ".message-container",
+        ".message",
+        "body"
+      ],
+      "reject": [
+        "button.sp_choice_type_13",
+        "button.sp_choice_type_REJECT_ALL",
+        "button[title='Reject All']"
+      ],
+      "settings": [
+        "button.sp_choice_type_12"
+      ],
+      "settingsReject": [
+        "button.sp_choice_type_REJECT_ALL",
+        "button.sp_choice_type_13"
+      ],
+      "toggles": "input[type=checkbox], [role=switch]",
+      "save": [
+        "button.sp_choice_type_SAVE_AND_EXIT"
+      ],
+      "state": [
+        "tcf"
+      ],
+      "lockClasses": [
+        "sp-message-open"
+      ],
+      "backdrops": [
+        "div.sp_veil"
+      ],
+      "delegatesToFrame": true,
+      "fixture": "sourcepoint",
+      "shadow": false,
+      "tested": true,
+      "frameDetect": [
+        "button[class*='sp_choice_type_']",
+        ".message-container .message-component"
+      ]
+    },
+    {
+      "id": "trustarc",
+      "name": "TrustArc",
+      "type": "enterprise",
+      "detect": [
+        "#truste-consent-track",
+        "#truste-consent-content",
+        "#consent_blackbar"
+      ],
+      "frameHosts": [
+        "consent-pref.trustarc.com"
+      ],
+      "container": [
+        "#truste-consent-track",
+        "#consent_blackbar"
+      ],
+      "reject": [
+        "#truste-consent-required",
+        "button.rejectAll",
+        "a.required"
+      ],
+      "settings": [
+        "#truste-show-consent"
+      ],
+      "settingsReject": [],
+      "toggles": null,
+      "save": [],
+      "state": [
+        "consentmode"
+      ],
+      "fixture": "trustarc",
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": true,
+      "frameDetect": [
+        "#truste-consent-required",
+        ".pdynamicbutton .required"
+      ]
+    },
+    {
+      "id": "klaro",
+      "name": "Klaro!",
+      "type": "open-source",
+      "detect": [
+        ".klaro .cookie-notice",
+        ".klaro .cookie-modal"
+      ],
+      "container": [
+        ".klaro .cookie-notice",
+        ".klaro .cookie-modal"
+      ],
+      "reject": [
+        ".klaro .cn-decline",
+        ".klaro .cm-btn-decline"
+      ],
+      "settings": [
+        ".klaro .cn-learn-more"
+      ],
+      "settingsReject": [
+        ".klaro .cm-btn-decline"
+      ],
+      "toggles": ".klaro .cookie-modal input[type=checkbox]",
+      "save": [
+        ".klaro .cm-btn-accept:not(.cm-btn-accept-all)"
+      ],
+      "state": [
+        "klaro"
+      ],
+      "fixture": "klaro",
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": true,
+      "frameDetect": []
+    },
+    {
+      "id": "axeptio",
+      "name": "Axeptio",
+      "type": "commercial",
+      "detect": [
+        "#axeptio_overlay .axeptio_widget",
+        "#axeptio_main_button"
+      ],
+      "container": [
+        "#axeptio_overlay"
+      ],
+      "reject": [
+        "#axeptio_btn_dismiss"
+      ],
+      "settings": [
+        "#axeptio_btn_configure"
+      ],
+      "settingsReject": [],
+      "toggles": "#axeptio_overlay input[type=checkbox]",
+      "save": [
+        "#axeptio_btn_next"
+      ],
+      "state": [],
+      "fixture": null,
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": false,
+      "frameDetect": []
+    },
+    {
+      "id": "osano",
+      "name": "Osano",
+      "type": "commercial",
+      "detect": [
+        ".osano-cm-dialog:not(.osano-cm-dialog--hidden)",
+        ".osano-cm-window"
+      ],
+      "container": [
+        ".osano-cm-dialog"
+      ],
+      "reject": [
+        ".osano-cm-denyAll",
+        ".osano-cm-deny"
+      ],
+      "settings": [
+        ".osano-cm-manage"
+      ],
+      "settingsReject": [
+        ".osano-cm-denyAll"
+      ],
+      "toggles": ".osano-cm-info input.osano-cm-toggle__input",
+      "save": [
+        ".osano-cm-save"
+      ],
+      "state": [
+        "osano"
+      ],
+      "fixture": "osano",
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": true,
+      "frameDetect": []
+    },
+    {
+      "id": "complianz",
+      "name": "Complianz",
+      "type": "wordpress",
+      "detect": [
+        "#cmplz-cookiebanner-container .cmplz-cookiebanner",
+        ".cmplz-cookiebanner.cmplz-show"
+      ],
+      "container": [
+        ".cmplz-cookiebanner"
+      ],
+      "reject": [
+        ".cmplz-btn.cmplz-deny"
+      ],
+      "settings": [
+        ".cmplz-btn.cmplz-view-preferences"
+      ],
+      "settingsReject": [
+        ".cmplz-btn.cmplz-deny"
+      ],
+      "toggles": ".cmplz-cookiebanner input.cmplz-consent-checkbox",
+      "save": [
+        ".cmplz-btn.cmplz-save-preferences"
+      ],
+      "state": [
+        "consentmode"
+      ],
+      "lockClasses": [
+        "cmplz-blocked"
+      ],
+      "fixture": "complianz",
+      "frameHosts": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": true,
+      "frameDetect": []
+    },
+    {
+      "id": "cookieyes",
+      "name": "CookieYes",
+      "type": "wordpress",
+      "detect": [
+        ".cky-consent-container:not(.cky-hide)"
+      ],
+      "container": [
+        ".cky-consent-container",
+        ".cky-modal"
+      ],
+      "reject": [
+        ".cky-btn-reject"
+      ],
+      "settings": [
+        ".cky-btn-customize"
+      ],
+      "settingsReject": [
+        ".cky-modal .cky-btn-reject"
+      ],
+      "toggles": ".cky-modal input[type=checkbox]",
+      "save": [
+        ".cky-btn-preferences"
+      ],
+      "state": [
+        "consentmode"
+      ],
+      "fixture": "cookieyes",
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": true,
+      "frameDetect": []
+    },
+    {
+      "id": "borlabs",
+      "name": "Borlabs Cookie",
+      "type": "wordpress",
+      "detect": [
+        "#BorlabsCookieBox ._brlbs-box",
+        ".brlbs-cmpnt-dialog"
+      ],
+      "container": [
+        "#BorlabsCookieBox",
+        ".brlbs-cmpnt-dialog"
+      ],
+      "reject": [
+        "._brlbs-refuse-btn a",
+        "a._brlbs-refuse-btn",
+        "._brlbs-refuse a",
+        ".brlbs-btn-accept-only-essential"
+      ],
+      "settings": [
+        "._brlbs-manage-btn a",
+        "a._brlbs-manage"
+      ],
+      "settingsReject": [],
+      "toggles": "#BorlabsCookieBox input[type=checkbox]",
+      "save": [
+        "._brlbs-btn-accept-selected"
+      ],
+      "state": [],
+      "fixture": null,
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": false,
+      "frameDetect": []
+    },
+    {
+      "id": "iubenda",
+      "name": "iubenda",
+      "type": "commercial",
+      "detect": [
+        "#iubenda-cs-banner"
+      ],
+      "container": [
+        "#iubenda-cs-banner"
+      ],
+      "reject": [
+        ".iubenda-cs-reject-btn"
+      ],
+      "settings": [
+        ".iubenda-cs-customize-btn"
+      ],
+      "settingsReject": [],
+      "toggles": null,
+      "save": [],
+      "state": [
+        "tcf",
+        "consentmode"
+      ],
+      "fixture": "iubenda",
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": true,
+      "frameDetect": []
+    },
+    {
+      "id": "consentmanager",
+      "name": "consentmanager.net",
+      "type": "commercial",
+      "detect": [
+        "#cmpbox",
+        "#cmpwrapper"
+      ],
+      "container": [
+        "#cmpbox"
+      ],
+      "shadow": true,
+      "reject": [
+        ".cmpboxbtnno",
+        "a.cmpboxbtn.cmpboxbtnno"
+      ],
+      "settings": [
+        ".cmpboxbtncustom"
+      ],
+      "settingsReject": [
+        ".cmpboxbtnno"
+      ],
+      "toggles": null,
+      "save": [
+        ".cmpboxbtnsave"
+      ],
+      "state": [
+        "tcf"
+      ],
+      "fixture": null,
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "delegatesToFrame": false,
+      "tested": false,
+      "frameDetect": []
+    },
+    {
+      "id": "cookie-law-info",
+      "name": "CookieLawInfo / GDPR Cookie Consent",
+      "type": "wordpress",
+      "detect": [
+        "#cookie-law-info-bar"
+      ],
+      "container": [
+        "#cookie-law-info-bar"
+      ],
+      "reject": [
+        "#cookie_action_close_header_reject",
+        ".cli_action_button.cookie_action_close_header_reject"
+      ],
+      "settings": [
+        ".cli_settings_button"
+      ],
+      "settingsReject": [],
+      "toggles": null,
+      "save": [],
+      "state": [],
+      "fixture": null,
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": false,
+      "frameDetect": []
+    },
+    {
+      "id": "cookie-notice",
+      "name": "Cookie Notice (Hu-manity)",
+      "type": "wordpress",
+      "detect": [
+        "#cookie-notice.cookie-notice-visible",
+        "#cookie-notice"
+      ],
+      "container": [
+        "#cookie-notice"
+      ],
+      "reject": [
+        "#cn-refuse-cookie"
+      ],
+      "settings": [],
+      "settingsReject": [],
+      "toggles": null,
+      "save": [],
+      "state": [],
+      "fixture": "cookienotice",
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": true,
+      "frameDetect": []
+    },
+    {
+      "id": "moove",
+      "name": "Moove GDPR Cookie Compliance",
+      "type": "wordpress",
+      "detect": [
+        "#moove_gdpr_cookie_info_bar:not(.moove-gdpr-info-bar-hidden)"
+      ],
+      "container": [
+        "#moove_gdpr_cookie_info_bar"
+      ],
+      "reject": [
+        ".moove-gdpr-infobar-reject-btn"
+      ],
+      "settings": [
+        ".moove-gdpr-infobar-settings-btn"
+      ],
+      "settingsReject": [
+        ".moove-gdpr-modal-reject-all"
+      ],
+      "toggles": "#moove_gdpr_cookie_modal input[type=checkbox]",
+      "save": [
+        ".moove-gdpr-modal-save-settings"
+      ],
+      "state": [],
+      "fixture": null,
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": false,
+      "frameDetect": []
+    },
+    {
+      "id": "civic",
+      "name": "Civic Cookie Control",
+      "type": "commercial",
+      "detect": [
+        "#ccc #ccc-notify",
+        "#ccc-module"
+      ],
+      "container": [
+        "#ccc"
+      ],
+      "reject": [
+        "#ccc-notify-reject",
+        "#ccc-reject-settings"
+      ],
+      "settings": [
+        "#ccc-notify-settings"
+      ],
+      "settingsReject": [
+        "#ccc-reject-settings"
+      ],
+      "toggles": "#ccc input[type=checkbox]",
+      "save": [
+        "#ccc-dismiss-button"
+      ],
+      "state": [],
+      "fixture": null,
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": false,
+      "frameDetect": []
+    },
+    {
+      "id": "shopify",
+      "name": "Shopify privacy banner",
+      "type": "platform",
+      "detect": [
+        "#shopify-pc__banner"
+      ],
+      "container": [
+        "#shopify-pc__banner",
+        "#shopify-pc__prefs"
+      ],
+      "reject": [
+        "#shopify-pc__banner__btn-decline"
+      ],
+      "settings": [
+        "#shopify-pc__banner__btn-manage-prefs"
+      ],
+      "settingsReject": [
+        "#shopify-pc__prefs__header-decline"
+      ],
+      "toggles": "#shopify-pc__prefs input[type=checkbox]",
+      "save": [
+        "#shopify-pc__prefs__header-save"
+      ],
+      "state": [],
+      "fixture": "shopify",
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": true,
+      "frameDetect": []
+    },
+    {
+      "id": "hubspot",
+      "name": "HubSpot cookie banner",
+      "type": "platform",
+      "detect": [
+        "#hs-eu-cookie-confirmation"
+      ],
+      "container": [
+        "#hs-eu-cookie-confirmation"
+      ],
+      "reject": [
+        "#hs-eu-decline-button"
+      ],
+      "settings": [
+        "#hs-eu-cookie-settings-button"
+      ],
+      "settingsReject": [],
+      "toggles": null,
+      "save": [],
+      "state": [],
+      "fixture": "hubspot",
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": true,
+      "frameDetect": []
+    },
+    {
+      "id": "cookiescript",
+      "name": "Cookie-Script",
+      "type": "commercial",
+      "detect": [
+        "#cookiescript_injected"
+      ],
+      "container": [
+        "#cookiescript_injected"
+      ],
+      "reject": [
+        "#cookiescript_reject"
+      ],
+      "settings": [
+        "#cookiescript_manage"
+      ],
+      "settingsReject": [],
+      "toggles": "#cookiescript_injected input[type=checkbox]",
+      "save": [
+        "#cookiescript_save"
+      ],
+      "state": [],
+      "fixture": null,
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": false,
+      "frameDetect": []
+    },
+    {
+      "id": "termly",
+      "name": "Termly",
+      "type": "commercial",
+      "detect": [
+        "#termly-code-snippet-support [class*='termly-styles-root']",
+        "div[class^='termly-styles-module-root']"
+      ],
+      "container": [
+        "#termly-code-snippet-support"
+      ],
+      "reject": [
+        "button[data-tid='banner-decline']"
+      ],
+      "settings": [
+        "button[data-tid='banner-manage']"
+      ],
+      "settingsReject": [],
+      "toggles": null,
+      "save": [],
+      "state": [],
+      "fixture": null,
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": false,
+      "frameDetect": []
+    },
+    {
+      "id": "ketch",
+      "name": "Ketch",
+      "type": "commercial",
+      "detect": [
+        "#lanyard_root"
+      ],
+      "container": [
+        "#lanyard_root"
+      ],
+      "shadow": true,
+      "reject": [
+        "button#ketch-banner-button-secondary"
+      ],
+      "settings": [
+        "button#ketch-banner-button-tertiary"
+      ],
+      "settingsReject": [
+        "button#ketch-preferences-reject-all"
+      ],
+      "toggles": "#lanyard_root input[type=checkbox], #lanyard_root [role=switch]",
+      "save": [
+        "button#ketch-preferences-button-save"
+      ],
+      "state": [],
+      "fixture": null,
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "delegatesToFrame": false,
+      "tested": false,
+      "frameDetect": []
+    },
+    {
+      "id": "evidon",
+      "name": "Evidon / Crownpeak",
+      "type": "enterprise",
+      "detect": [
+        "#_evidon_banner"
+      ],
+      "container": [
+        "#_evidon_banner"
+      ],
+      "reject": [
+        "#_evidon-decline-button"
+      ],
+      "settings": [
+        "#_evidon-option-button"
+      ],
+      "settingsReject": [],
+      "toggles": null,
+      "save": [],
+      "state": [],
+      "fixture": null,
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": false,
+      "frameDetect": []
+    },
+    {
+      "id": "commandersact",
+      "name": "Commanders Act TrustCommander",
+      "type": "enterprise",
+      "detect": [
+        "#tc-privacy-wrapper",
+        "#footer_tc_privacy"
+      ],
+      "container": [
+        "#tc-privacy-wrapper",
+        "#footer_tc_privacy"
+      ],
+      "reject": [
+        "#popin_tc_privacy_button_2",
+        "#footer_tc_privacy_button_2"
+      ],
+      "settings": [
+        "#popin_tc_privacy_button_3"
+      ],
+      "settingsReject": [],
+      "toggles": null,
+      "save": [],
+      "state": [
+        "tcf"
+      ],
+      "fixture": null,
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": false,
+      "frameDetect": []
+    },
+    {
+      "id": "amazon",
+      "name": "Amazon (EU stores)",
+      "type": "site",
+      "detect": [
+        "#sp-cc"
+      ],
+      "container": [
+        "#sp-cc"
+      ],
+      "reject": [
+        "#sp-cc-rejectall-link"
+      ],
+      "settings": [
+        "#sp-cc-customize"
+      ],
+      "settingsReject": [],
+      "toggles": null,
+      "save": [],
+      "state": [],
+      "fixture": null,
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": false,
+      "frameDetect": []
+    },
+    {
+      "id": "google",
+      "name": "Google / YouTube consent",
+      "type": "site",
+      "detect": [
+        "form[action*='consent.google'] button",
+        "div[aria-modal=true] form[action*='consent.youtube']",
+        "ytd-consent-bump-v2-lightbox"
+      ],
+      "container": [
+        "ytd-consent-bump-v2-lightbox",
+        "div[aria-modal=true]",
+        "form[action*='consent']"
+      ],
+      "reject": [],
+      "settings": [],
+      "settingsReject": [],
+      "toggles": null,
+      "save": [],
+      "state": [],
+      "notes": "Labels vary by language; uses the multilingual classifier only (no hard-coded selectors).",
+      "fixture": null,
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": false,
+      "frameDetect": []
+    },
+    {
+      "id": "microsoft",
+      "name": "Microsoft WCP consent",
+      "type": "site",
+      "detect": [
+        "#wcpConsentBannerCtrl"
+      ],
+      "container": [
+        "#wcpConsentBannerCtrl"
+      ],
+      "reject": [],
+      "settings": [],
+      "settingsReject": [],
+      "toggles": null,
+      "save": [],
+      "state": [],
+      "notes": "Buttons have no stable ids; classifier picks the 'Reject' button.",
+      "fixture": null,
+      "frameHosts": [],
+      "lockClasses": [],
+      "backdrops": [],
+      "shadow": false,
+      "delegatesToFrame": false,
+      "tested": false,
+      "frameDetect": []
+    }
+  ]
+}

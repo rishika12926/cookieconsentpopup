@@ -1,0 +1,706 @@
+[
+ {
+  "id": "onetrust",
+  "title": "OneTrust",
+  "sim": "onetrust",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "Layer-1 “Reject All”, scroll lock + dark backdrop."
+ },
+ {
+  "id": "onetrust-settings",
+  "title": "OneTrust — no reject button",
+  "sim": "onetrust",
+  "opts": {
+   "noLayer1Reject": true,
+   "prechecked": true
+  },
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "Only “Accept” + “Cookie Settings”; categories pre-ticked. Must untick and confirm."
+ },
+ {
+  "id": "onetrust-us-optout",
+  "title": "OneTrust — US opt-out model",
+  "sim": "onetrust",
+  "opts": {
+   "optOut": true
+  },
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "Optional groups are ON by default until you reject."
+ },
+ {
+  "id": "cookiebot",
+  "title": "Cookiebot",
+  "sim": "cookiebot",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "“Deny” button; Cookiebot.consent API."
+ },
+ {
+  "id": "cookiebot-customize",
+  "title": "Cookiebot — customise only",
+  "sim": "cookiebot",
+  "opts": {
+   "customize": true,
+   "prechecked": true
+  },
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "No deny button; untick categories, then “Allow selection”."
+ },
+ {
+  "id": "didomi",
+  "title": "Didomi (French)",
+  "sim": "didomi",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "“Continuer sans accepter” link; Didomi API."
+ },
+ {
+  "id": "usercentrics",
+  "title": "Usercentrics (closed Shadow DOM)",
+  "sim": "usercentrics",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "Banner inside a closed shadow root."
+ },
+ {
+  "id": "quantcast",
+  "title": "Quantcast Choice (TCF)",
+  "sim": "quantcast",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "“DISAGREE”; verified via IAB TCF API."
+ },
+ {
+  "id": "googlefc",
+  "title": "Google Funding Choices",
+  "sim": "googlefc",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "“Do not consent”; TCF."
+ },
+ {
+  "id": "sourcepoint",
+  "title": "Sourcepoint (iframe)",
+  "sim": "sourcepoint",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "Buttons inside a cross-origin iframe."
+ },
+ {
+  "id": "iubenda",
+  "title": "iubenda",
+  "sim": "iubenda",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": ""
+ },
+ {
+  "id": "klaro",
+  "title": "Klaro!",
+  "sim": "klaro",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": ""
+ },
+ {
+  "id": "osano",
+  "title": "Osano",
+  "sim": "osano",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": ""
+ },
+ {
+  "id": "complianz",
+  "title": "Complianz (WordPress)",
+  "sim": "complianz",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": ""
+ },
+ {
+  "id": "cookieyes",
+  "title": "CookieYes",
+  "sim": "cookieyes",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": ""
+ },
+ {
+  "id": "trustarc",
+  "title": "TrustArc",
+  "sim": "trustarc",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "“Required Only”."
+ },
+ {
+  "id": "shopify",
+  "title": "Shopify privacy banner",
+  "sim": "shopify",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": ""
+ },
+ {
+  "id": "hubspot",
+  "title": "HubSpot",
+  "sim": "hubspot",
+  "opts": {},
+  "expect": [
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "No readable consent record → honest “clicked” status."
+ },
+ {
+  "id": "cookienotice",
+  "title": "Cookie Notice (WordPress)",
+  "sim": "cookienotice",
+  "opts": {},
+  "expect": [
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "“No” link."
+ },
+ {
+  "id": "custom-en",
+  "title": "Custom banner (en)",
+  "sim": "custom",
+  "opts": {
+   "lang": "en",
+   "gcm": true
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform. Google Consent Mode."
+ },
+ {
+  "id": "custom-de",
+  "title": "Custom banner (de)",
+  "sim": "custom",
+  "opts": {
+   "lang": "de",
+   "gcm": false
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform."
+ },
+ {
+  "id": "custom-fr",
+  "title": "Custom banner (fr)",
+  "sim": "custom",
+  "opts": {
+   "lang": "fr",
+   "gcm": true
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform. Google Consent Mode."
+ },
+ {
+  "id": "custom-es",
+  "title": "Custom banner (es)",
+  "sim": "custom",
+  "opts": {
+   "lang": "es",
+   "gcm": false
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform."
+ },
+ {
+  "id": "custom-it",
+  "title": "Custom banner (it)",
+  "sim": "custom",
+  "opts": {
+   "lang": "it",
+   "gcm": true
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform. Google Consent Mode."
+ },
+ {
+  "id": "custom-nl",
+  "title": "Custom banner (nl)",
+  "sim": "custom",
+  "opts": {
+   "lang": "nl",
+   "gcm": false
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform."
+ },
+ {
+  "id": "custom-pt",
+  "title": "Custom banner (pt)",
+  "sim": "custom",
+  "opts": {
+   "lang": "pt",
+   "gcm": true
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform. Google Consent Mode."
+ },
+ {
+  "id": "custom-pl",
+  "title": "Custom banner (pl)",
+  "sim": "custom",
+  "opts": {
+   "lang": "pl",
+   "gcm": false
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform."
+ },
+ {
+  "id": "custom-sv",
+  "title": "Custom banner (sv)",
+  "sim": "custom",
+  "opts": {
+   "lang": "sv",
+   "gcm": true
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform. Google Consent Mode."
+ },
+ {
+  "id": "custom-fi",
+  "title": "Custom banner (fi)",
+  "sim": "custom",
+  "opts": {
+   "lang": "fi",
+   "gcm": false
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform."
+ },
+ {
+  "id": "custom-cs",
+  "title": "Custom banner (cs)",
+  "sim": "custom",
+  "opts": {
+   "lang": "cs",
+   "gcm": true
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform. Google Consent Mode."
+ },
+ {
+  "id": "custom-hu",
+  "title": "Custom banner (hu)",
+  "sim": "custom",
+  "opts": {
+   "lang": "hu",
+   "gcm": false
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform."
+ },
+ {
+  "id": "custom-el",
+  "title": "Custom banner (el)",
+  "sim": "custom",
+  "opts": {
+   "lang": "el",
+   "gcm": true
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform. Google Consent Mode."
+ },
+ {
+  "id": "custom-ru",
+  "title": "Custom banner (ru)",
+  "sim": "custom",
+  "opts": {
+   "lang": "ru",
+   "gcm": false
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform."
+ },
+ {
+  "id": "custom-uk",
+  "title": "Custom banner (uk)",
+  "sim": "custom",
+  "opts": {
+   "lang": "uk",
+   "gcm": true
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform. Google Consent Mode."
+ },
+ {
+  "id": "custom-tr",
+  "title": "Custom banner (tr)",
+  "sim": "custom",
+  "opts": {
+   "lang": "tr",
+   "gcm": false
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform."
+ },
+ {
+  "id": "custom-ja",
+  "title": "Custom banner (ja)",
+  "sim": "custom",
+  "opts": {
+   "lang": "ja",
+   "gcm": true
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform. Google Consent Mode."
+ },
+ {
+  "id": "custom-zh",
+  "title": "Custom banner (zh)",
+  "sim": "custom",
+  "opts": {
+   "lang": "zh",
+   "gcm": false
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform."
+ },
+ {
+  "id": "custom-ko",
+  "title": "Custom banner (ko)",
+  "sim": "custom",
+  "opts": {
+   "lang": "ko",
+   "gcm": true
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform. Google Consent Mode."
+ },
+ {
+  "id": "custom-ar",
+  "title": "Custom banner (ar)",
+  "sim": "custom",
+  "opts": {
+   "lang": "ar",
+   "gcm": false
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform."
+ },
+ {
+  "id": "custom-he",
+  "title": "Custom banner (he)",
+  "sim": "custom",
+  "opts": {
+   "lang": "he",
+   "gcm": true
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform. Google Consent Mode."
+ },
+ {
+  "id": "custom-hi",
+  "title": "Custom banner (hi)",
+  "sim": "custom",
+  "opts": {
+   "lang": "hi",
+   "gcm": false
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "language",
+  "description": "Bespoke banner, no consent platform."
+ },
+ {
+  "id": "custom-settings",
+  "title": "Custom — settings only",
+  "sim": "custom",
+  "opts": {
+   "noReject": true,
+   "gcm": true,
+   "settingsLabel": "Manage preferences"
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "generic",
+  "description": "No reject button; must open preferences, untick (incl. ARIA switch) and save."
+ },
+ {
+  "id": "late-banner",
+  "title": "Late-loading banner (5 s)",
+  "sim": "custom",
+  "opts": {
+   "lang": "en",
+   "delay": 5000
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "generic",
+  "description": "Banner injected 5 seconds after load."
+ },
+ {
+  "id": "leftover-lock",
+  "title": "Buggy CMP leaves page locked",
+  "sim": "custom",
+  "opts": {
+   "lang": "en",
+   "gcm": true,
+   "leaveLock": true
+  },
+  "expect": [
+   "VERIFIED",
+   "CLICKED"
+  ],
+  "reason": null,
+  "group": "generic",
+  "description": "After rejecting, the site forgets to unlock scrolling and leaves a dimmer. Extension must repair it (Priority 3)."
+ },
+ {
+  "id": "accept-only",
+  "title": "Accept-only banner",
+  "sim": "acceptOnly",
+  "opts": {},
+  "expect": [
+   "NEEDS_YOU"
+  ],
+  "reason": "ACCEPT_ONLY",
+  "group": "exception",
+  "description": "Only “Got it!” → must NOT click, must report."
+ },
+ {
+  "id": "pay-wall",
+  "title": "Consent-or-pay wall",
+  "sim": "payWall",
+  "opts": {},
+  "expect": [
+   "NEEDS_YOU"
+  ],
+  "reason": "CONSENT_OR_PAY",
+  "group": "exception",
+  "description": "Accept tracking or subscribe → must not choose."
+ },
+ {
+  "id": "sourcepoint-pay",
+  "title": "Sourcepoint “Pur-Abo” (iframe)",
+  "sim": "sourcepoint",
+  "opts": {
+   "pay": true
+  },
+  "expect": [
+   "NEEDS_YOU"
+  ],
+  "reason": "CONSENT_OR_PAY",
+  "group": "exception",
+  "description": "German consent-or-pay wall inside an iframe."
+ },
+ {
+  "id": "mislabeled",
+  "title": "Adversarial: “Reject” grants consent",
+  "sim": "custom",
+  "opts": {
+   "lang": "en",
+   "gcm": true,
+   "mislabeled": true
+  },
+  "expect": [
+   "FAILED"
+  ],
+  "reason": "OPTIONAL_STILL_GRANTED",
+  "group": "exception",
+  "description": "Must NOT report success when the site records consent anyway."
+ },
+ {
+  "id": "newsletter",
+  "title": "Newsletter pop-up (not cookies)",
+  "sim": "newsletter",
+  "opts": {},
+  "expect": [
+   "NO_BANNER"
+  ],
+  "reason": null,
+  "group": "negative",
+  "description": "Must be left alone."
+ }
+]

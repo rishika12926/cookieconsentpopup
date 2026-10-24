@@ -1,0 +1,7 @@
+node_modules/
+public/
+.vercel/
+.DS_Store
+Thumbs.db
+*.log
+tests/results/screens/

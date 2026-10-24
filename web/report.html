@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Report a site — CookieShield</title>
+  <link rel="icon" href="/icon.png">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="wrap">
+      <a class="logo" href="/"><img src="/icon.png" alt="">CookieShield</a>
+      <a class="link" href="/playground/">Test bench</a>
+      <a class="btn small primary" href="/#install">Install</a>
+    </div>
+  </nav>
+  <section class="block">
+    <div class="wrap grid2">
+      <div>
+        <h1 style="font-size:clamp(32px,5vw,48px)">Report a site</h1>
+        <p class="sub">A banner that wasn’t handled, a wrong choice, or a site that broke? The fastest way is the <b>Report a problem</b> button in the extension popup: it fills in the technical details for you. You can also use this form.</p>
+        <div class="card">
+          <h3>What happens to a report</h3>
+          <p>It becomes an issue in the project’s GitHub repository, labelled <code>site-report</code>. A maintainer adds a rule to <code>extension/rules/cmp-rules.json</code> and a test page, and every installed copy that has rule updates switched on picks up the fix.</p>
+        </div>
+        <p class="note">We keep only the site name (e.g. <code>example.com</code>, never the full address), the problem type and your comment. No IP address is stored.</p>
+      </div>
+      <form class="form card" id="f">
+        <label>Website <input name="site" placeholder="example.com" required></label>
+        <label>What went wrong?
+          <select name="issueType">
+            <option value="banner_not_handled">The cookie pop-up was not handled</option>
+            <option value="wrong_choice">It picked the wrong option / accepted something</option>
+            <option value="site_broken">The site broke (scrolling, sign-in, forms, links)</option>
+            <option value="translation">Translation problem</option>
+            <option value="other">Something else</option>
+          </select>
+        </label>
+        <label>Details (optional) <textarea name="comment" rows="4" maxlength="500" placeholder="What did the banner say? Which button should have been clicked?"></textarea></label>
+        <button class="btn primary" type="submit">Send report</button>
+        <p class="note" id="out" role="status"></p>
+      </form>
+    </div>
+  </section>
+  <script>
+    document.getElementById('f').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = Object.fromEntries(new FormData(e.target));
+      fd.site = fd.site.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/^www\./, '');
+      const out = document.getElementById('out');
+      out.textContent = 'Sending…';
+      try {
+        const r = await fetch('/api/report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fd) });
+        const j = await r.json();
+        if (r.ok) { out.innerHTML = 'Thanks! '; if (j.issueUrl) { const a = document.createElement('a'); a.href = j.issueUrl; a.textContent = 'View the issue'; out.appendChild(a); } e.target.reset(); }
+        else out.textContent = `Couldn’t send: ${j.error || r.status}`;
+      } catch (err) { out.textContent = 'Couldn’t reach the report server.'; }
+    });
+  </script>
+</body>
+</html>
