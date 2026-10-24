@@ -1,15 +1,45 @@
 {
   "metrics": {
-    "runAt": "2026-10-24T22:39:16.775Z",
-    "fixtures": 7,
+    "runAt": "2026-10-24T22:48:48.959Z",
+    "fixtures": 53,
     "p1": {
       "correctlyHandledPct": 100,
-      "correct": 6,
-      "total": 6,
+      "correct": 52,
+      "total": 52,
       "byPlatform": {
         "onetrust": {
+          "total": 3,
+          "correct": 3,
+          "pct": 100
+        },
+        "cookiebot": {
+          "total": 2,
+          "correct": 2,
+          "pct": 100
+        },
+        "didomi": {
           "total": 1,
           "correct": 1,
+          "pct": 100
+        },
+        "usercentrics": {
+          "total": 1,
+          "correct": 1,
+          "pct": 100
+        },
+        "quantcast": {
+          "total": 1,
+          "correct": 1,
+          "pct": 100
+        },
+        "googlefc": {
+          "total": 1,
+          "correct": 1,
+          "pct": 100
+        },
+        "sourcepoint": {
+          "total": 2,
+          "correct": 2,
           "pct": 100
         },
         "iubenda": {
@@ -21,32 +51,97 @@
           "total": 4,
           "correct": 4,
           "pct": 100
-        }
-      },
-      "byGroup": {
-        "platform": {
-          "total": 5,
-          "correct": 5,
+        },
+        "klaro": {
+          "total": 1,
+          "correct": 1,
           "pct": 100
         },
-        "exception": {
+        "osano": {
+          "total": 1,
+          "correct": 1,
+          "pct": 100
+        },
+        "complianz": {
+          "total": 1,
+          "correct": 1,
+          "pct": 100
+        },
+        "cookieyes": {
+          "total": 1,
+          "correct": 1,
+          "pct": 100
+        },
+        "trustarc": {
+          "total": 1,
+          "correct": 1,
+          "pct": 100
+        },
+        "shopify": {
+          "total": 1,
+          "correct": 1,
+          "pct": 100
+        },
+        "hubspot": {
+          "total": 1,
+          "correct": 1,
+          "pct": 100
+        },
+        "cookienotice": {
+          "total": 1,
+          "correct": 1,
+          "pct": 100
+        },
+        "custom": {
+          "total": 26,
+          "correct": 26,
+          "pct": 100
+        },
+        "acceptOnly": {
+          "total": 1,
+          "correct": 1,
+          "pct": 100
+        },
+        "payWall": {
           "total": 1,
           "correct": 1,
           "pct": 100
         }
       },
-      "verified": 5,
-      "clickedOnly": 0
+      "byGroup": {
+        "platform": {
+          "total": 22,
+          "correct": 22,
+          "pct": 100
+        },
+        "exception": {
+          "total": 5,
+          "correct": 5,
+          "pct": 100
+        },
+        "language": {
+          "total": 22,
+          "correct": 22,
+          "pct": 100
+        },
+        "generic": {
+          "total": 3,
+          "correct": 3,
+          "pct": 100
+        }
+      },
+      "verified": 33,
+      "clickedOnly": 14
     },
     "p2": {
       "acceptButtonClicks": 0,
       "silentOptionalAcceptances": 0,
       "falseSuccessReports": 0,
-      "exceptionsReportedCorrectly": 1,
-      "exceptionFixtures": 1
+      "exceptionsReportedCorrectly": 5,
+      "exceptionFixtures": 5
     },
     "p3": {
-      "handledVisits": 5,
+      "handledVisits": 47,
       "regressions": 0,
       "regressionsPer100": 0,
       "checks": [
@@ -81,6 +176,116 @@
   },
   "results": [
     {
+      "id": "onetrust",
+      "title": "OneTrust",
+      "group": "platform",
+      "cmp": "onetrust",
+      "expected": [
+        "VERIFIED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "OneTrust: Active groups: C0001 · OneTrust cookie: groups=C0001:1,C0002:0,C0003:0,C0004:0",
+      "clicks": [
+        "Reject All"
+      ],
+      "handledMs": 826,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "onetrust-settings",
+      "title": "OneTrust — no reject button",
+      "group": "platform",
+      "cmp": "onetrust",
+      "expected": [
+        "VERIFIED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "settings_all_off_saved",
+      "evidence": "OneTrust: Active groups: C0001 · OneTrust cookie: groups=C0001:1,C0002:0,C0003:0,C0004:0",
+      "clicks": [
+        "Cookie Settings",
+        "Confirm My Choices"
+      ],
+      "handledMs": 1462,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "settings",
+          "save"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
       "id": "onetrust-us-optout",
       "title": "OneTrust — US opt-out model",
       "group": "platform",
@@ -96,7 +301,7 @@
       "clicks": [
         "Reject All"
       ],
-      "handledMs": 729,
+      "handledMs": 767,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -104,6 +309,384 @@
         "simClicks": [
           "reject"
         ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "cookiebot",
+      "title": "Cookiebot",
+      "group": "platform",
+      "cmp": "cookiebot",
+      "expected": [
+        "VERIFIED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Cookiebot: preferences=false, statistics=false, marketing=false · Cookiebot cookie: {stamp:'sim',necessary:true,preferences:false,statistics:false,marketing:false,method:'explicit',ver:1}",
+      "clicks": [
+        "Deny"
+      ],
+      "handledMs": 808,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "deny"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "cookiebot-customize",
+      "title": "Cookiebot — customise only",
+      "group": "platform",
+      "cmp": "cookiebot",
+      "expected": [
+        "VERIFIED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "settings_all_off_saved",
+      "evidence": "Cookiebot: preferences=false, statistics=false, marketing=false · Cookiebot cookie: {stamp:'sim',necessary:true,preferences:false,statistics:false,marketing:false,method:'explicit',ver:1}",
+      "clicks": [
+        "Customize",
+        "Allow selection"
+      ],
+      "handledMs": 1472,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "customize",
+          "allow selection"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "didomi",
+      "title": "Didomi (French)",
+      "group": "platform",
+      "cmp": "didomi",
+      "expected": [
+        "VERIFIED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Didomi: 0 purposes enabled, 4 disabled",
+      "clicks": [
+        "Continuer sans accepter →"
+      ],
+      "handledMs": 733,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "continue without"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "usercentrics",
+      "title": "Usercentrics (closed Shadow DOM)",
+      "group": "platform",
+      "cmp": "usercentrics",
+      "expected": [
+        "VERIFIED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Usercentrics: 0 of 2 optional services granted",
+      "clicks": [
+        "Deny"
+      ],
+      "handledMs": 703,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "deny"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "quantcast",
+      "title": "Quantcast Choice (TCF)",
+      "group": "platform",
+      "cmp": "quantcast",
+      "expected": [
+        "VERIFIED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "IAB TCF v2: 0 purpose consents and 0 vendor consents granted",
+      "clicks": [
+        "DISAGREE"
+      ],
+      "handledMs": 727,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "googlefc",
+      "title": "Google Funding Choices",
+      "group": "platform",
+      "cmp": "googlefc",
+      "expected": [
+        "VERIFIED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "IAB TCF v2: 0 purpose consents and 0 vendor consents granted",
+      "clicks": [
+        "Do not consent"
+      ],
+      "handledMs": 760,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "sourcepoint",
+      "title": "Sourcepoint (iframe)",
+      "group": "platform",
+      "cmp": "sourcepoint",
+      "expected": [
+        "VERIFIED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "IAB TCF v2: 0 purpose consents and 0 vendor consents granted",
+      "clicks": [
+        "Reject"
+      ],
+      "handledMs": 1138,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": []
       },
       "health": {
         "after": [],
@@ -150,7 +733,7 @@
       "clicks": [
         "Reject"
       ],
-      "handledMs": 762,
+      "handledMs": 774,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -207,7 +790,7 @@
         "Reject all",
         "Save and continue"
       ],
-      "handledMs": 1838,
+      "handledMs": 1786,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -266,7 +849,7 @@
         "Reject all",
         "Save and continue"
       ],
-      "handledMs": 5014,
+      "handledMs": 5031,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -324,7 +907,7 @@
         "Reject all",
         "Save and continue"
       ],
-      "handledMs": 4998,
+      "handledMs": 4991,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -385,6 +968,1934 @@
         "decided": true,
         "optionalGranted": true,
         "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": null,
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false
+    },
+    {
+      "id": "klaro",
+      "title": "Klaro!",
+      "group": "platform",
+      "cmp": "klaro",
+      "expected": [
+        "VERIFIED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Klaro: 0 of 2 optional services granted",
+      "clicks": [
+        "I decline"
+      ],
+      "handledMs": 781,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "osano",
+      "title": "Osano",
+      "group": "platform",
+      "cmp": "osano",
+      "expected": [
+        "VERIFIED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Osano: ANALYTICS=DENY, MARKETING=DENY, PERSONALIZATION=DENY",
+      "clicks": [
+        "Deny"
+      ],
+      "handledMs": 705,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "complianz",
+      "title": "Complianz (WordPress)",
+      "group": "platform",
+      "cmp": "complianz",
+      "expected": [
+        "VERIFIED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Complianz cookie: marketing=deny, statistics=deny, preferences=deny",
+      "clicks": [
+        "Deny"
+      ],
+      "handledMs": 759,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "cookieyes",
+      "title": "CookieYes",
+      "group": "platform",
+      "cmp": "cookieyes",
+      "expected": [
+        "VERIFIED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "CookieYes cookie: consentid:sim,consent:no,action:yes,necessary:yes,functional:no,analytics:no,performance:no,advertisement:no",
+      "clicks": [
+        "Reject All"
+      ],
+      "handledMs": 730,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "trustarc",
+      "title": "TrustArc",
+      "group": "platform",
+      "cmp": "trustarc",
+      "expected": [
+        "VERIFIED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "TrustArc cookie: 0:",
+      "clicks": [
+        "Required Only"
+      ],
+      "handledMs": 754,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "shopify",
+      "title": "Shopify privacy banner",
+      "group": "platform",
+      "cmp": "shopify",
+      "expected": [
+        "VERIFIED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Shopify consent cookie: {\"a\":false,\"p\":false,\"m\":false,\"t\":false}",
+      "clicks": [
+        "Decline"
+      ],
+      "handledMs": 680,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "hubspot",
+      "title": "HubSpot",
+      "group": "platform",
+      "cmp": "hubspot",
+      "expected": [
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "CLICKED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": null,
+      "clicks": [
+        "Decline"
+      ],
+      "handledMs": 723,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "cookienotice",
+      "title": "Cookie Notice (WordPress)",
+      "group": "platform",
+      "cmp": "cookienotice",
+      "expected": [
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "CLICKED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": null,
+      "clicks": [
+        "No"
+      ],
+      "handledMs": 763,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-en",
+      "title": "Custom banner (en)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Google Consent Mode: ad_storage=denied, analytics_storage=denied, ad_user_data=denied, ad_personalization=denied",
+      "clicks": [
+        "Reject all"
+      ],
+      "handledMs": 780,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-de",
+      "title": "Custom banner (de)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "CLICKED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": null,
+      "clicks": [
+        "Alle ablehnen"
+      ],
+      "handledMs": 851,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-fr",
+      "title": "Custom banner (fr)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Google Consent Mode: ad_storage=denied, analytics_storage=denied, ad_user_data=denied, ad_personalization=denied",
+      "clicks": [
+        "Tout refuser"
+      ],
+      "handledMs": 760,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-es",
+      "title": "Custom banner (es)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "CLICKED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": null,
+      "clicks": [
+        "Rechazar todas"
+      ],
+      "handledMs": 787,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-it",
+      "title": "Custom banner (it)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Google Consent Mode: ad_storage=denied, analytics_storage=denied, ad_user_data=denied, ad_personalization=denied",
+      "clicks": [
+        "Rifiuta tutti"
+      ],
+      "handledMs": 731,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-nl",
+      "title": "Custom banner (nl)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "CLICKED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": null,
+      "clicks": [
+        "Alles weigeren"
+      ],
+      "handledMs": 712,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-pt",
+      "title": "Custom banner (pt)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Google Consent Mode: ad_storage=denied, analytics_storage=denied, ad_user_data=denied, ad_personalization=denied",
+      "clicks": [
+        "Rejeitar todos"
+      ],
+      "handledMs": 773,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-pl",
+      "title": "Custom banner (pl)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "CLICKED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": null,
+      "clicks": [
+        "Odrzuć wszystkie"
+      ],
+      "handledMs": 796,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-sv",
+      "title": "Custom banner (sv)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Google Consent Mode: ad_storage=denied, analytics_storage=denied, ad_user_data=denied, ad_personalization=denied",
+      "clicks": [
+        "Avvisa alla"
+      ],
+      "handledMs": 805,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-fi",
+      "title": "Custom banner (fi)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "CLICKED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": null,
+      "clicks": [
+        "Hylkää kaikki"
+      ],
+      "handledMs": 823,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-cs",
+      "title": "Custom banner (cs)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Google Consent Mode: ad_storage=denied, analytics_storage=denied, ad_user_data=denied, ad_personalization=denied",
+      "clicks": [
+        "Odmítnout vše"
+      ],
+      "handledMs": 855,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-hu",
+      "title": "Custom banner (hu)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "CLICKED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": null,
+      "clicks": [
+        "Összes elutasítása"
+      ],
+      "handledMs": 806,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-el",
+      "title": "Custom banner (el)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Google Consent Mode: ad_storage=denied, analytics_storage=denied, ad_user_data=denied, ad_personalization=denied",
+      "clicks": [
+        "Απόρριψη όλων"
+      ],
+      "handledMs": 1153,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-ru",
+      "title": "Custom banner (ru)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "CLICKED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": null,
+      "clicks": [
+        "Отклонить все"
+      ],
+      "handledMs": 1156,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-uk",
+      "title": "Custom banner (uk)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Google Consent Mode: ad_storage=denied, analytics_storage=denied, ad_user_data=denied, ad_personalization=denied",
+      "clicks": [
+        "Відхилити все"
+      ],
+      "handledMs": 1124,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-tr",
+      "title": "Custom banner (tr)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "CLICKED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": null,
+      "clicks": [
+        "Tümünü reddet"
+      ],
+      "handledMs": 826,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-ja",
+      "title": "Custom banner (ja)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Google Consent Mode: ad_storage=denied, analytics_storage=denied, ad_user_data=denied, ad_personalization=denied",
+      "clicks": [
+        "すべて拒否"
+      ],
+      "handledMs": 1128,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-zh",
+      "title": "Custom banner (zh)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "CLICKED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": null,
+      "clicks": [
+        "全部拒绝"
+      ],
+      "handledMs": 1034,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-ko",
+      "title": "Custom banner (ko)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Google Consent Mode: ad_storage=denied, analytics_storage=denied, ad_user_data=denied, ad_personalization=denied",
+      "clicks": [
+        "모두 거부"
+      ],
+      "handledMs": 1141,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-ar",
+      "title": "Custom banner (ar)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "CLICKED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": null,
+      "clicks": [
+        "رفض الكل"
+      ],
+      "handledMs": 1068,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-he",
+      "title": "Custom banner (he)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Google Consent Mode: ad_storage=denied, analytics_storage=denied, ad_user_data=denied, ad_personalization=denied",
+      "clicks": [
+        "דחה הכל"
+      ],
+      "handledMs": 1125,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-hi",
+      "title": "Custom banner (hi)",
+      "group": "language",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "CLICKED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": null,
+      "clicks": [
+        "सभी अस्वीकार करें"
+      ],
+      "handledMs": 1116,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "custom-settings",
+      "title": "Custom — settings only",
+      "group": "generic",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "settings_all_off_saved",
+      "evidence": "Google Consent Mode: ad_storage=denied, analytics_storage=denied, ad_user_data=denied, ad_personalization=denied",
+      "clicks": [
+        "Manage preferences",
+        "Save preferences"
+      ],
+      "handledMs": 1531,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "settings",
+          "save"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "late-banner",
+      "title": "Late-loading banner (5 s)",
+      "group": "generic",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "CLICKED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": null,
+      "clicks": [
+        "Reject all"
+      ],
+      "handledMs": 5822,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": []
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "leftover-lock",
+      "title": "Buggy CMP leaves page locked",
+      "group": "generic",
+      "cmp": "custom",
+      "expected": [
+        "VERIFIED",
+        "CLICKED"
+      ],
+      "expectedReason": null,
+      "status": "VERIFIED",
+      "reason": null,
+      "method": "reject_button",
+      "evidence": "Google Consent Mode: ad_storage=denied, analytics_storage=denied, ad_user_data=denied, ad_personalization=denied",
+      "clicks": [
+        "Reject all"
+      ],
+      "handledMs": 781,
+      "truth": {
+        "decided": true,
+        "optionalGranted": false,
+        "choice": "reject",
+        "simClicks": [
+          "reject"
+        ]
+      },
+      "health": {
+        "after": [],
+        "before": [
+          "SCROLL_LOCKED",
+          "CLICK_BLOCKED"
+        ],
+        "checks": {
+          "click": true,
+          "forms": true,
+          "inert": true,
+          "links": true,
+          "scroll": true
+        },
+        "ok": true,
+        "repairs": [
+          "removed lock class .cookie-modal-open",
+          "hid leftover consent dimmer",
+          "restored page scrolling"
+        ]
+      },
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false,
+      "functional": {
+        "checks": {
+          "scroll": true,
+          "forms": true,
+          "auth": true,
+          "spaNavigation": true,
+          "links": true
+        },
+        "failures": []
+      },
+      "regression": false
+    },
+    {
+      "id": "accept-only",
+      "title": "Accept-only banner",
+      "group": "exception",
+      "cmp": "acceptOnly",
+      "expected": [
+        "NEEDS_YOU"
+      ],
+      "expectedReason": "ACCEPT_ONLY",
+      "status": "NEEDS_YOU",
+      "reason": "ACCEPT_ONLY",
+      "method": null,
+      "evidence": null,
+      "clicks": [],
+      "handledMs": 487,
+      "truth": {
+        "decided": false,
+        "optionalGranted": null,
+        "choice": null,
+        "simClicks": []
+      },
+      "health": null,
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false
+    },
+    {
+      "id": "pay-wall",
+      "title": "Consent-or-pay wall",
+      "group": "exception",
+      "cmp": "payWall",
+      "expected": [
+        "NEEDS_YOU"
+      ],
+      "expectedReason": "CONSENT_OR_PAY",
+      "status": "NEEDS_YOU",
+      "reason": "CONSENT_OR_PAY",
+      "method": null,
+      "evidence": null,
+      "clicks": [],
+      "handledMs": 511,
+      "truth": {
+        "decided": false,
+        "optionalGranted": null,
+        "choice": null,
+        "simClicks": []
+      },
+      "health": null,
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false
+    },
+    {
+      "id": "sourcepoint-pay",
+      "title": "Sourcepoint “Pur-Abo” (iframe)",
+      "group": "exception",
+      "cmp": "sourcepoint",
+      "expected": [
+        "NEEDS_YOU"
+      ],
+      "expectedReason": "CONSENT_OR_PAY",
+      "status": "NEEDS_YOU",
+      "reason": "CONSENT_OR_PAY",
+      "method": null,
+      "evidence": null,
+      "clicks": [],
+      "handledMs": 700,
+      "truth": {
+        "decided": false,
+        "optionalGranted": null,
+        "choice": null,
+        "simClicks": []
+      },
+      "health": null,
+      "correct": true,
+      "acceptClicked": false,
+      "falseSuccess": false,
+      "silentAcceptance": false
+    },
+    {
+      "id": "mislabeled",
+      "title": "Adversarial: “Reject” grants consent",
+      "group": "exception",
+      "cmp": "custom",
+      "expected": [
+        "FAILED"
+      ],
+      "expectedReason": "OPTIONAL_STILL_GRANTED",
+      "status": "FAILED",
+      "reason": "OPTIONAL_STILL_GRANTED",
+      "method": "reject_button",
+      "evidence": "Google Consent Mode: ad_storage=granted, analytics_storage=granted, ad_user_data=granted, ad_personalization=granted",
+      "clicks": [
+        "Reject all"
+      ],
+      "handledMs": 857,
+      "truth": {
+        "decided": true,
+        "optionalGranted": true,
+        "choice": "accept (mislabeled)",
         "simClicks": [
           "reject"
         ]

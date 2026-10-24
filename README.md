@@ -37,7 +37,7 @@ A Chrome extension (Manifest V3) with a friendly penguin guide, Pip, plus a smal
   - **Rejected · confirmed:** the site's own consent record says nothing optional is on.
   - **Rejected · not double-checked:** a clear reject button was clicked and the banner closed, but the site exposes no record to read.
   - **Needs your choice / Site still allows extras:** no safe reject, or the record contradicts the click. This is reported, never called a success.
-- **US state privacy laws are checked too.** A banner's "Reject all" doesn't always cover sale, sharing and targeted advertising. On granola.ai (iubenda), for example, they stayed on after the banner closed. CookieShield reads the US signals after every rejection and completes the opt-out in *Your Privacy Choices*. If a site offers no way to opt out, it reports *Needs your choice* instead of success.
+- **US state privacy laws are checked too.** A banner's "Reject all" doesn't always cover sale, sharing and targeted advertising. On granola.ai (iubenda), for example, they stayed on after the banner closed. CookieShield reads the US signals after every rejection and completes the opt-out in *Your Privacy Choices*, including on return visits where the site no longer shows a banner. If the link isn't drawn, it opens the same panel through the platform's own API (an allow-list of open-only calls). This was tested live on granola.ai. If a site offers no way to opt out, it reports *Needs your choice* instead of success.
 - A second check 5 seconds later downgrades a result if the record changes or the banner comes back. This is how false success reports are caught.
 - **Metrics:** accept-button clicks, silent optional-consent acceptances and false success reports, all measured by the test suite against independent ground truth.
 
@@ -84,13 +84,13 @@ Requires Chrome 120 or later. Page translation uses Chrome's built-in on-device 
 npm install                          # installs Playwright
 npx playwright install chromium      # first time only
 npm test                             # unit tests: 362 lexicon/rule checks + report API
-npm run test:e2e                     # real Chromium with the extension loaded, 52 scenarios
+npm run test:e2e                     # real Chromium with the extension loaded, 53 scenarios
 ```
 The end-to-end run writes `tests/results/e2e-report.md` and `.json` with all three metrics. Latest run:
 
 | Metric | Result |
 |---|---|
-| P1: banners handled correctly | **51 / 51 (100%)** across 16 consent platforms (including iubenda's US privacy choices, copied from a real site), custom banners in 22 languages and edge cases |
+| P1: banners handled correctly | **52 / 52 (100%)** across 16 consent platforms (including iubenda's US privacy choices, copied from a real site), custom banners in 22 languages and edge cases |
 | P2: accept buttons clicked / silent acceptances / false success reports | **0 / 0 / 0** |
 | P2: exceptions correctly reported to the user | **5 / 5** (accept-only, pay-or-consent ×2, mislabeled reject, US opt-out with no opt-out link) |
 | P3: regressions per 100 handled visits | **0** |
