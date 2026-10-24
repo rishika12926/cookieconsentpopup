@@ -5,3 +5,4 @@ public/
 Thumbs.db
 *.log
 tests/results/screens/
+extension/_metadata/
