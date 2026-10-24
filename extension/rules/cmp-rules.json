@@ -65,7 +65,13 @@
     "save": [
      "#onetrust-pc-sdk .save-preference-btn-handler"
     ],
-    "toggles": null
+    "toggles": null,
+    "api": "onetrust",
+    "present": [
+     "#onetrust-consent-sdk",
+     "script[src*=\"cookielaw.org\"]",
+     "script[src*=\"onetrust.com\"]"
+    ]
    }
   },
   {
@@ -640,7 +646,14 @@
     "save": [
      "#iubFooterBtn"
     ],
-    "toggles": "#iubenda-iframe input[type=\"checkbox\"]"
+    "toggles": "#iubenda-iframe input[type=\"checkbox\"]",
+    "api": "iubenda",
+    "present": [
+     "html.iubenda",
+     "#iubenda-cs-banner",
+     "script[src*=\"iubenda.com\"]",
+     ".iubenda-cs-preferences-link"
+    ]
    },
    "notes": "US mode (verified on granola.ai, Oct 2026): the banner's Reject all leaves sale/sharing/targeted-ads ON (_iub_cs-*-uspr cookie, GPP usnat=2). Handled by the usOptOut step."
   },

@@ -488,6 +488,9 @@
    * _iub_cs-<id>-uspr cookie and in the GPP usnat section until "Your Privacy Choices" is used.
    * opts.answered: the banner was already answered with "Reject all" on an earlier visit.
    * opts.noLink:   the site exposes no "Your Privacy Choices" control at all.
+   * opts.dismissed: like granola.ai on a return visit — the US notice counts as acknowledged, so
+   *                 the banner stays hidden and the widget isn't drawn; only _iub.cs.api.openPreferences()
+   *                 opens the panel.
    */
   SIMS.iubendaUS = function (o) {
     const ID = 's999', P = `_iub_cs-${ID}`, U = `${P}-uspr`;
@@ -502,7 +505,8 @@
     let uspOptedOut = !!purposes();
     const truth = () => {
       const p = purposes(), u = uspr();
-      Object.assign(T(), { cmp: 'iubenda', decided: !!p, optionalGranted: !!p && (!!(p[4] || p[5]) || u.s || u.sh || u.adv) });
+      // US opt-out regime: sale / sharing / ads count as granted until opted out, banner or not.
+      Object.assign(T(), { cmp: 'iubenda', decided: true, optionalGranted: !!(p && (p[4] || p[5])) || u.s || u.sh || u.adv });
     };
     window.__uspapi = (cmd, v, cb) => cb({ version: 1, uspString: uspOptedOut ? '1YY-' : '1YN-' }, true);
     window.__gpp = (cmd, cb) => {
@@ -512,7 +516,8 @@
     truth();
 
     // Floating US widget (always present) + preference panel
-    if (!o.noLink) {
+    if (!o.noLink) window._iub = { cs: { api: { openPreferences: () => { log('api openPreferences'); openPanel(); } } } };
+    if (!o.noLink && !o.dismissed) {
       const w = $(`<div class="iub__us-widget" style="position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:2147483000;background:#fff;padding:6px 10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.2)">
         <a class="iub__us-widget__link iubenda-cs-uspr-link" href="/playground/fixtures/next.html">Notice at collection</a>
         <button class="iub__us-widget__link iub__us-widget__link--privacy-choices iubenda-cs-preferences-link">Your Privacy Choices</button></div>`);
@@ -554,7 +559,7 @@
       document.body.appendChild(panel);
     }
 
-    if (purposes()) { T().choice = 'stored'; return; }
+    if (purposes() || o.dismissed) { T().choice = 'stored'; return; }
     const banner = $(`<div id="iubenda-cs-banner" class="iubenda-cs-default-floating iubenda-cs-visible" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);width:min(560px,95vw);background:#fff;padding:20px;z-index:2147483001;box-shadow:0 10px 30px rgba(0,0,0,.3)">
       <h2 id="iubenda-cs-title">OK with Cookies?</h2>
       <div id="iubenda-cs-paragraph"><p>We use cookies to keep things running, understand how people use our site, and improve the experience over time. Some are essential and the site needs them to work. Others are optional and you're in control of those.</p></div>

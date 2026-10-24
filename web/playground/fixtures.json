@@ -166,6 +166,20 @@
   "description": "No banner (rejected on an earlier visit), but US opt-outs are still on. Must open “Your Privacy Choices” and switch them off."
  },
  {
+  "id": "iubenda-us-hidden",
+  "title": "iubenda US — notice dismissed, no link",
+  "sim": "iubendaUS",
+  "opts": {
+   "dismissed": true
+  },
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "Granola on a return visit: banner hidden, “Your Privacy Choices” not drawn. Must open the panel via iubenda’s own API and opt out."
+ },
+ {
   "id": "us-no-optout-link",
   "title": "US opt-outs on, no way to opt out",
   "sim": "iubendaUS",

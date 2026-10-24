@@ -242,6 +242,24 @@
 
   const READERS = { tcf: readTCF, onetrust: readOneTrust, cookiebot: readCookiebot, didomi: readDidomi, usercentrics: readUsercentrics, osano: readOsano, klaro: readKlaro, consentmode: readConsentMode, gpp: readGPP, usp: readUSP };
 
+  // --- Open a platform's own privacy-settings panel through its public API. Used when the
+  //     "Your Privacy Choices" link isn't on the page (iubenda only draws it in some states).
+  //     Allow-list only: these calls OPEN a panel; they never grant or change consent.
+  const OPENERS = {
+    iubenda: () => window._iub && window._iub.cs && window._iub.cs.api && typeof window._iub.cs.api.openPreferences === 'function' && (window._iub.cs.api.openPreferences(), true),
+    onetrust: () => window.OneTrust && typeof window.OneTrust.ToggleInfoDisplay === 'function' && (window.OneTrust.ToggleInfoDisplay(), true),
+    didomi: () => window.Didomi && window.Didomi.preferences && typeof window.Didomi.preferences.show === 'function' && (window.Didomi.preferences.show(), true),
+    usercentrics: () => window.UC_UI && typeof window.UC_UI.showSecondLayer === 'function' && (window.UC_UI.showSecondLayer(), true),
+    osano: () => window.Osano && window.Osano.cm && typeof window.Osano.cm.showDrawer === 'function' && (window.Osano.cm.showDrawer('osano-cm-dom-info-dialog-open'), true)
+  };
+  document.addEventListener('cookieshield:open-prefs', (ev) => {
+    let req = {};
+    try { req = JSON.parse(ev.detail || '{}'); } catch (e) { /* ignore */ }
+    let ok = false;
+    try { ok = !!(OPENERS[req.cmp] && OPENERS[req.cmp]()); } catch (e) { ok = false; }
+    document.dispatchEvent(new CustomEvent('cookieshield:open-prefs-response', { detail: JSON.stringify({ id: req.id, ok }) }));
+  });
+
   document.addEventListener('cookieshield:state-request', async (ev) => {
     let req = {};
     try { req = JSON.parse(ev.detail || '{}'); } catch (e) { /* ignore */ }

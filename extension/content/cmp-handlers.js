@@ -103,6 +103,24 @@
     return out;
   }
 
+  /** Ask the MAIN-world bridge to open a platform's privacy panel (allow-listed calls only). */
+  function openViaApi(cmp) {
+    return new Promise(resolve => {
+      const id = `op-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const onRes = (ev) => {
+        let d = {};
+        try { d = JSON.parse(ev.detail || '{}'); } catch (e) { return; }
+        if (d.id !== id) return;
+        document.removeEventListener('cookieshield:open-prefs-response', onRes);
+        clearTimeout(t);
+        resolve(!!d.ok);
+      };
+      const t = setTimeout(() => { document.removeEventListener('cookieshield:open-prefs-response', onRes); resolve(false); }, 1500);
+      document.addEventListener('cookieshield:open-prefs-response', onRes);
+      document.dispatchEvent(new CustomEvent('cookieshield:open-prefs', { detail: JSON.stringify({ id, cmp }) }));
+    });
+  }
+
   async function findUsPanel(rule, before) {
     return await D().waitFor(() => {
       const sels = (rule && rule.usOptOut && rule.usOptOut.container) || [];
@@ -124,13 +142,17 @@
     const wanted = [...new Set(st0.sources.filter(s => s.regime === 'us' && s.optionalGranted).flatMap(s => s.granted.map(g => g.split(' (')[0])))];
 
     const opener = findUsOpener(rule);
-    if (!opener) {
+    const before = dialogsNow();
+    if (opener) {
+      D().safeClick(opener);
+      record(ctx, opener, 'open US privacy choices');
+    } else if (rule && rule.usOptOut && rule.usOptOut.api && await openViaApi(rule.usOptOut.api)) {
+      // The link isn't drawn right now, but the platform's own API opens the same panel.
+      ctx.clicks.push({ label: `Your Privacy Choices (opened via ${rule.name})`, kind: 'open US privacy choices' });
+    } else {
       ctx.evidence = st0.summary;
       return { status: 'NEEDS_YOU', reason: 'US_OPTOUT_NOT_FOUND' };
     }
-    const before = dialogsNow();
-    D().safeClick(opener);
-    record(ctx, opener, 'open US privacy choices');
     const panel = await findUsPanel(rule, before);
     if (!panel) { ctx.evidence = st0.summary; return { status: 'NEEDS_YOU', reason: 'US_OPTOUT_NOT_FOUND' }; }
 

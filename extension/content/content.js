@@ -209,7 +209,7 @@
     if (state.usGranted && !state.otherGranted) {
       busy = true;
       try {
-        const rule = rules.find(r => r.usOptOut && (r.detect || []).concat(r.usOptOut.open || []).some(sel => { try { return document.querySelector(sel); } catch (e) { return false; } })) || null;
+        const rule = rules.find(r => r.usOptOut && (r.detect || []).concat(r.usOptOut.open || [], r.usOptOut.present || []).some(sel => { try { return document.querySelector(sel); } catch (e) { return false; } })) || null;
         const ctx = { cmpId: rule ? rule.id : 'us-privacy', cmpName: rule ? rule.name : 'US privacy choices', clicks: [], turnedOff: [], essentialKept: [], evidence: null, method: 'us_optout' };
         const v = await window.CookieShieldEngine.usOptOut(rule, ctx);
         const outcome = window.CookieShieldEngine.result(ctx, v.status, v.reason, 'us_optout');
