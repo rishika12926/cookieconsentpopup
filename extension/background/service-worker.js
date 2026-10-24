@@ -14,7 +14,8 @@ const DEFAULT_SETTINGS = {
   shareReports: false,             // opt-in: send anonymized reports to the project server
   reportEndpoint: '',              // e.g. https://your-app.vercel.app/api/report
   rulesEndpoint: '',               // e.g. https://your-app.vercel.app/rules/cmp-rules.json
-  repoUrl: ''                      // e.g. https://github.com/you/cookieshield (for prefilled issues)
+  repoUrl: '',                     // e.g. https://github.com/you/cookieshield (for prefilled issues)
+  sendGPC: true                    // Global Privacy Control: legal "do not sell/share" signal (US)
 };
 
 const HISTORY_MAX = 1000;
@@ -40,8 +41,40 @@ async function setSettings(patch) {
   return next;
 }
 
+// ------------------------------------------------------------------------------------------
+// Global Privacy Control: Sec-GPC header (static ruleset) + navigator.globalPrivacyControl
+// (MAIN-world script). Off when CookieShield is off or the setting is off; never on paused sites.
+const GPC_SCRIPT_ID = 'cookieshield-gpc';
+async function syncGPC() {
+  try {
+    const s = await getSettings();
+    const on = !!(s.enabled && s.sendGPC);
+    const paused = (s.pausedSites || []).filter(d => /^[a-z0-9.-]+$/i.test(d));
+    await chrome.declarativeNetRequest.updateEnabledRulesets(on ? { enableRulesetIds: ['gpc'] } : { disableRulesetIds: ['gpc'] });
+    // Paused sites: higher-priority "allow" rules stop the header on the site and its requests.
+    const old = await chrome.declarativeNetRequest.getDynamicRules();
+    const add = paused.length ? [
+      { id: 101, priority: 10, action: { type: 'allow' }, condition: { requestDomains: paused, resourceTypes: ['main_frame', 'sub_frame'] } },
+      { id: 102, priority: 10, action: { type: 'allow' }, condition: { initiatorDomains: paused } }
+    ] : [];
+    await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: old.map(r => r.id), addRules: add });
+    const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [GPC_SCRIPT_ID] });
+    if (existing.length) await chrome.scripting.unregisterContentScripts({ ids: [GPC_SCRIPT_ID] });
+    if (on) {
+      await chrome.scripting.registerContentScripts([{
+        id: GPC_SCRIPT_ID, js: ['content/gpc.js'], matches: ['http://*/*', 'https://*/*'],
+        excludeMatches: paused.flatMap(d => [`*://${d}/*`, `*://*.${d}/*`]),
+        runAt: 'document_start', allFrames: true, world: 'MAIN', persistAcrossSessions: true
+      }]);
+    }
+  } catch (e) { console.warn('[CookieShield] GPC sync failed', e); }
+}
+chrome.runtime.onStartup.addListener(syncGPC);
+chrome.storage.onChanged.addListener((changes, area) => { if (area === 'sync' && changes.settings) syncGPC(); });
+
 chrome.runtime.onInstalled.addListener(async () => {
   await setSettings({});
+  await syncGPC();
   const local = await chrome.storage.local.get({ history: null, metrics: null, siteMemory: null, reports: null });
   const init = {};
   if (!local.history) init.history = [];
@@ -126,6 +159,7 @@ async function recordOutcome(p, tabId) {
     clicks: o.clicks || [], turnedOff: o.turnedOff || [], essentialKept: (o.essentialKept || []).slice(0, 6),
     evidence: o.evidence, stateSources: o.stateSources || [],
     bannerLang: o.bannerLang, translatedLabels: o.translatedLabels || null,
+    usOptOut: o.usOptOut || null,
     siteType: p.siteType || 'other', ms: p.ms
   };
   history.unshift(entry);

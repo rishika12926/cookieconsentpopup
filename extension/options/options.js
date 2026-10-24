@@ -273,7 +273,7 @@
     e.preventDefault();
     const f = e.target;
     const patch = {};
-    for (const k of ['enabled', 'showSuccess', 'shareReports']) patch[k] = f.elements[k].checked;
+    for (const k of ['enabled', 'showSuccess', 'shareReports', 'sendGPC']) patch[k] = f.elements[k].checked;
     for (const k of ['translateMode', 'targetLang', 'reportEndpoint', 'rulesEndpoint', 'repoUrl']) patch[k] = f.elements[k].value.trim();
     for (const k of ['reportEndpoint', 'rulesEndpoint', 'repoUrl']) {
       if (patch[k] && !/^https:\/\//.test(patch[k])) { $('settings-saved').textContent = `${k}: please use an https:// address.`; return; }

@@ -2,24 +2,40 @@
   "manifest_version": 3,
   "name": "CookieShield — Reject Cookie Pop-ups",
   "short_name": "CookieShield",
-  "version": "2.0.0",
-  "description": "Rejects optional cookies on cookie pop-ups, verifies the choice, tells you when it can't, and never clicks Accept for you.",
+  "version": "2.1.0",
+  "description": "Rejects optional cookies and US 'sale/sharing' on cookie pop-ups, verifies the choice, tells you when it can't, and never clicks Accept for you.",
   "minimum_chrome_version": "120",
-  "permissions": ["storage", "alarms", "activeTab"],
-  "host_permissions": ["<all_urls>"],
+  "permissions": [
+    "storage",
+    "alarms",
+    "activeTab",
+    "declarativeNetRequest",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "background": {
     "service_worker": "background/service-worker.js"
   },
   "content_scripts": [
     {
-      "matches": ["http://*/*", "https://*/*"],
-      "js": ["content/page-bridge.js"],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content/page-bridge.js"
+      ],
       "run_at": "document_start",
       "all_frames": true,
       "world": "MAIN"
     },
     {
-      "matches": ["http://*/*", "https://*/*"],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
       "js": [
         "content/lexicon.js",
         "content/dom-utils.js",
@@ -55,5 +71,14 @@
     "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
+  },
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "gpc",
+        "enabled": true,
+        "path": "rules/gpc-dnr.json"
+      }
+    ]
   }
 }

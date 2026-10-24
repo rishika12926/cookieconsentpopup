@@ -139,7 +139,7 @@
       if (settings.showSuccess && isTop) window.CookieShieldNotifier.showSuccess(outcome);
       if (isTop) postHandlingHealth(det && det.rule);
       setTimeout(() => recheck(outcome, det), 5000);
-    } else if (isTop) {
+    } else if (isTop && !outcome.quiet) {
       showNotice(outcome);
     }
   }
@@ -204,6 +204,24 @@
     const state = await window.CookieShieldVerifier.readState();
     if (finished || busy) return;
     pageStatus.siteType = pageStatus.siteType || classifySite();
+    // No banner, but the site says you haven't opted out of sale / sharing / targeted ads
+    // (US opt-out laws make that the default). Opt out the same way a person would.
+    if (state.usGranted && !state.otherGranted) {
+      busy = true;
+      try {
+        const rule = rules.find(r => r.usOptOut && (r.detect || []).concat(r.usOptOut.open || []).some(sel => { try { return document.querySelector(sel); } catch (e) { return false; } })) || null;
+        const ctx = { cmpId: rule ? rule.id : 'us-privacy', cmpName: rule ? rule.name : 'US privacy choices', clicks: [], turnedOff: [], essentialKept: [], evidence: null, method: 'us_optout' };
+        const v = await window.CookieShieldEngine.usOptOut(rule, ctx);
+        const outcome = window.CookieShieldEngine.result(ctx, v.status, v.reason, 'us_optout');
+        outcome.supported = !!rule;
+        outcome.ruleTested = !!(rule && rule.tested);
+        // If there is no opt-out link at all, tell the popup but don't interrupt the page.
+        outcome.quiet = v.status === 'NEEDS_YOU' && v.reason === 'US_OPTOUT_NOT_FOUND';
+        await finish(outcome, null);
+      } catch (e) { console.warn('[CookieShield] US opt-out error', e); }
+      finally { busy = false; }
+      return;
+    }
     if (state.decided && state.allDenied) pageStatus.status = 'REMEMBERED';
     else if (state.decided && state.anyGranted) pageStatus.status = 'PREVIOUSLY_ACCEPTED';
     else pageStatus.status = 'NO_BANNER';
@@ -263,9 +281,16 @@
         const det = lastDetection || { rule: null, container: null };
         const ctx = { evidence: null };
         (async () => {
-          const v = await window.CookieShieldEngine.verifyAfter(det.container, det.rule || (msg.outcome.cmpId ? rules.find(r => r.id === msg.outcome.cmpId) : null), ctx);
+          const frule = det.rule || (msg.outcome.cmpId ? rules.find(r => r.id === msg.outcome.cmpId) : null);
+          let v = await window.CookieShieldEngine.verifyAfter(det.container, frule, ctx);
+          if (v.status === 'US_PENDING') {
+            ctx.clicks = [...(msg.outcome.clicks || [])]; ctx.turnedOff = [];
+            v = await window.CookieShieldEngine.usOptOut(frule, ctx);
+            msg.outcome.clicks = ctx.clicks;
+            msg.outcome.usOptOut = ctx.usOptOut || null;
+          }
           const status = v.status === 'PENDING' ? (v.state && v.state.allDenied ? 'VERIFIED' : 'NEEDS_YOU') : v.status;
-          const outcome = { ...msg.outcome, status, reason: status === 'NEEDS_YOU' ? 'REJECT_NOT_CONFIRMED' : (v.reason || null), evidence: ctx.evidence, stateSources: ctx.stateSources || [], supported: true, selector: det.rule ? (det.rule.detect || [])[0] : null };
+          const outcome = { ...msg.outcome, status, reason: status === 'NEEDS_YOU' ? (v.reason || 'REJECT_NOT_CONFIRMED') : (v.reason || null), evidence: ctx.evidence, stateSources: ctx.stateSources || [], supported: true, selector: det.rule ? (det.rule.detect || [])[0] : null };
           await finish(outcome, det.container ? det : null);
         })();
         sendResponse({ ok: true });

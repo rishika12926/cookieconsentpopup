@@ -140,6 +140,46 @@
   "description": ""
  },
  {
+  "id": "iubenda-us",
+  "title": "iubenda — US privacy choices",
+  "sim": "iubendaUS",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "Copied from granola.ai: banner “Reject all” leaves sale, sharing and targeted ads ON. Must also opt out in “Your Privacy Choices”."
+ },
+ {
+  "id": "iubenda-us-revisit",
+  "title": "iubenda US — banner already answered",
+  "sim": "iubendaUS",
+  "opts": {
+   "answered": true
+  },
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "No banner (rejected on an earlier visit), but US opt-outs are still on. Must open “Your Privacy Choices” and switch them off."
+ },
+ {
+  "id": "us-no-optout-link",
+  "title": "US opt-outs on, no way to opt out",
+  "sim": "iubendaUS",
+  "opts": {
+   "noLink": true
+  },
+  "expect": [
+   "NEEDS_YOU"
+  ],
+  "reason": "US_OPTOUT_NOT_FOUND",
+  "group": "exception",
+  "description": "Must NOT report success while sale/sharing stay on."
+ },
+ {
   "id": "klaro",
   "title": "Klaro!",
   "sim": "klaro",

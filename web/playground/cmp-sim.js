@@ -482,6 +482,100 @@
     SimSite.lockPage();
   };
 
+  /**
+   * iubenda in US mode — reproduced from granola.ai (Oct 2026). The banner's "Reject all" only
+   * declines the EU-style purposes; sale / sharing / targeted advertising stay ON in the separate
+   * _iub_cs-<id>-uspr cookie and in the GPP usnat section until "Your Privacy Choices" is used.
+   * opts.answered: the banner was already answered with "Reject all" on an earlier visit.
+   * opts.noLink:   the site exposes no "Your Privacy Choices" control at all.
+   */
+  SIMS.iubendaUS = function (o) {
+    const ID = 's999', P = `_iub_cs-${ID}`, U = `${P}-uspr`;
+    document.documentElement.classList.add('ccpa', 'iubenda');
+    if (o.answered && !getCookie('sim_seeded')) {
+      setCookie('sim_seeded', '1');
+      setCookie(P, JSON.stringify({ purposes: { 1: true, 4: false, 5: false }, id: 99 }));
+    }
+    if (!getCookie(U)) setCookie(U, JSON.stringify({ s: true, sh: true, adv: true }));
+    const purposes = () => { try { return JSON.parse(getCookie(P)).purposes; } catch (e) { return null; } };
+    const uspr = () => JSON.parse(getCookie(U));
+    let uspOptedOut = !!purposes();
+    const truth = () => {
+      const p = purposes(), u = uspr();
+      Object.assign(T(), { cmp: 'iubenda', decided: !!p, optionalGranted: !!p && (!!(p[4] || p[5]) || u.s || u.sh || u.adv) });
+    };
+    window.__uspapi = (cmd, v, cb) => cb({ version: 1, uspString: uspOptedOut ? '1YY-' : '1YN-' }, true);
+    window.__gpp = (cmd, cb) => {
+      const u = uspr(), f = (b) => (b ? 2 : 1);
+      if (cmd === 'ping') cb({ gppVersion: '1.1', cmpStatus: 'loaded', signalStatus: 'ready', applicableSections: [7], parsedSections: { usnat: { Version: 1, SaleOptOut: f(u.s), SharingOptOut: f(u.sh), TargetedAdvertisingOptOut: f(u.adv), SaleOptOutNotice: 2 } } }, true);
+    };
+    truth();
+
+    // Floating US widget (always present) + preference panel
+    if (!o.noLink) {
+      const w = $(`<div class="iub__us-widget" style="position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:2147483000;background:#fff;padding:6px 10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.2)">
+        <a class="iub__us-widget__link iubenda-cs-uspr-link" href="/playground/fixtures/next.html">Notice at collection</a>
+        <button class="iub__us-widget__link iub__us-widget__link--privacy-choices iubenda-cs-preferences-link">Your Privacy Choices</button></div>`);
+      w.querySelector('.iubenda-cs-preferences-link').onclick = () => { log('open privacy choices'); openPanel(); };
+      document.body.appendChild(w);
+    }
+    function openPanel() {
+      const u = uspr(), p = purposes() || { 1: true, 4: false, 5: false };
+      const row = (k, label, on, locked) => `<div class="purposes-item"><label for="purpose-${k}">${label}</label><input type="checkbox" id="purpose-${k}" class="style1${locked ? ' locked' : ''}" ${on ? 'checked' : ''} ${locked ? 'disabled' : ''}></div>`;
+      const panel = $(`<div id="iubenda-iframe" class="iubenda-iframe-visible" style="position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.5);z-index:2147483002">
+        <div style="background:#fff;padding:24px;width:min(760px,95vw);max-height:90vh;overflow:auto">
+          <button class="iub-btn iub-btn-cp purposes-btn">See full Privacy Policy</button>
+          <p>To deny your consent to, or where applicable opt out of, the specific processing activities described below, switch the toggles to off or use the “Reject all” button and confirm you want to save your choices.</p>
+          <button class="iub-btn iub-btn-consent iub-btn-reject purposes-btn">Reject all</button>
+          <button class="iub-btn iub-btn-consent iub-btn-accept purposes-btn">Accept all</button>
+          <h2>Your privacy rights under US state privacy laws</h2>
+          ${row('s', '<b>Sale</b> of my personal information', u.s)}
+          ${row('sh', '<b>Sharing</b> of my personal information', u.sh)}
+          ${row('adv', 'Processing of my personal information for <b>targeted advertising</b>', u.adv)}
+          <h2>Your consent preferences for tracking technologies</h2>
+          ${row('1', 'Necessary', true, true)}${row('4', 'Measurement', p[4])}${row('5', 'Marketing', p[5])}
+          <button id="iubRejectBtn">Reject all</button> <button id="iubFooterBtn">Save and continue</button>
+        </div></div>`);
+      const box = (k) => panel.querySelector('#purpose-' + k);
+      panel.querySelector('.iub-btn-reject').onclick = panel.querySelector('#iubRejectBtn').onclick = () => { log('panel reject all'); for (const k of ['s', 'sh', 'adv', '4', '5']) box(k).checked = false; };
+      panel.querySelector('.iub-btn-accept').onclick = () => {
+        log('panel accept all');
+        setCookie(U, JSON.stringify({ s: true, sh: true, adv: true }));
+        setCookie(P, JSON.stringify({ purposes: { 1: true, 4: true, 5: true }, id: 99 }));
+        panel.remove(); truth(); T().choice = 'accept';
+      };
+      panel.querySelector('#iubFooterBtn').onclick = () => {
+        log('panel save');
+        setCookie(U, JSON.stringify({ s: box('s').checked, sh: box('sh').checked, adv: box('adv').checked }));
+        setCookie(P, JSON.stringify({ purposes: { 1: true, 4: box('4').checked, 5: box('5').checked }, id: 99 }));
+        uspOptedOut = !box('s').checked;
+        panel.remove(); truth(); T().choice = 'save';
+      };
+      document.body.appendChild(panel);
+    }
+
+    if (purposes()) { T().choice = 'stored'; return; }
+    const banner = $(`<div id="iubenda-cs-banner" class="iubenda-cs-default-floating iubenda-cs-visible" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);width:min(560px,95vw);background:#fff;padding:20px;z-index:2147483001;box-shadow:0 10px 30px rgba(0,0,0,.3)">
+      <h2 id="iubenda-cs-title">OK with Cookies?</h2>
+      <div id="iubenda-cs-paragraph"><p>We use cookies to keep things running, understand how people use our site, and improve the experience over time. Some are essential and the site needs them to work. Others are optional and you're in control of those.</p></div>
+      <button class="iubenda-cs-customize-btn">Manage my preferences</button>
+      <button class="iubenda-cs-reject-btn iubenda-cs-btn-primary">Reject all</button>
+      <button class="iubenda-cs-accept-btn iubenda-cs-btn-primary">Accept all</button></div>`);
+    banner.querySelector('.iubenda-cs-reject-btn').onclick = () => {
+      log('reject');
+      setCookie(P, JSON.stringify({ purposes: { 1: true, 4: false, 5: false }, id: 99 }));
+      uspOptedOut = true;            // the CCPA string flips…
+      banner.remove(); truth(); T().choice = 'reject'; // …but uspr / GPP stay "not opted out"
+    };
+    banner.querySelector('.iubenda-cs-accept-btn').onclick = () => {
+      log('accept');
+      setCookie(P, JSON.stringify({ purposes: { 1: true, 4: true, 5: true }, id: 99 }));
+      banner.remove(); truth(); T().choice = 'accept';
+    };
+    banner.querySelector('.iubenda-cs-customize-btn').onclick = () => { log('settings'); banner.remove(); openPanel(); };
+    document.body.appendChild(banner);
+  };
+
   /** Not a cookie banner at all. Expected: untouched. */
   SIMS.newsletter = () => {
     const el = $(`<div id="newsletter" role="dialog" aria-modal="true" style="position:fixed;inset:auto 20px 20px auto;width:360px;background:#fff;padding:18px;z-index:99999;box-shadow:0 10px 30px rgba(0,0,0,.25)">

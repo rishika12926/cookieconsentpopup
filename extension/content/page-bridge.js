@@ -191,7 +191,56 @@
     });
   }
 
-  const READERS = { tcf: readTCF, onetrust: readOneTrust, cookiebot: readCookiebot, didomi: readDidomi, usercentrics: readUsercentrics, osano: readOsano, klaro: readKlaro, consentmode: readConsentMode };
+  // --- US state privacy laws (CCPA/CPRA, VA, CO, CT…). These are OPT-OUT regimes: sale, sharing
+  //     and targeted advertising are ON until the person opts out, so "not opted out" counts as
+  //     optional consent still granted. regime:'us' lets the content script tell them apart.
+
+  /** IAB Global Privacy Platform (GPP) — US national and state sections. */
+  const GPP_US_FIELDS = { SaleOptOut: 'sale', SharingOptOut: 'sharing', TargetedAdvertisingOptOut: 'targeted advertising' };
+  function readGPP() {
+    if (typeof window.__gpp !== 'function') return Promise.resolve(null);
+    return withTimeout(new Promise(resolve => {
+      try {
+        window.__gpp('ping', (d) => {
+          const sections = d && d.parsedSections;
+          if (!sections || typeof sections !== 'object') return resolve(null);
+          const granted = [], denied = [];
+          for (const [name, sec] of Object.entries(sections)) {
+            if (!/^us/.test(name)) continue;            // usnat, usca, usva, usco, usct, usut…
+            const s = Array.isArray(sec) ? sec[0] : sec; // some CMPs wrap sub-sections in arrays
+            if (!s || typeof s !== 'object') continue;
+            for (const [field, label] of Object.entries(GPP_US_FIELDS)) {
+              if (s[field] === 2) granted.push(`${label} (${name})`);   // 2 = did not opt out
+              else if (s[field] === 1) denied.push(`${label} (${name})`); // 1 = opted out
+            }
+          }
+          if (!granted.length && !denied.length) return resolve(null);
+          resolve({
+            source: 'US privacy signal (GPP)', regime: 'us', decided: true,
+            optionalGranted: granted.length > 0, granted, denied,
+            evidence: granted.length ? `not opted out of: ${[...new Set(granted.map(g => g.split(' (')[0]))].join(', ')}` : `opted out of: ${[...new Set(denied.map(g => g.split(' (')[0]))].join(', ')}`
+          });
+        });
+      } catch (e) { resolve(null); }
+    }), 1200);
+  }
+
+  /** IAB US Privacy string (CCPA) — "1YN-": 3rd character Y = opted out of sale, N = not. */
+  function readUSP() {
+    if (typeof window.__uspapi !== 'function') return Promise.resolve(null);
+    return withTimeout(new Promise(resolve => {
+      try {
+        window.__uspapi('getUSPData', 1, (d, ok) => {
+          const s = ok && d && typeof d.uspString === 'string' ? d.uspString : '';
+          if (!/^1[YN-][YN]/i.test(s)) return resolve(null);
+          const optedOut = s[2].toUpperCase() === 'Y';
+          resolve({ source: 'US Privacy string (CCPA)', regime: 'us', decided: true, optionalGranted: !optedOut, granted: optedOut ? [] : ['sale'], denied: optedOut ? ['sale'] : [], evidence: `uspString=${s} (${optedOut ? 'opted out of sale' : 'not opted out of sale'})` });
+        });
+      } catch (e) { resolve(null); }
+    }), 1000);
+  }
+
+  const READERS = { tcf: readTCF, onetrust: readOneTrust, cookiebot: readCookiebot, didomi: readDidomi, usercentrics: readUsercentrics, osano: readOsano, klaro: readKlaro, consentmode: readConsentMode, gpp: readGPP, usp: readUSP };
 
   document.addEventListener('cookieshield:state-request', async (ev) => {
     let req = {};

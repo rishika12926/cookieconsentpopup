@@ -34,6 +34,7 @@ function serve(port) {
   return new Promise(resolve => {
     const srv = http.createServer((req, res) => {
       const u = new URL(req.url, 'http://x');
+      if (/\.html$/.test(u.pathname)) GPC_SEEN[req.headers.host.split(':')[0]] = req.headers['sec-gpc'] || null;
       let p = path.join(WEB, decodeURIComponent(u.pathname));
       if (!p.startsWith(WEB)) { res.writeHead(403); return res.end(); }
       if (fs.existsSync(p) && fs.statSync(p).isDirectory()) p = path.join(p, 'index.html');
@@ -44,6 +45,7 @@ function serve(port) {
   });
 }
 
+const GPC_SEEN = {}; // host -> value of the Sec-GPC request header on the last page load
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 async function getSW(ctx) {
@@ -209,6 +211,15 @@ async function functionalChecks(page, baseUrl) {
     console.log(`${extra.remember.pass ? '✓' : '✗'} remember-choice          ${tab && tab.status}`);
   }
   {
+    // Global Privacy Control: header on requests + navigator.globalPrivacyControl in the page.
+    const host = 'gpc.localhost';
+    await page.goto(`http://${host}:${PORT}/playground/fixtures/next.html`);
+    await sleep(500);
+    const js = await page.evaluate(() => navigator.globalPrivacyControl);
+    extra.gpc = { header: GPC_SEEN[host], navigator: js, pass: GPC_SEEN[host] === '1' && js === true };
+    console.log(`${extra.gpc.pass ? '✓' : '✗'} global privacy control     header=${GPC_SEEN[host]} navigator=${js}`);
+  }
+  {
     // Pause: banner must be left alone on a paused site.
     const host = 'paused.localhost';
     await sw.evaluate(async (h) => { const { settings } = await chrome.storage.sync.get({ settings: {} }); settings.pausedSites = [h]; await chrome.storage.sync.set({ settings }); }, host);
@@ -218,7 +229,8 @@ async function functionalChecks(page, baseUrl) {
     const truth = await page.evaluate(() => window.__simConsent);
     const visible = await page.evaluate(() => !!document.querySelector('#CybotCookiebotDialog'));
     const tab = await tabStatus(sw, page);
-    extra.pause = { status: tab && tab.status, bannerVisible: visible, decided: truth.decided, pass: visible && !truth.decided && tab && tab.status === 'PAUSED' };
+    const gpcOnPaused = await page.evaluate(() => navigator.globalPrivacyControl === true) || GPC_SEEN[host] === '1';
+    extra.pause = { status: tab && tab.status, bannerVisible: visible, decided: truth.decided, gpcOnPaused, pass: visible && !truth.decided && tab && tab.status === 'PAUSED' && !gpcOnPaused };
     console.log(`${extra.pause.pass ? '✓' : '✗'} per-site pause           ${tab && tab.status}`);
     await sw.evaluate(async () => { const { settings } = await chrome.storage.sync.get({ settings: {} }); settings.pausedSites = []; await chrome.storage.sync.set({ settings }); });
   }
@@ -281,12 +293,12 @@ async function functionalChecks(page, baseUrl) {
   md.push(`\n## Priority 2 — never silently accept\n\n| Metric | Value |\n|---|---|\n| Accept/agree buttons clicked by the extension | ${metrics.p2.acceptButtonClicks} |\n| Silent optional-consent acceptances | ${metrics.p2.silentOptionalAcceptances} |\n| False reports of successful rejection | ${metrics.p2.falseSuccessReports} |\n| Exceptions reported correctly | ${metrics.p2.exceptionsReportedCorrectly}/${metrics.p2.exceptionFixtures} |\n`);
   md.push(`## Priority 3 — don't break sites\n\n**${metrics.p3.regressionsPer100}** regressions per 100 handled visits (${metrics.p3.regressions} of ${metrics.p3.handledVisits}). Checks after handling: scrolling, form submit, sign-in survives reload, SPA navigation, link navigation.\n`);
   if (metrics.p3.failingFixtures.length) md.push(metrics.p3.failingFixtures.map(f => `- ${f.id}: ${f.failures.join(', ')}`).join('\n'));
-  md.push(`\n## Extra scenarios\n\n- Remember choice on revisit: ${extra.remember.pass ? 'pass' : 'FAIL'} (${extra.remember.status})\n- Per-site pause leaves banner alone: ${extra.pause.pass ? 'pass' : 'FAIL'} (${extra.pause.status})\n`);
+  md.push(`\n## Extra scenarios\n\n- Remember choice on revisit: ${extra.remember.pass ? 'pass' : 'FAIL'} (${extra.remember.status})\n- Per-site pause leaves banner alone (and sends no GPC): ${extra.pause.pass ? 'pass' : 'FAIL'} (${extra.pause.status})\n- Global Privacy Control sent (header + navigator): ${extra.gpc.pass ? 'pass' : 'FAIL'}\n`);
   md.push('\n## All fixtures\n\n| Fixture | Expected | Got | Reason | Truth | ms | P3 |\n|---|---|---|---|---|---|---|');
   for (const r of results) md.push(`| ${r.id} | ${r.expected.join('/')} | ${r.correct ? '✅' : '❌'} ${r.status} | ${r.reason || ''} | ${r.truth.decided ? (r.truth.optionalGranted ? 'granted' : 'rejected') : 'undecided'} | ${r.handledMs ?? ''} | ${r.functional ? (r.regression ? '❌ ' + r.functional.failures.join(',') : '✅') : '–'} |`);
   fs.writeFileSync(path.join(OUT, 'e2e-report.md'), md.join('\n') + '\n');
 
   console.log('\n' + JSON.stringify({ p1: { pct: metrics.p1.correctlyHandledPct, correct: metrics.p1.correct, total: metrics.p1.total }, p2: metrics.p2, p3: { per100: metrics.p3.regressionsPer100, regressions } }, null, 1));
-  const failed = metrics.p2.acceptButtonClicks || metrics.p2.silentOptionalAcceptances || metrics.p2.falseSuccessReports || regressions || metrics.p1.correct < metrics.p1.total || !extra.remember.pass || !extra.pause.pass;
+  const failed = metrics.p2.acceptButtonClicks || metrics.p2.silentOptionalAcceptances || metrics.p2.falseSuccessReports || regressions || metrics.p1.correct < metrics.p1.total || !extra.remember.pass || !extra.pause.pass || !extra.gpc.pass;
   process.exit(failed ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(2); });

@@ -112,20 +112,46 @@
       } catch (e) { /* ignore */ }
     }
 
+    // iubenda: purposes cookie (_iub_cs-<id>) and the separate US opt-out cookie (_iub_cs-<id>-uspr)
+    for (const m of document.cookie.matchAll(/(?:^|;\s*)(_iub_cs-[\w-]+?)=([^;]*)/g)) {
+      let o = null;
+      try { o = JSON.parse(decodeURIComponent(m[2])); } catch (e) { continue; }
+      if (!o || typeof o !== 'object') continue;
+      if (/-uspr$/.test(m[1])) {
+        const names = { s: 'sale', sh: 'sharing', adv: 'targeted advertising', sd: 'sensitive data' };
+        const keys = Object.keys(o).filter(k => typeof o[k] === 'boolean');
+        const g = keys.filter(k => o[k]).map(k => names[k] || k);
+        out.push({ key: 'iubenda-uspr', source: 'iubenda US privacy choices', regime: 'us', decided: true, optionalGranted: g.length > 0, granted: g, denied: keys.filter(k => !o[k]).map(k => names[k] || k), evidence: g.length ? `still allowed: ${g.join(', ')}` : `opted out of: ${keys.map(k => names[k] || k).join(', ')}` });
+      } else if (o.purposes && typeof o.purposes === 'object') {
+        const g = Object.keys(o.purposes).filter(k => k !== '1' && o.purposes[k] === true);
+        out.push({ key: 'iubenda', source: 'iubenda cookie', decided: true, optionalGranted: g.length > 0, granted: g.map(k => `purpose ${k}`), denied: [], evidence: `purposes ${JSON.stringify(o.purposes)}` });
+      }
+    }
+
     return out;
   }
 
+  /** Readers that apply to every site regardless of the platform rule (US privacy signals). */
+  const ALWAYS_READ = ['gpp', 'usp'];
+
   /** Combined consent state. `preferred` limits to the bridge readers relevant to a rule. */
   async function readState(preferred) {
-    const page = await requestPageState(preferred && preferred.length ? preferred : undefined);
+    const only = preferred && preferred.length ? [...new Set([...preferred, ...ALWAYS_READ])] : undefined;
+    const page = await requestPageState(only);
     const cookies = readCookieStates();
     const all = [...page, ...cookies];
     const decided = all.filter(r => r.decided && r.optionalGranted !== null);
+    const us = decided.filter(r => r.regime === 'us');
+    const other = decided.filter(r => r.regime !== 'us');
     return {
       sources: all,
       decided: decided.length > 0,
       anyGranted: decided.some(r => r.optionalGranted === true),
       allDenied: decided.length > 0 && decided.every(r => r.optionalGranted === false),
+      // US opt-out regime: sale / sharing / targeted ads still on (the default until you opt out)
+      usGranted: us.some(r => r.optionalGranted === true),
+      otherGranted: other.some(r => r.optionalGranted === true),
+      otherDecided: other.length > 0,
       summary: decided.map(r => `${r.source}: ${r.evidence}`).join(' · ')
     };
   }

@@ -8,7 +8,7 @@ const ROOT = path.resolve(__dirname, '..'), WEB = path.join(ROOT, 'web'), EXT = 
   let [sw] = ctx.serviceWorkers(); if (!sw) sw = await ctx.waitForEvent('serviceworker');
   const id = sw.url().split('/')[2];
   const tabs = {};
-  for (const fx of (process.argv[2] || 'onetrust,custom-de,accept-only,mislabeled,leftover-lock').split(',')) {
+  for (const fx of (process.argv[2] || 'onetrust,custom-de,accept-only,mislabeled,leftover-lock,iubenda-us').split(',')) {
     const p = await ctx.newPage(); await p.setViewportSize({ width: 1200, height: 800 });
     await p.goto(`http://${fx}.localhost:8796/playground/fixtures/${fx}.html`); await p.waitForTimeout(7000);
     await p.screenshot({ path: path.join(OUT, `page-${fx}.png`) });
