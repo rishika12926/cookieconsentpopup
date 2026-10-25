@@ -115,6 +115,7 @@
     C0002: 'Performance & analytics cookies', C0003: 'Functional cookies', C0004: 'Targeting & advertising cookies', C0005: 'Social media cookies',
     preferences: 'Preference cookies', statistics: 'Statistics cookies', marketing: 'Marketing cookies',
     'purpose 2': 'Functionality', 'purpose 3': 'Experience', 'purpose 4': 'Measurement (analytics)', 'purpose 5': 'Marketing',
+    SSPD_BG: 'Sale or sharing of your personal data', SPD_BG: 'Sale of your personal data', STDF: 'Targeted advertising', 'SSPD': 'Sale or sharing of your personal data',
     sale: 'Sale of your personal information', sharing: 'Sharing of your personal information',
     'targeted advertising': 'Targeted advertising', 'sensitive data': 'Use of sensitive data'
   };

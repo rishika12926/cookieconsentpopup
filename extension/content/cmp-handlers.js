@@ -139,6 +139,14 @@
    * Returns {status, reason}: VERIFIED | CLICKED | NEEDS_YOU | FAILED.
    */
   async function usOptOut(rule, ctx) {
+    // Work out of sight: keep the platform's panel (and its dark backdrop) transparent while we
+    // switch things off, so the page doesn't flash a pop-up open and shut.
+    const sels = [...(((rule && rule.usOptOut) || {}).container || []), ...((rule && rule.backdrops) || [])];
+    const unhide = D().hideWhileWorking(sels);
+    try { return await usOptOutInner(rule, ctx); } finally { setTimeout(unhide, 400); }
+  }
+
+  async function usOptOutInner(rule, ctx) {
     const st0 = await V().readState(rule && rule.state);
     if (!st0.usGranted) return { status: 'VERIFIED' };
     const wanted = [...new Set(st0.sources.filter(s => s.regime === 'us' && s.optionalGranted).flatMap(s => s.granted.map(g => g.split(' (')[0])))];

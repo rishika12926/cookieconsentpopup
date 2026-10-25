@@ -23,6 +23,24 @@
   let prehideStyle = null;
   const startedAt = Date.now();
 
+  // Consent windows YOU open (e.g. "Do Not Sell or Share" in the footer) are yours to use:
+  // anything that appears within a few seconds of your own click or key press is left alone.
+  const USER_WINDOW_MS = 5000;
+  let lastUserAction = 0;
+  const userOwned = new WeakSet();
+  const OPENS_CONSENT_UI = /cookie|privacy|consent|do not sell|don.?t sell|sell or share|opt.?out|preferences|your choices|datenschutz|confidentialit|privacidad|privacy choices|gdpr|ccpa/i;
+  const markUser = (e) => {
+    if (!e.isTrusted) return;                         // our own clicks don't count
+    endPrehide();
+    if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+    const t = e.type === 'keydown' ? document.activeElement : e.target;
+    const el = t && t.closest ? (t.closest('a, button, [role="button"], [role="link"], [onclick]') || t) : null;
+    const label = el ? `${el.textContent || ''} ${el.getAttribute('aria-label') || ''} ${el.id || ''} ${typeof el.className === 'string' ? el.className : ''}`.slice(0, 300) : '';
+    if (OPENS_CONSENT_UI.test(label)) lastUserAction = Date.now();
+  };
+  document.addEventListener('pointerdown', markUser, true);
+  document.addEventListener('keydown', markUser, true);
+
   const pageStatus = {
     site, host: location.hostname, status: 'SCANNING', frame: isTop ? 'top' : 'sub',
     outcome: null, health: null, siteType: null, language: null
@@ -51,6 +69,7 @@
   function prehide(selectors) {
     if (!selectors || !selectors.length) return;
     prehideStyle = document.createElement('style');
+    prehideStyle.setAttribute('data-cookieshield-prehide-style', '');
     prehideStyle.textContent = `${selectors.join(',')}{opacity:0 !important;transition:none !important}`;
     document.documentElement.setAttribute('data-cookieshield-prehide', '');
     (document.head || document.documentElement).appendChild(prehideStyle);
@@ -58,7 +77,7 @@
   }
   function endPrehide() {
     if (prehideStyle) { prehideStyle.remove(); prehideStyle = null; }
-    document.documentElement.removeAttribute('data-cookieshield-prehide');
+    if (!document.querySelector('style[data-cookieshield-working]')) document.documentElement.removeAttribute('data-cookieshield-prehide');
   }
 
   // "Hide without answering" chosen by the user for this site.
@@ -91,12 +110,16 @@
   // ---------------------------------------------------------------------------------------
   // Core flow
   // ---------------------------------------------------------------------------------------
-  async function scan() {
+  async function scan(force = false) {
     if (busy || finished) return;
     busy = true;
     try {
       const det = window.CookieShieldDetector.detect(rules);
       if (!det) return;
+      if (!force && (userOwned.has(det.container) || Date.now() - lastUserAction < USER_WINDOW_MS)) {
+        userOwned.add(det.container);   // opened by you → not ours to answer
+        return;
+      }
 
       if (det.kind === 'delegated') {
         if (pageStatus.status !== 'WAITING_FRAME') {
@@ -109,7 +132,14 @@
 
       lastDetection = det;
       pageStatus.status = 'HANDLING';
-      const outcome = await window.CookieShieldEngine.handle(det);
+      // Known platform: keep its banner transparent while we click "reject" (no flash).
+      const unhide = det.rule ? D.hideWhileWorking([...(det.rule.container || []), ...(det.rule.backdrops || [])]) : () => {};
+      let outcome;
+      try { outcome = await window.CookieShieldEngine.handle(det); }
+      finally {
+        // On success the banner is gone anyway; otherwise show it again right away for you.
+        if (outcome && (outcome.status === 'VERIFIED' || outcome.status === 'CLICKED')) setTimeout(unhide, 400); else unhide();
+      }
       outcome.supported = !!det.rule;
       outcome.ruleTested = !!(det.rule && det.rule.tested);
       outcome.selector = det.rule ? (det.rule.container || [])[0] || null : D.selectorFor(det.container);
@@ -228,6 +258,7 @@
     if (state.decided && state.allDenied) pageStatus.status = 'REMEMBERED';
     else if (state.decided && state.anyGranted) pageStatus.status = 'PREVIOUSLY_ACCEPTED';
     else pageStatus.status = 'NO_BANNER';
+    endPrehide();
     pageStatus.evidence = state.summary || null;
     pageStatus.refused = state.refused || [];
     pageStatus.allowed = state.allowed || [];
@@ -272,7 +303,7 @@
     switch (msg.type) {
       case 'RESCAN':
         finished = false; lastOutcome = null; pageStatus.status = 'SCANNING';
-        scan().then(() => sendResponse({ ok: true, status: pageStatus.status }));
+        scan(true).then(() => sendResponse({ ok: true, status: pageStatus.status }));
         return true;
       case 'RUN_SELF_TEST':
         sendResponse(window.CookieShieldRestorer.selfTest());
@@ -337,6 +368,13 @@
     applyUserHide(memory.hideSelector);
   } else if (memory && memory.prehide && memory.prehide.length) {
     prehide(memory.prehide);
+  } else if (isTop) {
+    // Banners from known platforms stay transparent for the first moments while we reject
+    // them, so you don't see them pop up and vanish. Any click/key press of yours, or our
+    // result (success or not), ends this immediately; it never lasts more than 8 seconds.
+    const sels = [...new Set(rules.filter(r => r.tested && !r.shadow && !r.delegatesToFrame).flatMap(r => (r.detect || []).slice(0, 1)))]
+      .filter(sel => /^[#.][\w-]+$/.test(sel));
+    prehide(sels);
   }
 
   const onReady = async () => {

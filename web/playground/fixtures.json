@@ -41,6 +41,18 @@
   "description": "Optional groups are ON by default until you reject."
  },
  {
+  "id": "onetrust-us-nobanner",
+  "title": "OneTrust — US, no banner",
+  "sim": "onetrustUS",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "Copied from newbalance.com: no banner, “Share or Sale of Personal Data” ON by default. Must opt out via “Do Not Sell or Share” without the panel flashing."
+ },
+ {
   "id": "cookiebot",
   "title": "Cookiebot",
   "sim": "cookiebot",

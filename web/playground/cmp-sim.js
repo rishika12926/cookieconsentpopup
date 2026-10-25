@@ -581,6 +581,54 @@
     document.body.appendChild(banner);
   };
 
+  /**
+   * OneTrust, US opt-out model — reproduced from newbalance.com (Oct 2026). No banner ever shows;
+   * optional groups incl. "Share Or Sale of Personal Data" (SSPD_BG) are ON until you use the
+   * footer link "Do Not Sell or Share My Personal Information", which opens the preference centre.
+   * The panel's opacity when first shown is recorded (T().pcOpacity) to check for flicker.
+   */
+  SIMS.onetrustUS = function () {
+    const ON = ['SSPD_BG', 'C0002', 'C0004'];
+    const decided = () => !!getCookie('OptanonAlertBoxClosed');
+    const active = () => decided() ? (getCookie('sim_ot_groups') || ',C0001,') : ',C0001,' + ON.join(',') + ',';
+    window.OnetrustActiveGroups = active();
+    window.OneTrust = { IsAlertBoxClosed: decided, ToggleInfoDisplay: () => openPc() };
+    const truth = () => Object.assign(T(), { cmp: 'onetrust', decided: true, optionalGranted: active() !== ',C0001,' });
+    truth();
+    T().choice = decided() ? 'stored' : undefined;
+    const link = $(`<a class="ot-sdk-show-settings" href="javascript:void(0);" style="position:fixed;bottom:8px;right:12px;z-index:5;background:#fff;padding:4px 8px">Do Not Sell or Share My Personal Information</a>`);
+    link.onclick = () => { log('open do-not-sell'); openPc(); };
+    document.body.appendChild(link);
+    function openPc() {
+      if (document.getElementById('onetrust-pc-sdk')) return;
+      const on = new Set(active().split(',').filter(g => g && g !== 'C0001'));
+      const pc = $(`<div id="onetrust-consent-sdk"><div class="onetrust-pc-dark-filter" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2147483000"></div>
+        <div id="onetrust-pc-sdk" role="dialog" aria-modal="true" style="position:fixed;inset:8% 22%;z-index:2147483002;background:#fff;padding:20px;overflow:auto">
+          <h2>Do Not Sell or Share My Personal Data</h2>
+          <p>When you visit our website, we store cookies on your browser to collect information. You can choose not to allow certain types of cookies.</p>
+          <button id="accept-recommended-btn-handler">Allow All</button>
+          <h3>Manage Consent Preferences</h3>
+          <div class="ot-sdk-row"><h4>Strictly Necessary Cookies</h4><span>Always Active</span></div>
+          ${[['SSPD_BG', 'Share Or Sale of Personal Data'], ['C0002', 'Performance Cookies'], ['C0004', 'Targeting Cookies']].map(([id, n]) =>
+            `<div class="ot-sdk-row"><label for="ot-group-id-${id}">${n}</label><span class="ot-tgl"><input type="checkbox" class="category-switch-handler" id="ot-group-id-${id}" ${on.has(id) ? 'checked' : ''}></span></div>`).join('')}
+          <div class="ot-pc-footer"><button class="ot-pc-refuse-all-handler">Reject All</button> <button class="save-preference-btn-handler onetrust-close-btn-handler">Confirm My Choices</button></div>
+        </div></div>`);
+      const save = (groups, choice) => {
+        setCookie('OptanonAlertBoxClosed', new Date().toISOString());
+        setCookie('sim_ot_groups', ',' + ['C0001', ...groups].join(',') + ',');
+        setCookie('OptanonConsent', `isGpcEnabled=0&groups=C0001:1,${ON.map(g => g + ':' + (groups.includes(g) ? 1 : 0)).join(',')}`);
+        window.OnetrustActiveGroups = active();
+        pc.remove(); truth(); T().choice = choice;
+      };
+      pc.querySelector('.ot-pc-refuse-all-handler').onclick = () => { log('pc reject all'); save([], 'reject'); };
+      pc.querySelector('#accept-recommended-btn-handler').onclick = () => { log('pc allow all'); save(ON, 'accept'); };
+      pc.querySelector('.save-preference-btn-handler').onclick = () => { log('pc confirm'); save(ON.filter(g => pc.querySelector('#ot-group-id-' + g).checked), 'save'); };
+      document.body.appendChild(pc);
+      const el = pc.querySelector('#onetrust-pc-sdk');
+      T().pcOpacity = getComputedStyle(el).opacity; // read at once: CookieShield may close it within a frame
+    }
+  };
+
   /** Not a cookie banner at all. Expected: untouched. */
   SIMS.newsletter = () => {
     const el = $(`<div id="newsletter" role="dialog" aria-modal="true" style="position:fixed;inset:auto 20px 20px auto;width:360px;background:#fff;padding:18px;z-index:99999;box-shadow:0 10px 30px rgba(0,0,0,.25)">

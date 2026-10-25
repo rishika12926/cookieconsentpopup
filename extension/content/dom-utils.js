@@ -177,7 +177,33 @@
     return multi.test(two) ? parts.slice(-3).join('.') : two;
   }
 
+  /**
+   * Make consent UI transparent while CookieShield clicks through it (anti-flicker). isVisible()
+   * ignores opacity while the html[data-cookieshield-prehide] flag is set, so detection still works.
+   * Returns an undo function. Reference-counted so overlapping callers don't un-hide each other.
+   */
+  let hideCount = 0;
+  function hideWhileWorking(selectors) {
+    const sels = (selectors || []).filter(Boolean);
+    if (!sels.length) return () => {};
+    const st = document.createElement('style');
+    st.setAttribute('data-cookieshield-working', '');
+    st.textContent = `${sels.join(',')}{opacity:0 !important;transition:none !important;animation:none !important}`;
+    (document.head || document.documentElement).appendChild(st);
+    hideCount++;
+    document.documentElement.setAttribute('data-cookieshield-prehide', '');
+    let done = false;
+    return () => {
+      if (done) return;
+      done = true;
+      st.remove();
+      hideCount--;
+      if (hideCount <= 0 && !document.querySelector('style[data-cookieshield-prehide-style]')) document.documentElement.removeAttribute('data-cookieshield-prehide');
+    };
+  }
+
   window.CookieShieldDOM = {
+    hideWhileWorking,
     CLICKABLE, shadowOf, allRoots, deepQuery, deepQueryAll, isVisible, labelOf, clickablesIn,
     navigatesAway, safeClick, selectorFor, wait, waitFor, siteKey
   };

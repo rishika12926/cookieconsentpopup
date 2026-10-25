@@ -62,6 +62,18 @@
     try { decided = typeof window.OneTrust?.IsAlertBoxClosed === 'function' ? window.OneTrust.IsAlertBoxClosed() : /OptanonAlertBoxClosed=/.test(document.cookie); } catch (e) { /* ignore */ }
     const optional = active.filter(g => g !== 'C0001' && !/^C0001$/i.test(g));
     // OneTrust uses C0001 for strictly necessary. Others (C0002 performance, C0003 functional, C0004 targeting, C0005 social, V2STACKx / ISFxx for IAB) are optional.
+    // US opt-out model (e.g. newbalance.com): no banner is ever shown and optional groups —
+    // including "Share or Sale of Personal Data" — are ON until you opt out. That is not a
+    // decision you made, so report it as a US-style default opt-in.
+    const banner = document.getElementById('onetrust-banner-sdk');
+    const bannerShown = !!(banner && banner.offsetWidth > 0 && getComputedStyle(banner).visibility !== 'hidden');
+    if (!decided && !bannerShown && optional.length && hasSdk) {
+      return Promise.resolve({
+        source: 'OneTrust (US opt-out model)', regime: 'us', decided: true, optionalGranted: true,
+        granted: optional, denied: [],
+        evidence: `on by default until you opt out: ${optional.join(', ')}`
+      });
+    }
     return Promise.resolve({
       source: 'OneTrust',
       decided,
