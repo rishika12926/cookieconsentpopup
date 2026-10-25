@@ -288,6 +288,10 @@ async function refreshRules() {
 chrome.alarms.onAlarm.addListener(a => { if (a.name === 'rules-refresh') refreshRules(); });
 
 let bundledRules = null;
+async function getPageRules() {
+  try { return (await (await fetch(chrome.runtime.getURL('rules/cmp-rules.json'))).json()).optOutPages || []; }
+  catch (e) { return []; }
+}
 async function getRules() {
   if (!bundledRules) {
     try { bundledRules = (await (await fetch(chrome.runtime.getURL('rules/cmp-rules.json'))).json()).platforms || []; }
@@ -305,11 +309,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   const tabId = sender.tab ? sender.tab.id : msg.tabId;
   const frameId = sender.frameId || 0;
   const p = msg.payload || {};
+  // Messages from a page that is no longer the one on screen (back/forward cache, a page being
+  // replaced) must not overwrite the current page's status in the popup and badge.
+  const stale = !!(sender.documentLifecycle && sender.documentLifecycle !== 'active');
 
   (async () => {
     switch (msg.type) {
       case 'STATUS':
-        if (tabId != null) updateTab(tabId, frameId, p);
+        if (tabId != null && !stale) updateTab(tabId, frameId, p);
         return { ok: true };
 
       case 'FRAME_ACTION':
@@ -321,7 +328,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         if (frameId !== 0 && sender.tab && sender.tab.url) {
           try { const h = new URL(sender.tab.url).hostname; p.host = h; p.site = siteKey(h); } catch (e) { /* ignore */ }
         }
-        if (tabId != null) updateTab(tabId, frameId, { ...p, status: p.outcome.status });
+        if (tabId != null && !stale) updateTab(tabId, frameId, { ...p, status: p.outcome.status });
         const entry = await recordOutcome(p, tabId);
         // A CMP inside an iframe finished → let the top frame repair / notify.
         if (frameId !== 0 && tabId != null) chrome.tabs.sendMessage(tabId, { type: 'FRAME_OUTCOME', outcome: p.outcome }, { frameId: 0 }).catch(() => {});
@@ -329,7 +336,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       }
 
       case 'HEALTH':
-        if (tabId != null) updateTab(tabId, frameId, { health: p.health });
+        if (tabId != null && !stale) updateTab(tabId, frameId, { health: p.health });
         await bumpMetric(m => {
           if (!p.health.ok) m.autoRegressions++;
           m.repairsMade += (p.health.repairs || []).length;
@@ -396,6 +403,24 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         // Remember that a "no" was in place here, so a later "yes" is treated as the person's choice.
         if (p.status === 'REMEMBERED') siteMemory[p.site] = { ...(siteMemory[p.site] || { count: 0 }), seenNo: true, seenNoAt: new Date().toISOString() };
         await chrome.storage.local.set({ history, siteMemory });
+        return { ok: true };
+      }
+
+      case 'GET_PAGE_RULES':
+        return getPageRules();
+
+      case 'PAGE_OPTOUT_PENDING':
+      case 'PAGE_OPTOUT_DONE': {
+        // Settings-page opt-outs (e.g. Amazon ads): done ONCE per site and page, then left alone.
+        const { siteMemory } = await chrome.storage.local.get({ siteMemory: {} });
+        const mem = siteMemory[p.site] || { count: 0 };
+        mem.pageOptOuts = mem.pageOptOuts || {};
+        const prev = mem.pageOptOuts[p.key] || {};
+        mem.pageOptOuts[p.key] = msg.type === 'PAGE_OPTOUT_PENDING'
+          ? { pending: true, at: new Date().toISOString(), clicks: p.clicks || [] }
+          : { ...prev, pending: false, ok: !!p.ok, already: !!p.already, doneAt: new Date().toISOString() };
+        siteMemory[p.site] = mem;
+        await chrome.storage.local.set({ siteMemory });
         return { ok: true };
       }
 

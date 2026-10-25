@@ -15,6 +15,8 @@
 
   let settings = null;
   let rules = [];
+  let pageRules = [];
+  let onSettingsPage = false;
   let busy = false;
   let finished = false;          // a banner was handled (or an exception raised) on this page
   let lastOutcome = null;
@@ -61,6 +63,7 @@
     const local = await chrome.storage.local.get({ siteMemory: {} });
     // Rules come from the background (bundled + optional remote updates, data only).
     try { rules = (await chrome.runtime.sendMessage({ type: 'GET_RULES' })) || []; } catch (e) { rules = []; }
+    try { pageRules = (await chrome.runtime.sendMessage({ type: 'GET_PAGE_RULES' })) || []; } catch (e) { pageRules = []; }
     return local.siteMemory[site] || null;
   }
 
@@ -230,7 +233,7 @@
 
   /** No banner after a while: tell the user whether an earlier choice is still in effect. */
   async function checkRemembered() {
-    if (finished || busy || !isTop || pageStatus.status === 'WAITING_FRAME') return;
+    if (finished || busy || !isTop || onSettingsPage || pageStatus.status === 'WAITING_FRAME') return;
     const state = await window.CookieShieldVerifier.readState();
     if (finished || busy) return;
     pageStatus.siteType = pageStatus.siteType || classifySite();
@@ -404,6 +407,23 @@
       }, 1200);
     }
     if (memory && memory.hideAlways) return;
+    // Privacy settings pages (e.g. Amazon "Your Ads Privacy Choices"): opt out once, then hands off.
+    if (isTop && window.CookieShieldOptOutPages) (async () => {
+      try {
+        const sendP = (type, payload) => send(type, { site, ...payload });
+        const r = await window.CookieShieldOptOutPages.run({ memory, pageRules, send: sendP, onFound: () => { onSettingsPage = true; } });
+        if (r) {
+          onSettingsPage = true;
+          if (r.kind === 'left-alone') {
+            Object.assign(pageStatus, { status: r.status, evidence: r.evidence, refused: r.refused, allowed: r.allowed });
+            send('STATUS', { ...pageStatus });
+            send('REMEMBERED_VISIT', { site, host: location.hostname, siteType: pageStatus.siteType, status: r.status, evidence: r.evidence, refused: r.refused, allowed: r.allowed, stateSources: [] });
+          } else {
+            await finish(r, null);
+          }
+        }
+      } catch (e) { console.warn('[CookieShield] settings page error', e); }
+    })();                       // runs alongside banner handling; never delays it
     scan();
     startObserving();
     if (isTop) setTimeout(checkRemembered, NO_BANNER_CHECK_MS);

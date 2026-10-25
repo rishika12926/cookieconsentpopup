@@ -96,6 +96,7 @@
     UNRECOGNIZED_LANGUAGE_OR_LAYOUT: 'We couldn’t recognise the buttons on this banner.',
     OPTIONAL_STILL_GRANTED: 'The site’s consent record still lists optional cookies as allowed.',
     US_OPTOUT_NOT_FOUND: 'Under US state privacy laws this site sells, shares or uses your data for targeted ads until you opt out, and we couldn’t find its “Your Privacy Choices” / “Do Not Sell or Share” option. Your browser is sending the Global Privacy Control opt-out signal, which many US sites must honour.',
+    OPTOUT_NOT_SAVED: 'We selected the opt-out on the site’s privacy settings page, but it wasn’t saved.',
     US_OPTOUT_NOT_SAVED: 'We switched off sale, sharing and targeted advertising in the site’s privacy choices, but the site still reports them as allowed.'
   };
 
@@ -104,7 +105,8 @@
     settings_reject_all: 'Opened the settings and clicked “reject all” there',
     settings_all_off_saved: 'Opened the settings, switched every optional category off, then saved',
     translated_reject: 'Translated the buttons on your device, then clicked the reject option',
-    us_optout: 'Opened the site’s “Your Privacy Choices” panel, switched everything off and saved'
+    us_optout: 'Opened the site’s “Your Privacy Choices” panel, switched everything off and saved',
+    page_optout: 'Selected the “opt out” option on the site’s privacy settings page and saved it — only this once, so you can switch it back'
   };
 
   // Consent-record codes → everyday words. Items arrive as "reader:item" from the content script.
@@ -173,7 +175,7 @@
     if (e.method && METHOD[e.method]) out.push(['What we did', METHOD[e.method]]);
     if (e.clicks && e.clicks.length) out.push(['Buttons clicked', e.clicks.map(c => `“${c.label}”`).join(' → ')]);
     if (e.turnedOff && e.turnedOff.length) out.push(['Switched off', e.turnedOff.slice(0, 8).join(', ')]);
-    if (e.usOptOut && e.usOptOut.length) out.push(['US privacy opt-out', `Turned off: ${e.usOptOut.join(', ').replace(/, ([^,]*)$/, ' and $1')} of your personal information`]);
+    if (e.usOptOut && e.usOptOut.length) out.push(['US privacy opt-out', `Turned off: ${e.usOptOut.join(', ').replace(/, ([^,]*)$/, ' and $1')}`]);
     if ((e.status === 'VERIFIED' || e.status === 'CLICKED') && e.refused && e.refused.length) out.push(['Refused', humanize(e.refused).join(', ')]);
     if (e.reason && REASON[e.reason]) out.push(['Why we stopped', REASON[e.reason]]);
     if (e.evidence) out.push(['Proof', e.evidence]);

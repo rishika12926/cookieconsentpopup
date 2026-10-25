@@ -291,6 +291,25 @@ async function functionalChecks(page, baseUrl) {
     console.log(`${extra.userOpened.pass ? '✓' : '✗'} no flicker / your panel     auto=${first && first.status} (panel opacity while working: ${auto.opacity}) · you opened it → stays open=${st.open}, extension clicks=${st.clicks.length - 1}, status=${tab && tab.status}`);
   }
 
+  {
+    // Settings pages are changed ONCE: CookieShield opts out on the first visit; you then pick
+    // "Allow" and save; on later visits CookieShield must leave your "Allow" alone.
+    const host = 'settings-respect.localhost';
+    await ctx.clearCookies();
+    await page.goto(`http://${host}:${PORT}/playground/fixtures/amazon-privacyprefs.html`);
+    await sleep(6000);
+    const first = await page.evaluate(() => document.querySelector('input[name="cross-context-behavioral-ads"]:checked').value);
+    await page.click('label[for="cross-context-behavioral-ads-in"]');
+    await Promise.all([page.waitForLoadState('load'), page.click('#privacy-pref-save')]);
+    await sleep(5000);
+    await page.goto(`http://${host}:${PORT}/playground/fixtures/amazon-privacyprefs.html`);
+    await sleep(5000);
+    const after = await page.evaluate(() => document.querySelector('input[name="cross-context-behavioral-ads"]:checked').value);
+    const tab = await tabStatus(sw, page);
+    extra.settingsOnce = { firstVisit: first, afterYouChoseAllow: after, status: tab && tab.status, pass: first === 'off' && after === 'on' && tab && tab.status === 'PREVIOUSLY_ACCEPTED' };
+    console.log(`${extra.settingsOnce.pass ? '✓' : '✗'} settings page, once only  first visit=${first} → you chose Allow → later visit=${after} (${tab && tab.status})`);
+  }
+
   await ctx.close();
   s1.close(); s2.close();
 
@@ -349,12 +368,12 @@ async function functionalChecks(page, baseUrl) {
   md.push(`\n## Priority 2 — never silently accept\n\n| Metric | Value |\n|---|---|\n| Accept/agree buttons clicked by the extension | ${metrics.p2.acceptButtonClicks} |\n| Silent optional-consent acceptances | ${metrics.p2.silentOptionalAcceptances} |\n| False reports of successful rejection | ${metrics.p2.falseSuccessReports} |\n| Exceptions reported correctly | ${metrics.p2.exceptionsReportedCorrectly}/${metrics.p2.exceptionFixtures} |\n`);
   md.push(`## Priority 3 — don't break sites\n\n**${metrics.p3.regressionsPer100}** regressions per 100 handled visits (${metrics.p3.regressions} of ${metrics.p3.handledVisits}). Checks after handling: scrolling, form submit, sign-in survives reload, SPA navigation, link navigation.\n`);
   if (metrics.p3.failingFixtures.length) md.push(metrics.p3.failingFixtures.map(f => `- ${f.id}: ${f.failures.join(', ')}`).join('\n'));
-  md.push(`\n## Extra scenarios\n\n- Remember choice on revisit (and log it in History with origin + what was refused): ${extra.remember.pass ? 'pass' : 'FAIL'} (${extra.remember.status})\n- Per-site pause leaves banner alone (and sends no GPC): ${extra.pause.pass ? 'pass' : 'FAIL'} (${extra.pause.status})\n- Global Privacy Control off by default, sent only when enabled: ${extra.gpc.pass ? 'pass' : 'FAIL'}\n- A toggle you switch back on yourself is left alone: ${extra.respectYes.pass ? 'pass' : 'FAIL'}\n- Opt-out happens without the panel flashing, and a panel you open yourself is left alone: ${extra.userOpened.pass ? 'pass' : 'FAIL'}\n`);
+  md.push(`\n## Extra scenarios\n\n- Remember choice on revisit (and log it in History with origin + what was refused): ${extra.remember.pass ? 'pass' : 'FAIL'} (${extra.remember.status})\n- Per-site pause leaves banner alone (and sends no GPC): ${extra.pause.pass ? 'pass' : 'FAIL'} (${extra.pause.status})\n- Global Privacy Control off by default, sent only when enabled: ${extra.gpc.pass ? 'pass' : 'FAIL'}\n- A toggle you switch back on yourself is left alone: ${extra.respectYes.pass ? 'pass' : 'FAIL'}\n- Privacy settings pages (e.g. Amazon) are opted out once, then your own choice is left alone: ${extra.settingsOnce.pass ? 'pass' : 'FAIL'}\n- Opt-out happens without the panel flashing, and a panel you open yourself is left alone: ${extra.userOpened.pass ? 'pass' : 'FAIL'}\n`);
   md.push('\n## All fixtures\n\n| Fixture | Expected | Got | Reason | Truth | ms | P3 |\n|---|---|---|---|---|---|---|');
   for (const r of results) md.push(`| ${r.id} | ${r.expected.join('/')} | ${r.correct ? '✅' : '❌'} ${r.status} | ${r.reason || ''} | ${r.truth.decided ? (r.truth.optionalGranted ? 'granted' : 'rejected') : 'undecided'} | ${r.handledMs ?? ''} | ${r.functional ? (r.regression ? '❌ ' + r.functional.failures.join(',') : '✅') : '–'} |`);
   fs.writeFileSync(path.join(OUT, 'e2e-report.md'), md.join('\n') + '\n');
 
   console.log('\n' + JSON.stringify({ p1: { pct: metrics.p1.correctlyHandledPct, correct: metrics.p1.correct, total: metrics.p1.total }, p2: metrics.p2, p3: { per100: metrics.p3.regressionsPer100, regressions } }, null, 1));
-  const failed = metrics.p2.acceptButtonClicks || metrics.p2.silentOptionalAcceptances || metrics.p2.falseSuccessReports || regressions || metrics.p1.correct < metrics.p1.total || !extra.remember.pass || !extra.pause.pass || !extra.gpc.pass || !extra.respectYes.pass || !extra.userOpened.pass;
+  const failed = metrics.p2.acceptButtonClicks || metrics.p2.silentOptionalAcceptances || metrics.p2.falseSuccessReports || regressions || metrics.p1.correct < metrics.p1.total || !extra.remember.pass || !extra.pause.pass || !extra.gpc.pass || !extra.respectYes.pass || !extra.userOpened.pass || !extra.settingsOnce.pass;
   process.exit(failed ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(2); });

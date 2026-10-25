@@ -650,6 +650,40 @@
     }
   };
 
+  /**
+   * Privacy settings page with no banner — reproduced from amazon.com/privacyprefs (Oct 2026):
+   * "Allow cross-context behavioral ads" (default) / "Opt out of …" radios + "Save preferences",
+   * saved by a form POST that reloads the page with "Your preferences have been updated."
+   * opts.generic: a different site's wording/markup, to exercise the generic recogniser.
+   */
+  SIMS.optOutPage = function (o = {}) {
+    const pref = getCookie('sim_pref') || 'on';
+    const justSaved = sessionStorage.getItem('sim_saved') === '1';
+    sessionStorage.removeItem('sim_saved');
+    Object.assign(T(), { cmp: o.generic ? 'generic-settings' : 'amazon', decided: true, optionalGranted: pref !== 'off', choice: justSaved ? 'save' : undefined });
+    const name = o.generic ? 'sell_share_pref' : 'cross-context-behavioral-ads';
+    const [onText, offText, btn] = o.generic
+      ? ['Allow personalized advertising', 'Do not sell or share my personal information', 'Save choices']
+      : ['Allow cross-context behavioral ads', 'Opt out of cross-context behavioral ads', 'Save preferences'];
+    const el = $(`<section style="max-width:760px;margin:24px auto;padding:20px;border:1px solid #ddd;border-radius:8px;background:#fff">
+      ${justSaved ? '<div class="a-alert a-alert-success"><div class="a-alert-content">Your preferences have been updated.</div></div>' : ''}
+      <h2>${o.generic ? 'Your Privacy Choices' : 'Cross-context behavioral ads'}</h2>
+      <p>It’s your right under some US state laws to opt out of ${o.generic ? 'the sale or sharing of your personal information for advertising' : 'cross-context behavioral ads'}.</p>
+      <form method="post">
+        <input type="hidden" name="anti-csrftoken-a2z" value="sim">
+        <label for="${name}-in"><input id="${name}-in" type="radio" name="${name}" value="on" ${pref !== 'off' ? 'checked' : ''}> ${onText}</label><br>
+        <label for="${name}-out"><input id="${name}-out" type="radio" name="${name}" value="off" ${pref === 'off' ? 'checked' : ''}> ${offText}</label><br>
+        ${o.generic ? `<button type="submit" class="save">${btn}</button>` : `<span class="a-button"><input id="privacy-pref-save" class="a-button-input" type="submit" aria-labelledby="save-label"><span id="save-label" class="a-button-text">${btn}</span></span>`}
+      </form></section>`);
+    el.querySelector('form').addEventListener('submit', () => {
+      const v = el.querySelector(`input[name="${name}"]:checked`).value;
+      log(`save ${v}`);
+      setCookie('sim_pref', v);
+      sessionStorage.setItem('sim_saved', '1');
+    });
+    document.body.prepend(el);
+  };
+
   /** Not a cookie banner at all. Expected: untouched. */
   SIMS.newsletter = () => {
     const el = $(`<div id="newsletter" role="dialog" aria-modal="true" style="position:fixed;inset:auto 20px 20px auto;width:360px;background:#fff;padding:18px;z-index:99999;box-shadow:0 10px 30px rgba(0,0,0,.25)">

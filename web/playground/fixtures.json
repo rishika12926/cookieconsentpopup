@@ -206,6 +206,32 @@
   "description": "Granola on a return visit: banner hidden, “Your Privacy Choices” not drawn. Must open the panel via iubenda’s own API and opt out."
  },
  {
+  "id": "amazon-privacyprefs",
+  "title": "Amazon — Your Ads Privacy Choices",
+  "sim": "optOutPage",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "Copied from amazon.com/privacyprefs: no banner, “Allow cross-context behavioral ads” selected by default. First visit: select “Opt out” and save, once."
+ },
+ {
+  "id": "settings-page-generic",
+  "title": "Other site’s privacy settings page",
+  "sim": "optOutPage",
+  "opts": {
+   "generic": true
+  },
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "generic",
+  "description": "Unknown site with “Allow …” / “Do not sell or share …” and a Save button. Recognised by wording."
+ },
+ {
   "id": "us-no-optout-link",
   "title": "US opt-outs on, no way to opt out",
   "sim": "iubendaUS",
