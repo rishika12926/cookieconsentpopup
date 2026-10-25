@@ -53,6 +53,20 @@
   "description": "Copied from newbalance.com: no banner, “Share or Sale of Personal Data” ON by default. Must opt out via “Do Not Sell or Share” without the panel flashing."
  },
  {
+  "id": "onetrust-us-netflix",
+  "title": "OneTrust US — switches only (Netflix)",
+  "sim": "onetrustUS",
+  "opts": {
+   "netflix": true
+  },
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "Copied from jobs.netflix.com: no banner, no “Reject all”, hidden switch inputs behind styled labels, and the “Do Not Sell” link is only an info page. Must switch each one off for real and save."
+ },
+ {
   "id": "cookiebot",
   "title": "Cookiebot",
   "sim": "cookiebot",

@@ -587,31 +587,47 @@
    * footer link "Do Not Sell or Share My Personal Information", which opens the preference centre.
    * The panel's opacity when first shown is recorded (T().pcOpacity) to check for flicker.
    */
-  SIMS.onetrustUS = function () {
+  SIMS.onetrustUS = function (o = {}) {
     const ON = ['SSPD_BG', 'C0002', 'C0004'];
     const decided = () => !!getCookie('OptanonAlertBoxClosed');
     const active = () => decided() ? (getCookie('sim_ot_groups') || ',C0001,') : ',C0001,' + ON.join(',') + ',';
     window.OnetrustActiveGroups = active();
-    window.OneTrust = { IsAlertBoxClosed: decided, ToggleInfoDisplay: () => openPc() };
+    window.OneTrust = { IsAlertBoxClosed: decided, ToggleInfoDisplay: () => { log('api open'); openPc(); } };
+    // Like the real SDK, OneTrust keeps an (empty) root container on every page.
+    const root = $(`<div id="onetrust-consent-sdk"></div>`);
+    document.body.appendChild(root);
     const truth = () => Object.assign(T(), { cmp: 'onetrust', decided: true, optionalGranted: active() !== ',C0001,' });
     truth();
     T().choice = decided() ? 'stored' : undefined;
-    const link = $(`<a class="ot-sdk-show-settings" href="javascript:void(0);" style="position:fixed;bottom:8px;right:12px;z-index:5;background:#fff;padding:4px 8px">Do Not Sell or Share My Personal Information</a>`);
-    link.onclick = () => { log('open do-not-sell'); openPc(); };
-    document.body.appendChild(link);
+    if (o.netflix) {
+      // jobs.netflix.com: custom footer links. "Cookie Preferences" opens the panel; "Do Not Sell or
+      // Share" is only an information page (here an in-page anchor, like being on /dnssi already).
+      const f = $(`<div style="position:fixed;bottom:8px;right:12px;z-index:5;background:#fff;padding:4px 8px">
+        <a href="#" class="cp">Cookie Preferences</a> · <a href="#dnssi" class="dn">Do Not Sell Or Share My Personal Information</a></div>`);
+      f.querySelector('.cp').onclick = (e) => { e.preventDefault(); log('open cookie preferences'); openPc(); };
+      f.querySelector('.dn').onclick = () => log('open dnssi info page');
+      document.body.appendChild(f);
+    } else {
+      const link = $(`<a class="ot-sdk-show-settings" href="javascript:void(0);" style="position:fixed;bottom:8px;right:12px;z-index:5;background:#fff;padding:4px 8px">Do Not Sell or Share My Personal Information</a>`);
+      link.onclick = () => { log('open do-not-sell'); openPc(); };
+      document.body.appendChild(link);
+    }
     function openPc() {
       if (document.getElementById('onetrust-pc-sdk')) return;
       const on = new Set(active().split(',').filter(g => g && g !== 'C0001'));
-      const pc = $(`<div id="onetrust-consent-sdk"><div class="onetrust-pc-dark-filter" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2147483000"></div>
+      const pc = $(`<div class="ot-sim-pc"><div class="onetrust-pc-dark-filter" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2147483000"></div>
         <div id="onetrust-pc-sdk" role="dialog" aria-modal="true" style="position:fixed;inset:8% 22%;z-index:2147483002;background:#fff;padding:20px;overflow:auto">
           <h2>Do Not Sell or Share My Personal Data</h2>
           <p>When you visit our website, we store cookies on your browser to collect information. You can choose not to allow certain types of cookies.</p>
           <button id="accept-recommended-btn-handler">Allow All</button>
           <h3>Manage Consent Preferences</h3>
           <div class="ot-sdk-row"><h4>Strictly Necessary Cookies</h4><span>Always Active</span></div>
-          ${[['SSPD_BG', 'Share Or Sale of Personal Data'], ['C0002', 'Performance Cookies'], ['C0004', 'Targeting Cookies']].map(([id, n]) =>
-            `<div class="ot-sdk-row"><label for="ot-group-id-${id}">${n}</label><span class="ot-tgl"><input type="checkbox" class="category-switch-handler" id="ot-group-id-${id}" ${on.has(id) ? 'checked' : ''}></span></div>`).join('')}
-          <div class="ot-pc-footer"><button class="ot-pc-refuse-all-handler">Reject All</button> <button class="save-preference-btn-handler onetrust-close-btn-handler">Confirm My Choices</button></div>
+          ${[['SSPD_BG', 'Share Or Sale of Personal Data'], ['C0002', 'Performance Cookies'], ['C0004', 'Targeting Cookies']].map(([id, n]) => o.netflix
+            // Netflix markup: the real input is visually hidden; a styled <label class="ot-switch"
+            // for=…> is what people click. OneTrust updates its model only from 'click' events.
+            ? `<div class="ot-sdk-row"><h4 id="ot-header-id-${id}">${n}</h4><div class="ot-tgl"><input type="checkbox" role="switch" class="category-switch-handler" id="ot-group-id-${id}" aria-labelledby="ot-header-id-${id}" style="position:absolute;opacity:0;width:1px;height:1px" ${on.has(id) ? 'checked' : ''}> <label class="ot-switch" for="ot-group-id-${id}" style="display:inline-block;width:40px;height:20px;background:#ccc;border-radius:10px"><span class="ot-switch-nob"></span></label></div></div>`
+            : `<div class="ot-sdk-row"><label for="ot-group-id-${id}">${n}</label><span class="ot-tgl"><input type="checkbox" class="category-switch-handler" id="ot-group-id-${id}" ${on.has(id) ? 'checked' : ''}></span></div>`).join('')}
+          <div class="ot-pc-footer">${o.netflix ? '' : '<button class="ot-pc-refuse-all-handler">Reject All</button> '}<button class="save-preference-btn-handler onetrust-close-btn-handler">${o.netflix ? 'Save settings' : 'Confirm My Choices'}</button></div>
         </div></div>`);
       const save = (groups, choice) => {
         setCookie('OptanonAlertBoxClosed', new Date().toISOString());
@@ -620,10 +636,15 @@
         window.OnetrustActiveGroups = active();
         pc.remove(); truth(); T().choice = choice;
       };
-      pc.querySelector('.ot-pc-refuse-all-handler').onclick = () => { log('pc reject all'); save([], 'reject'); };
+      // OneTrust keeps its own model of the switches and only updates it on 'click'. Setting
+      // .checked from script changes the picture but not this model (the jobs.netflix.com bug).
+      const model = new Set(on);
+      for (const g of ON) pc.querySelector('#ot-group-id-' + g).addEventListener('click', (e) => { if (e.target.checked) model.add(g); else model.delete(g); });
+      const rj = pc.querySelector('.ot-pc-refuse-all-handler');
+      if (rj) rj.onclick = () => { log('pc reject all'); save([], 'reject'); };
       pc.querySelector('#accept-recommended-btn-handler').onclick = () => { log('pc allow all'); save(ON, 'accept'); };
-      pc.querySelector('.save-preference-btn-handler').onclick = () => { log('pc confirm'); save(ON.filter(g => pc.querySelector('#ot-group-id-' + g).checked), 'save'); };
-      document.body.appendChild(pc);
+      pc.querySelector('.save-preference-btn-handler').onclick = () => { log('pc save'); save(ON.filter(g => model.has(g)), 'save'); };
+      root.appendChild(pc);
       const el = pc.querySelector('#onetrust-pc-sdk');
       T().pcOpacity = getComputedStyle(el).opacity; // read at once: CookieShield may close it within a frame
     }

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "CookieShield — Reject Cookie Pop-ups",
   "short_name": "CookieShield",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "Rejects optional cookies and US 'sale/sharing' on cookie pop-ups, verifies the choice, tells you when it can't, and never clicks Accept for you.",
   "minimum_chrome_version": "120",
   "permissions": [

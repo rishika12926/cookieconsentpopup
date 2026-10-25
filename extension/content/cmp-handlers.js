@@ -81,12 +81,13 @@
   const US_OPENER_RE = /your privacy choices|privacy choices|do not sell|don.?t sell|do not share|sell or share|opt.?out of (the )?(sale|sharing|targeted)|opt.?out preferences|limit the use of my sensitive|your (california|us|state) privacy (rights|choices)/i;
   const US_ACCEPT_RE = /\b(accept|agree|allow all|opt.?in)\b/i;
 
-  function findUsOpener(rule) {
-    const sels = (rule && rule.usOptOut && rule.usOptOut.open) || [];
+  function findUsOpener(rule, { ruleOnly = false, genericOnly = false } = {}) {
+    const sels = genericOnly ? [] : ((rule && rule.usOptOut && rule.usOptOut.open) || []);
     for (const sel of sels) {
       const el = D().deepQueryAll(sel).find(e => D().isVisible(e) && !D().navigatesAway(e));
       if (el) return el;
     }
+    if (ruleOnly) return null;
     // Generic: links/buttons whose wording means "opt out of sale / sharing / targeted ads".
     const cands = D().deepQueryAll('a, button, [role="button"], [role="link"]')
       .filter(e => {
@@ -151,22 +152,34 @@
     if (!st0.usGranted) return { status: 'VERIFIED' };
     const wanted = [...new Set(st0.sources.filter(s => s.regime === 'us' && s.optionalGranted).flatMap(s => s.granted.map(g => g.split(' (')[0])))];
 
-    const opener = findUsOpener(rule);
-    const before = dialogsNow();
-    if (opener) {
-      D().safeClick(opener);
-      record(ctx, opener, 'open US privacy choices');
-    } else if (rule && rule.usOptOut && rule.usOptOut.api && await openViaApi(rule.usOptOut.api)) {
-      // The link isn't drawn right now, but the platform's own API opens the same panel.
-      ctx.clicks.push({ label: `Your Privacy Choices (opened via ${rule.name})`, kind: 'open US privacy choices' });
-    } else {
-      ctx.evidence = st0.summary;
-      return { status: 'NEEDS_YOU', reason: 'US_OPTOUT_NOT_FOUND' };
+    // Ways to open the privacy panel, most reliable first:
+    //  1. the platform's own link (rule selector), 2. the platform's own API (opens the real
+    //  panel even when sites use custom links, e.g. Netflix's "Cookie Preferences"),
+    //  3. a link whose wording means "Do Not Sell or Share" / "privacy choices".
+    // Links that only lead to an information page (jobs.netflix.com/dnssi) open no panel, so
+    // we move on to the next way instead of giving up.
+    const u0 = (rule && rule.usOptOut) || {};
+    const attempts = [];
+    const ruleLink = findUsOpener(rule, { ruleOnly: true });
+    if (ruleLink) attempts.push(['link', ruleLink]);
+    if (u0.api) attempts.push(['api', u0.api]);
+    const textLink = findUsOpener(rule, { genericOnly: true });
+    if (textLink && textLink !== ruleLink) attempts.push(['link', textLink]);
+    let panel = null;
+    for (const [kind, x] of attempts) {
+      const before = dialogsNow();
+      if (kind === 'link') {
+        D().safeClick(x);
+        record(ctx, x, 'open US privacy choices');
+      } else if (await openViaApi(x)) {
+        ctx.clicks.push({ label: `Privacy settings (opened via ${rule.name})`, kind: 'open US privacy choices' });
+      } else continue;
+      panel = await findUsPanel(rule, before);
+      if (panel) break;
     }
-    const panel = await findUsPanel(rule, before);
     if (!panel) { ctx.evidence = st0.summary; return { status: 'NEEDS_YOU', reason: 'US_OPTOUT_NOT_FOUND' }; }
 
-    const u = (rule && rule.usOptOut) || {};
+    const u = u0;
     // 1. "Reject all" inside the panel (never "Accept all").
     let rej = findRuleEl(u.reject, panel);
     if (rej && !V().canClick(rej, 'REJECT', { fromRule: true }).ok) rej = null;
@@ -178,7 +191,7 @@
 
     // 2. Anything still on gets switched off, then the choice is saved.
     if (D().isVisible(panel)) {
-      const t = await V().deselectOptional(panel, u.toggles);
+      const t = await V().deselectOptional(panel, u.toggles || (rule && rule.toggles));
       ctx.turnedOff = [...new Set([...(ctx.turnedOff || []), ...t.turnedOff])];
       if (t.stillOn.length) { ctx.evidence = `Could not switch off: ${t.stillOn.slice(0, 4).join('; ')}`; return { status: 'NEEDS_YOU', reason: 'TOGGLES_STUCK' }; }
       let save = findRuleEl(u.save, panel);

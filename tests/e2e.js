@@ -232,6 +232,7 @@ async function functionalChecks(page, baseUrl) {
     // Pause: banner must be left alone on a paused site.
     const host = 'paused.localhost';
     await sw.evaluate(async (h) => { const { settings } = await chrome.storage.sync.get({ settings: {} }); settings.pausedSites = [h]; await chrome.storage.sync.set({ settings }); }, host);
+    await sleep(1500); // Chrome applies the "no GPC here" rules asynchronously after a settings change
     await ctx.clearCookies();
     await page.goto(`http://${host}:${PORT}/playground/fixtures/cookiebot.html`);
     await sleep(4000);

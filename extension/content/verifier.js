@@ -252,12 +252,22 @@
       const label = toggleLabel(t);
       if (isLocked(t) || L().isEssentialLabel(label)) { essential.push(label); continue; }
       if (!isOn(t)) continue;
-      // Real user-style click so the CMP's own listeners update its model.
-      const target = t.tagName === 'INPUT' && !D().isVisible(t) ? (t.closest('label') || t.parentElement) : t;
+      // Real user-style click so the CMP's own listeners update its model. Hidden inputs are
+      // usually driven by a styled <label for=…> (OneTrust, iubenda): click that label, or the
+      // input itself — never just flip .checked, which changes the picture but not what the
+      // site saves (seen on jobs.netflix.com: switches looked off, OneTrust saved them on).
+      let target = t;
+      if (t.tagName === 'INPUT' && !D().isVisible(t)) {
+        const root = t.getRootNode();
+        const forLabel = t.id && root.querySelector ? root.querySelector(`label[for="${CSS.escape(t.id)}"]`) : null;
+        target = (forLabel && D().isVisible(forLabel)) ? forLabel : (t.closest('label') || t);
+      }
       D().safeClick(target);
-      await D().wait(60);
+      await D().wait(80);
+      if (isOn(t) && t.tagName === 'INPUT' && target !== t) { t.click(); await D().wait(80); }
       if (isOn(t) && t.tagName === 'INPUT') {
-        // Some custom UIs hide the input behind a styled label; set it directly as a fallback.
+        // Last resort for unusual widgets. Verification afterwards will catch it if the site
+        // didn't actually register the change.
         t.checked = false;
         t.dispatchEvent(new Event('input', { bubbles: true }));
         t.dispatchEvent(new Event('change', { bubbles: true }));

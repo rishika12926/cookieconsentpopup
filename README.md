@@ -10,7 +10,7 @@ A Chrome extension (Manifest V3) with a friendly penguin guide, Pip, plus a smal
 
 | | |
 |---|---|
-| **US privacy opt-outs too** | In US "opt-out" states, sites often sell or share your data and use it for targeted ads until you say no, even after you reject cookies. CookieShield opens the site's *Your Privacy Choices* / *Do Not Sell or Share* panel, switches everything off and saves, then checks the site's US privacy signals (GPP, the CCPA string and iubenda's US cookie). This also covers OneTrust's no-banner US mode (e.g. newbalance.com). It works out of sight, with no pop-up flashing, and never touches a privacy window you open yourself. It only says “no” the first time: if you switch a toggle back on yourself, CookieShield leaves it on. An optional **Global Privacy Control** signal is off by default, because sites that honour it lock their toggles off. |
+| **US privacy opt-outs too** | In US "opt-out" states, sites often sell or share your data and use it for targeted ads until you say no, even after you reject cookies. CookieShield opens the site's *Your Privacy Choices* / *Do Not Sell or Share* panel, switches everything off and saves, then checks the site's US privacy signals (GPP, the CCPA string and iubenda's US cookie). This also covers OneTrust's no-banner US mode (e.g. newbalance.com), including sites with no "Reject all" where each switch has to be turned off for real (e.g. jobs.netflix.com). It works out of sight, with no pop-up flashing, and never touches a privacy window you open yourself. It only says “no” the first time: if you switch a toggle back on yourself, CookieShield leaves it on. An optional **Global Privacy Control** signal is off by default, because sites that honour it lock their toggles off. |
 | **Rejects, never accepts** | Clicks "Reject all", "Only necessary" and similar options, or opens the settings panel and switches every optional category off. "Accept", "Agree", "OK" and "Subscribe" buttons are hard-blocked in code. |
 | **Checks the result** | After clicking, it reads the site's own consent record (the consent platform's API or cookie) and only shows a green *Rejected · confirmed* when that record says nothing optional is on. |
 | **Says when it can't** | Accept-only banners, "pay or consent" walls and banners it can't read confidently are left for you, with a short note: *"I didn't accept anything."* |
@@ -84,13 +84,13 @@ Requires Chrome 120 or later. Page translation uses Chrome's built-in on-device 
 npm install                          # installs Playwright
 npx playwright install chromium      # first time only
 npm test                             # unit tests: 362 lexicon/rule checks + report API
-npm run test:e2e                     # real Chromium with the extension loaded, 54 scenarios
+npm run test:e2e                     # real Chromium with the extension loaded, 55 scenarios
 ```
 The end-to-end run writes `tests/results/e2e-report.md` and `.json` with all three metrics. Latest run:
 
 | Metric | Result |
 |---|---|
-| P1: banners handled correctly | **53 / 53 (100%)** across 16 consent platforms (including iubenda's US privacy choices, copied from a real site), custom banners in 22 languages and edge cases |
+| P1: banners handled correctly | **54 / 54 (100%)** across 16 consent platforms (including iubenda's US privacy choices, copied from a real site), custom banners in 22 languages and edge cases |
 | P2: accept buttons clicked / silent acceptances / false success reports | **0 / 0 / 0** |
 | P2: exceptions correctly reported to the user | **5 / 5** (accept-only, pay-or-consent ×2, mislabeled reject, US opt-out with no opt-out link) |
 | P3: regressions per 100 handled visits | **0** |
