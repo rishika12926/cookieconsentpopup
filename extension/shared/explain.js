@@ -48,12 +48,12 @@
       kept: 'Open the site’s cookie settings (often a link in the footer) to withdraw consent.'
     },
     PREVIOUSLY_ACCEPTED: {
-      icon: 'i', tone: 'warn', label: 'Earlier “accept” stored',
-      headline: 'This site remembers an “accept”',
-      mood: 'thinking',
-      say: 'This site has an older “accept” saved — maybe from before you installed me.',
-      what: 'The site’s consent record shows optional cookies were accepted in the past. We never change an existing choice by ourselves.',
-      kept: 'To change it, open the site’s cookie settings (often linked in the footer), or clear this site’s cookies and reload.'
+      icon: 'i', tone: 'calm', label: 'Your “yes” is respected',
+      headline: 'Some extras are allowed here',
+      mood: 'calm',
+      say: 'This site has a “yes” saved for some extras. If that was you, I’m leaving it alone.',
+      what: 'The site’s consent record allows some optional cookies or data uses. CookieShield only says “no” when a site asks for the first time. It never undoes a choice that was changed later, so you can switch any toggle back on yourself.',
+      kept: 'To change it, use the site’s own cookie or “Your Privacy Choices” settings (often linked in the footer).'
     },
     HIDDEN_BY_YOU: {
       icon: '–', tone: 'muted', label: 'Hidden by you',

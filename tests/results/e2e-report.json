@@ -1,6 +1,6 @@
 {
   "metrics": {
-    "runAt": "2026-10-25T02:27:35.588Z",
+    "runAt": "2026-10-25T02:45:54.971Z",
     "fixtures": 53,
     "p1": {
       "correctlyHandledPct": 100,
@@ -159,7 +159,7 @@
         "bannerVisible": false,
         "historyOk": true,
         "origin": {
-          "at": "2026-10-25T02:27:18.039Z",
+          "at": "2026-10-25T02:45:20.143Z",
           "clicks": [
             "Reject All"
           ],
@@ -182,8 +182,8 @@
         "pass": true
       },
       "gpc": {
-        "header": "1",
-        "navigator": true,
+        "offByDefault": true,
+        "whenEnabled": true,
         "pass": true
       },
       "pause": {
@@ -191,6 +191,12 @@
         "bannerVisible": true,
         "decided": false,
         "gpcOnPaused": false,
+        "pass": true
+      },
+      "respectYes": {
+        "first": "VERIFIED",
+        "after": "PREVIOUSLY_ACCEPTED",
+        "saleStillOn": true,
         "pass": true
       }
     },
@@ -213,7 +219,7 @@
       "clicks": [
         "Reject All"
       ],
-      "handledMs": 736,
+      "handledMs": 864,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -268,7 +274,7 @@
         "Cookie Settings",
         "Confirm My Choices"
       ],
-      "handledMs": 1481,
+      "handledMs": 1470,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -323,7 +329,7 @@
       "clicks": [
         "Reject All"
       ],
-      "handledMs": 735,
+      "handledMs": 730,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -377,7 +383,7 @@
       "clicks": [
         "Deny"
       ],
-      "handledMs": 818,
+      "handledMs": 886,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -432,7 +438,7 @@
         "Customize",
         "Allow selection"
       ],
-      "handledMs": 1493,
+      "handledMs": 1497,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -487,7 +493,7 @@
       "clicks": [
         "Continuer sans accepter →"
       ],
-      "handledMs": 844,
+      "handledMs": 851,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -541,7 +547,7 @@
       "clicks": [
         "Deny"
       ],
-      "handledMs": 666,
+      "handledMs": 738,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -595,7 +601,7 @@
       "clicks": [
         "DISAGREE"
       ],
-      "handledMs": 759,
+      "handledMs": 774,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -649,7 +655,7 @@
       "clicks": [
         "Do not consent"
       ],
-      "handledMs": 789,
+      "handledMs": 783,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -703,7 +709,7 @@
       "clicks": [
         "Reject"
       ],
-      "handledMs": 1138,
+      "handledMs": 1131,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -755,7 +761,7 @@
       "clicks": [
         "Reject"
       ],
-      "handledMs": 817,
+      "handledMs": 797,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -812,7 +818,7 @@
         "Reject all",
         "Save and continue"
       ],
-      "handledMs": 1767,
+      "handledMs": 1807,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -871,7 +877,7 @@
         "Reject all",
         "Save and continue"
       ],
-      "handledMs": 5191,
+      "handledMs": 4980,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -929,7 +935,7 @@
         "Reject all",
         "Save and continue"
       ],
-      "handledMs": 5052,
+      "handledMs": 5029,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -985,7 +991,7 @@
       "clicks": [
         "Reject all"
       ],
-      "handledMs": 837,
+      "handledMs": 772,
       "truth": {
         "decided": true,
         "optionalGranted": true,
@@ -1016,7 +1022,7 @@
       "clicks": [
         "I decline"
       ],
-      "handledMs": 941,
+      "handledMs": 784,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1070,7 +1076,7 @@
       "clicks": [
         "Deny"
       ],
-      "handledMs": 726,
+      "handledMs": 803,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1124,7 +1130,7 @@
       "clicks": [
         "Deny"
       ],
-      "handledMs": 782,
+      "handledMs": 733,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1178,7 +1184,7 @@
       "clicks": [
         "Reject All"
       ],
-      "handledMs": 859,
+      "handledMs": 759,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1232,7 +1238,7 @@
       "clicks": [
         "Required Only"
       ],
-      "handledMs": 736,
+      "handledMs": 746,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1286,7 +1292,7 @@
       "clicks": [
         "Decline"
       ],
-      "handledMs": 832,
+      "handledMs": 825,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1340,7 +1346,7 @@
       "clicks": [
         "Decline"
       ],
-      "handledMs": 750,
+      "handledMs": 735,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1394,7 +1400,7 @@
       "clicks": [
         "No"
       ],
-      "handledMs": 714,
+      "handledMs": 716,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1449,7 +1455,7 @@
       "clicks": [
         "Reject all"
       ],
-      "handledMs": 817,
+      "handledMs": 800,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1504,7 +1510,7 @@
       "clicks": [
         "Alle ablehnen"
       ],
-      "handledMs": 909,
+      "handledMs": 832,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1559,7 +1565,7 @@
       "clicks": [
         "Tout refuser"
       ],
-      "handledMs": 800,
+      "handledMs": 839,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1614,7 +1620,7 @@
       "clicks": [
         "Rechazar todas"
       ],
-      "handledMs": 789,
+      "handledMs": 880,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1669,7 +1675,7 @@
       "clicks": [
         "Rifiuta tutti"
       ],
-      "handledMs": 764,
+      "handledMs": 868,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1724,7 +1730,7 @@
       "clicks": [
         "Alles weigeren"
       ],
-      "handledMs": 892,
+      "handledMs": 819,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1779,7 +1785,7 @@
       "clicks": [
         "Rejeitar todos"
       ],
-      "handledMs": 800,
+      "handledMs": 810,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1834,7 +1840,7 @@
       "clicks": [
         "Odrzuć wszystkie"
       ],
-      "handledMs": 827,
+      "handledMs": 852,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1889,7 +1895,7 @@
       "clicks": [
         "Avvisa alla"
       ],
-      "handledMs": 800,
+      "handledMs": 905,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1944,7 +1950,7 @@
       "clicks": [
         "Hylkää kaikki"
       ],
-      "handledMs": 881,
+      "handledMs": 915,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -1999,7 +2005,7 @@
       "clicks": [
         "Odmítnout vše"
       ],
-      "handledMs": 854,
+      "handledMs": 807,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -2054,7 +2060,7 @@
       "clicks": [
         "Összes elutasítása"
       ],
-      "handledMs": 817,
+      "handledMs": 779,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -2109,7 +2115,7 @@
       "clicks": [
         "Απόρριψη όλων"
       ],
-      "handledMs": 1184,
+      "handledMs": 1138,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -2164,7 +2170,7 @@
       "clicks": [
         "Отклонить все"
       ],
-      "handledMs": 1085,
+      "handledMs": 1063,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -2219,7 +2225,7 @@
       "clicks": [
         "Відхилити все"
       ],
-      "handledMs": 1102,
+      "handledMs": 1037,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -2274,7 +2280,7 @@
       "clicks": [
         "Tümünü reddet"
       ],
-      "handledMs": 877,
+      "handledMs": 830,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -2329,7 +2335,7 @@
       "clicks": [
         "すべて拒否"
       ],
-      "handledMs": 1381,
+      "handledMs": 1141,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -2384,7 +2390,7 @@
       "clicks": [
         "全部拒绝"
       ],
-      "handledMs": 1237,
+      "handledMs": 1049,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -2439,7 +2445,7 @@
       "clicks": [
         "모두 거부"
       ],
-      "handledMs": 1123,
+      "handledMs": 1017,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -2494,7 +2500,7 @@
       "clicks": [
         "رفض الكل"
       ],
-      "handledMs": 1127,
+      "handledMs": 1200,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -2549,7 +2555,7 @@
       "clicks": [
         "דחה הכל"
       ],
-      "handledMs": 1022,
+      "handledMs": 1170,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -2604,7 +2610,7 @@
       "clicks": [
         "सभी अस्वीकार करें"
       ],
-      "handledMs": 1076,
+      "handledMs": 1073,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -2660,7 +2666,7 @@
         "Manage preferences",
         "Save preferences"
       ],
-      "handledMs": 1529,
+      "handledMs": 1535,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -2716,7 +2722,7 @@
       "clicks": [
         "Reject all"
       ],
-      "handledMs": 5840,
+      "handledMs": 5837,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -2771,7 +2777,7 @@
       "clicks": [
         "Reject all"
       ],
-      "handledMs": 830,
+      "handledMs": 812,
       "truth": {
         "decided": true,
         "optionalGranted": false,
@@ -2830,7 +2836,7 @@
       "method": null,
       "evidence": null,
       "clicks": [],
-      "handledMs": 501,
+      "handledMs": 500,
       "truth": {
         "decided": false,
         "optionalGranted": null,
@@ -2857,7 +2863,7 @@
       "method": null,
       "evidence": null,
       "clicks": [],
-      "handledMs": 610,
+      "handledMs": 538,
       "truth": {
         "decided": false,
         "optionalGranted": null,
@@ -2884,7 +2890,7 @@
       "method": null,
       "evidence": null,
       "clicks": [],
-      "handledMs": 631,
+      "handledMs": 811,
       "truth": {
         "decided": false,
         "optionalGranted": null,
@@ -2913,7 +2919,7 @@
       "clicks": [
         "Reject all"
       ],
-      "handledMs": 794,
+      "handledMs": 789,
       "truth": {
         "decided": true,
         "optionalGranted": true,

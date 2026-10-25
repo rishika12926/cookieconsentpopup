@@ -214,13 +214,19 @@ async function functionalChecks(page, baseUrl) {
     console.log(`${extra.remember.pass ? '✓' : '✗'} remember-choice          ${tab && tab.status} · history: ${historyOk ? 'logged with origin + refused' : 'MISSING'}`);
   }
   {
-    // Global Privacy Control: header on requests + navigator.globalPrivacyControl in the page.
-    const host = 'gpc.localhost';
+    // Global Privacy Control is OPT-IN: off by default (sites that honour it lock their toggles).
+    const host = 'gpc.localhost', host2 = 'gpc-on.localhost';
     await page.goto(`http://${host}:${PORT}/playground/fixtures/next.html`);
     await sleep(500);
-    const js = await page.evaluate(() => navigator.globalPrivacyControl);
-    extra.gpc = { header: GPC_SEEN[host], navigator: js, pass: GPC_SEEN[host] === '1' && js === true };
-    console.log(`${extra.gpc.pass ? '✓' : '✗'} global privacy control     header=${GPC_SEEN[host]} navigator=${js}`);
+    const offHeader = GPC_SEEN[host], offJs = await page.evaluate(() => navigator.globalPrivacyControl);
+    await sw.evaluate(async () => { const { settings } = await chrome.storage.sync.get({ settings: {} }); settings.gpcSignal = true; await chrome.storage.sync.set({ settings }); });
+    await sleep(1500);
+    await page.goto(`http://${host2}:${PORT}/playground/fixtures/next.html`);
+    await sleep(500);
+    const onHeader = GPC_SEEN[host2], onJs = await page.evaluate(() => navigator.globalPrivacyControl);
+    extra.gpc = { offByDefault: !offHeader && offJs !== true, whenEnabled: onHeader === '1' && onJs === true };
+    extra.gpc.pass = extra.gpc.offByDefault && extra.gpc.whenEnabled;
+    console.log(`${extra.gpc.pass ? '✓' : '✗'} global privacy control     default: header=${offHeader} navigator=${offJs} · enabled: header=${onHeader} navigator=${onJs}`);
   }
   {
     // Pause: banner must be left alone on a paused site.
@@ -235,7 +241,28 @@ async function functionalChecks(page, baseUrl) {
     const gpcOnPaused = await page.evaluate(() => navigator.globalPrivacyControl === true) || GPC_SEEN[host] === '1';
     extra.pause = { status: tab && tab.status, bannerVisible: visible, decided: truth.decided, gpcOnPaused, pass: visible && !truth.decided && tab && tab.status === 'PAUSED' && !gpcOnPaused };
     console.log(`${extra.pause.pass ? '✓' : '✗'} per-site pause           ${tab && tab.status}`);
-    await sw.evaluate(async () => { const { settings } = await chrome.storage.sync.get({ settings: {} }); settings.pausedSites = []; await chrome.storage.sync.set({ settings }); });
+    await sw.evaluate(async () => { const { settings } = await chrome.storage.sync.get({ settings: {} }); settings.pausedSites = []; settings.gpcSignal = false; await chrome.storage.sync.set({ settings }); });
+  }
+  {
+    // Your "yes" is respected: after CookieShield opted out, the person switches "Sale" back on in
+    // the site's own panel. On the next visit CookieShield must leave that choice alone.
+    const host = 'respect-yes.localhost';
+    await ctx.clearCookies();
+    await sleep(800);
+    await page.goto(`http://${host}:${PORT}/playground/fixtures/iubenda-us-revisit.html`);
+    await sleep(7000);
+    const first = await tabStatus(sw, page);
+    await page.click('.iubenda-cs-preferences-link');
+    await page.waitForSelector('#iubenda-iframe');
+    await page.check('#purpose-s');
+    await page.click('#iubFooterBtn');
+    await sleep(300);
+    await page.reload();
+    await sleep(6500);
+    const after = await tabStatus(sw, page);
+    const sale = await page.evaluate(() => JSON.parse(decodeURIComponent(document.cookie.match(/_iub_cs-s999-uspr=([^;]*)/)[1])).s);
+    extra.respectYes = { first: first && first.status, after: after && after.status, saleStillOn: sale, pass: first && first.status === 'VERIFIED' && sale === true && after && after.status === 'PREVIOUSLY_ACCEPTED' };
+    console.log(`${extra.respectYes.pass ? '✓' : '✗'} your "yes" is respected    first=${first && first.status} → you switched Sale on → next visit=${after && after.status}, sale still on=${sale}`);
   }
 
   await ctx.close();
@@ -296,12 +323,12 @@ async function functionalChecks(page, baseUrl) {
   md.push(`\n## Priority 2 — never silently accept\n\n| Metric | Value |\n|---|---|\n| Accept/agree buttons clicked by the extension | ${metrics.p2.acceptButtonClicks} |\n| Silent optional-consent acceptances | ${metrics.p2.silentOptionalAcceptances} |\n| False reports of successful rejection | ${metrics.p2.falseSuccessReports} |\n| Exceptions reported correctly | ${metrics.p2.exceptionsReportedCorrectly}/${metrics.p2.exceptionFixtures} |\n`);
   md.push(`## Priority 3 — don't break sites\n\n**${metrics.p3.regressionsPer100}** regressions per 100 handled visits (${metrics.p3.regressions} of ${metrics.p3.handledVisits}). Checks after handling: scrolling, form submit, sign-in survives reload, SPA navigation, link navigation.\n`);
   if (metrics.p3.failingFixtures.length) md.push(metrics.p3.failingFixtures.map(f => `- ${f.id}: ${f.failures.join(', ')}`).join('\n'));
-  md.push(`\n## Extra scenarios\n\n- Remember choice on revisit (and log it in History with origin + what was refused): ${extra.remember.pass ? 'pass' : 'FAIL'} (${extra.remember.status})\n- Per-site pause leaves banner alone (and sends no GPC): ${extra.pause.pass ? 'pass' : 'FAIL'} (${extra.pause.status})\n- Global Privacy Control sent (header + navigator): ${extra.gpc.pass ? 'pass' : 'FAIL'}\n`);
+  md.push(`\n## Extra scenarios\n\n- Remember choice on revisit (and log it in History with origin + what was refused): ${extra.remember.pass ? 'pass' : 'FAIL'} (${extra.remember.status})\n- Per-site pause leaves banner alone (and sends no GPC): ${extra.pause.pass ? 'pass' : 'FAIL'} (${extra.pause.status})\n- Global Privacy Control off by default, sent only when enabled: ${extra.gpc.pass ? 'pass' : 'FAIL'}\n- A toggle you switch back on yourself is left alone: ${extra.respectYes.pass ? 'pass' : 'FAIL'}\n`);
   md.push('\n## All fixtures\n\n| Fixture | Expected | Got | Reason | Truth | ms | P3 |\n|---|---|---|---|---|---|---|');
   for (const r of results) md.push(`| ${r.id} | ${r.expected.join('/')} | ${r.correct ? '✅' : '❌'} ${r.status} | ${r.reason || ''} | ${r.truth.decided ? (r.truth.optionalGranted ? 'granted' : 'rejected') : 'undecided'} | ${r.handledMs ?? ''} | ${r.functional ? (r.regression ? '❌ ' + r.functional.failures.join(',') : '✅') : '–'} |`);
   fs.writeFileSync(path.join(OUT, 'e2e-report.md'), md.join('\n') + '\n');
 
   console.log('\n' + JSON.stringify({ p1: { pct: metrics.p1.correctlyHandledPct, correct: metrics.p1.correct, total: metrics.p1.total }, p2: metrics.p2, p3: { per100: metrics.p3.regressionsPer100, regressions } }, null, 1));
-  const failed = metrics.p2.acceptButtonClicks || metrics.p2.silentOptionalAcceptances || metrics.p2.falseSuccessReports || regressions || metrics.p1.correct < metrics.p1.total || !extra.remember.pass || !extra.pause.pass || !extra.gpc.pass;
+  const failed = metrics.p2.acceptButtonClicks || metrics.p2.silentOptionalAcceptances || metrics.p2.falseSuccessReports || regressions || metrics.p1.correct < metrics.p1.total || !extra.remember.pass || !extra.pause.pass || !extra.gpc.pass || !extra.respectYes.pass;
   process.exit(failed ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(2); });

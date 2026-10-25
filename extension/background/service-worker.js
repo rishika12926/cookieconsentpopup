@@ -15,7 +15,10 @@ const DEFAULT_SETTINGS = {
   reportEndpoint: '',              // e.g. https://your-app.vercel.app/api/report
   rulesEndpoint: '',               // e.g. https://your-app.vercel.app/rules/cmp-rules.json
   repoUrl: '',                     // e.g. https://github.com/you/cookieshield (for prefilled issues)
-  sendGPC: true                    // Global Privacy Control: legal "do not sell/share" signal (US)
+  // Global Privacy Control. OFF by default: sites that honour it (e.g. iubenda) lock their
+  // sale/sharing toggles OFF so you can't switch them back on from the site. Opt-in only.
+  // (Renamed from sendGPC, which was on by default in 2.1 — that old value is ignored.)
+  gpcSignal: false
 };
 
 const HISTORY_MAX = 1000;
@@ -48,7 +51,7 @@ const GPC_SCRIPT_ID = 'cookieshield-gpc';
 async function syncGPC() {
   try {
     const s = await getSettings();
-    const on = !!(s.enabled && s.sendGPC);
+    const on = !!(s.enabled && s.gpcSignal);
     const paused = (s.pausedSites || []).filter(d => /^[a-z0-9.-]+$/i.test(d));
     await chrome.declarativeNetRequest.updateEnabledRulesets(on ? { enableRulesetIds: ['gpc'] } : { disableRulesetIds: ['gpc'] });
     // Paused sites: higher-priority "allow" rules stop the header on the site and its requests.
@@ -73,7 +76,9 @@ chrome.runtime.onStartup.addListener(syncGPC);
 chrome.storage.onChanged.addListener((changes, area) => { if (area === 'sync' && changes.settings) syncGPC(); });
 
 chrome.runtime.onInstalled.addListener(async () => {
-  await setSettings({});
+  const cur = await getSettings();
+  delete cur.sendGPC;                       // 2.1 default-on value: drop it, GPC is now opt-in
+  await chrome.storage.sync.set({ settings: cur });
   await syncGPC();
   const local = await chrome.storage.local.get({ history: null, metrics: null, siteMemory: null, reports: null });
   const init = {};
@@ -110,7 +115,7 @@ const BADGE = {
   REMEMBERED: { text: '✓', color: '#8ab6d6', title: 'Your earlier rejection is still in effect' },
   NEEDS_YOU: { text: '!', color: '#e9a23b', title: 'Needs your choice — nothing was accepted' },
   FAILED: { text: '!', color: '#d1495b', title: 'Site still reports optional cookies as allowed' },
-  PREVIOUSLY_ACCEPTED: { text: 'i', color: '#e9a23b', title: 'This site has an earlier “accept” stored' },
+  PREVIOUSLY_ACCEPTED: { text: 'i', color: '#8ab6d6', title: 'Some extras are allowed here — your choice is respected' },
   HIDDEN_BY_YOU: { text: '–', color: '#8d99ae', title: 'Banner hidden by you (no answer sent)' },
   PAUSED: { text: '❚❚', color: '#8d99ae', title: 'Paused on this site' },
   OFF: { text: 'off', color: '#8d99ae', title: 'CookieShield is turned off' }
@@ -388,7 +393,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           });
           if (history.length > HISTORY_MAX) history.length = HISTORY_MAX;
         }
-        await chrome.storage.local.set({ history });
+        // Remember that a "no" was in place here, so a later "yes" is treated as the person's choice.
+        if (p.status === 'REMEMBERED') siteMemory[p.site] = { ...(siteMemory[p.site] || { count: 0 }), seenNo: true, seenNoAt: new Date().toISOString() };
+        await chrome.storage.local.set({ history, siteMemory });
         return { ok: true };
       }
 

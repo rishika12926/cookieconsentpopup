@@ -206,7 +206,10 @@
     pageStatus.siteType = pageStatus.siteType || classifySite();
     // No banner, but the site says you haven't opted out of sale / sharing / targeted ads
     // (US opt-out laws make that the default). Opt out the same way a person would.
-    if (state.usGranted && !state.otherGranted) {
+    // …but only if your "no" was never in place here. If CookieShield (or you) opted out before
+    // and it's back on now, someone switched it back on — that's your choice; we leave it alone.
+    const choseYesHere = !!(memory && (memory.lastRejection || memory.seenNo));
+    if (state.usGranted && !state.otherGranted && !choseYesHere) {
       busy = true;
       try {
         const rule = rules.find(r => r.usOptOut && (r.detect || []).concat(r.usOptOut.open || [], r.usOptOut.present || []).some(sel => { try { return document.querySelector(sel); } catch (e) { return false; } })) || null;

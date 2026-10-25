@@ -10,7 +10,7 @@ A Chrome extension (Manifest V3) with a friendly penguin guide, Pip, plus a smal
 
 | | |
 |---|---|
-| **US privacy opt-outs too** | In US "opt-out" states, sites often sell or share your data and use it for targeted ads until you say no, even after you reject cookies. CookieShield opens the site's *Your Privacy Choices* / *Do Not Sell or Share* panel, switches everything off and saves, then checks the site's US privacy signals (GPP, the CCPA string and iubenda's US cookie). It also sends the **Global Privacy Control** signal, which several US state laws require sites to honour. |
+| **US privacy opt-outs too** | In US "opt-out" states, sites often sell or share your data and use it for targeted ads until you say no, even after you reject cookies. CookieShield opens the site's *Your Privacy Choices* / *Do Not Sell or Share* panel, switches everything off and saves, then checks the site's US privacy signals (GPP, the CCPA string and iubenda's US cookie). It only says “no” the first time: if you switch a toggle back on yourself, CookieShield leaves it on. An optional **Global Privacy Control** signal is off by default, because sites that honour it lock their toggles off. |
 | **Rejects, never accepts** | Clicks "Reject all", "Only necessary" and similar options, or opens the settings panel and switches every optional category off. "Accept", "Agree", "OK" and "Subscribe" buttons are hard-blocked in code. |
 | **Checks the result** | After clicking, it reads the site's own consent record (the consent platform's API or cookie) and only shows a green *Rejected · confirmed* when that record says nothing optional is on. |
 | **Says when it can't** | Accept-only banners, "pay or consent" walls and banners it can't read confidently are left for you, with a short note: *"I didn't accept anything."* |
@@ -94,7 +94,7 @@ The end-to-end run writes `tests/results/e2e-report.md` and `.json` with all thr
 | P2: accept buttons clicked / silent acceptances / false success reports | **0 / 0 / 0** |
 | P2: exceptions correctly reported to the user | **5 / 5** (accept-only, pay-or-consent ×2, mislabeled reject, US opt-out with no opt-out link) |
 | P3: regressions per 100 handled visits | **0** |
-| Remember choice on revisit (logged in History with origin + what was refused) / per-site pause / Global Privacy Control sent | pass / pass / pass |
+| Remember choice on revisit (logged in History with origin + what was refused) / per-site pause / GPC off by default and only sent when enabled / a toggle you switch back on is left alone | pass / pass / pass / pass |
 
 Run a subset with `node tests/e2e.js --only=onetrust,cookiebot`. Add `--headed` to watch it run.
 
