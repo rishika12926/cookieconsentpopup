@@ -54,14 +54,16 @@
       const groups = (ot.match(/groups=([^&]*)/) || [])[1] || '';
       const pairs = decodeURIComponent(groups).split(',').map(p => p.split(':'));
       const granted = pairs.filter(([g, v]) => g && g !== 'C0001' && v === '1').map(([g]) => g);
+      const denied = pairs.filter(([g, v]) => g && g !== 'C0001' && v === '0').map(([g]) => g);
       const decided = !!getCookie('OptanonAlertBoxClosed');
-      out.push({ key: 'onetrust-cookie', source: 'OneTrust cookie', decided, optionalGranted: decided ? granted.length > 0 : null, granted, denied: [], evidence: `groups=${decodeURIComponent(groups)}` });
+      out.push({ key: 'onetrust-cookie', source: 'OneTrust cookie', decided, optionalGranted: decided ? granted.length > 0 : null, granted, denied, evidence: `groups=${decodeURIComponent(groups)}` });
     }
 
     const cb = getCookie('CookieConsent');
     if (cb && /marketing:/.test(cb)) {
       const g = ['preferences', 'statistics', 'marketing'].filter(k => new RegExp(`${k}:true`).test(cb));
-      out.push({ key: 'cookiebot-cookie', source: 'Cookiebot cookie', decided: true, optionalGranted: g.length > 0, granted: g, denied: [], evidence: cb.slice(0, 120) });
+      const dn = ['preferences', 'statistics', 'marketing'].filter(k => new RegExp(`${k}:false`).test(cb));
+      out.push({ key: 'cookiebot-cookie', source: 'Cookiebot cookie', decided: true, optionalGranted: g.length > 0, granted: g, denied: dn, evidence: cb.slice(0, 120) });
     }
 
     const ax = getCookie('axeptio_cookies');
@@ -124,7 +126,8 @@
         out.push({ key: 'iubenda-uspr', source: 'iubenda US privacy choices', regime: 'us', decided: true, optionalGranted: g.length > 0, granted: g, denied: keys.filter(k => !o[k]).map(k => names[k] || k), evidence: g.length ? `still allowed: ${g.join(', ')}` : `opted out of: ${keys.map(k => names[k] || k).join(', ')}` });
       } else if (o.purposes && typeof o.purposes === 'object') {
         const g = Object.keys(o.purposes).filter(k => k !== '1' && o.purposes[k] === true);
-        out.push({ key: 'iubenda', source: 'iubenda cookie', decided: true, optionalGranted: g.length > 0, granted: g.map(k => `purpose ${k}`), denied: [], evidence: `purposes ${JSON.stringify(o.purposes)}` });
+        const dn = Object.keys(o.purposes).filter(k => k !== '1' && o.purposes[k] === false);
+        out.push({ key: 'iubenda', source: 'iubenda cookie', decided: true, optionalGranted: g.length > 0, granted: g.map(k => `purpose ${k}`), denied: dn.map(k => `purpose ${k}`), evidence: `purposes ${JSON.stringify(o.purposes)}` });
       }
     }
 
@@ -152,6 +155,9 @@
       usGranted: us.some(r => r.optionalGranted === true),
       otherGranted: other.some(r => r.optionalGranted === true),
       otherDecided: other.length > 0,
+      // What the site's own records say is refused / still allowed, as "reader:item" (humanised in the UI)
+      refused: [...new Set(decided.flatMap(r => (r.denied || []).map(d => `${r.key}:${d}`)))],
+      allowed: [...new Set(decided.flatMap(r => (r.optionalGranted ? r.granted || [] : []).map(g => `${r.key}:${g}`)))],
       summary: decided.map(r => `${r.source}: ${r.evidence}`).join(' · ')
     };
   }

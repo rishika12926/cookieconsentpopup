@@ -1,6 +1,6 @@
 # CookieShield end-to-end report
 
-Run: 2026-10-24T22:48:48.959Z · 53 fixtures · real Chromium with the extension loaded
+Run: 2026-10-25T02:27:35.588Z · 53 fixtures · real Chromium with the extension loaded
 
 ## Priority 1 — coverage
 
@@ -52,7 +52,7 @@ Run: 2026-10-24T22:48:48.959Z · 53 fixtures · real Chromium with the extension
 
 ## Extra scenarios
 
-- Remember choice on revisit: pass (REMEMBERED)
+- Remember choice on revisit (and log it in History with origin + what was refused): pass (REMEMBERED)
 - Per-site pause leaves banner alone (and sends no GPC): pass (PAUSED)
 - Global Privacy Control sent (header + navigator): pass
 
@@ -61,56 +61,56 @@ Run: 2026-10-24T22:48:48.959Z · 53 fixtures · real Chromium with the extension
 
 | Fixture | Expected | Got | Reason | Truth | ms | P3 |
 |---|---|---|---|---|---|---|
-| onetrust | VERIFIED | ✅ VERIFIED |  | rejected | 826 | ✅ |
-| onetrust-settings | VERIFIED | ✅ VERIFIED |  | rejected | 1462 | ✅ |
-| onetrust-us-optout | VERIFIED | ✅ VERIFIED |  | rejected | 767 | ✅ |
-| cookiebot | VERIFIED | ✅ VERIFIED |  | rejected | 808 | ✅ |
-| cookiebot-customize | VERIFIED | ✅ VERIFIED |  | rejected | 1472 | ✅ |
-| didomi | VERIFIED | ✅ VERIFIED |  | rejected | 733 | ✅ |
-| usercentrics | VERIFIED | ✅ VERIFIED |  | rejected | 703 | ✅ |
-| quantcast | VERIFIED | ✅ VERIFIED |  | rejected | 727 | ✅ |
-| googlefc | VERIFIED | ✅ VERIFIED |  | rejected | 760 | ✅ |
+| onetrust | VERIFIED | ✅ VERIFIED |  | rejected | 736 | ✅ |
+| onetrust-settings | VERIFIED | ✅ VERIFIED |  | rejected | 1481 | ✅ |
+| onetrust-us-optout | VERIFIED | ✅ VERIFIED |  | rejected | 735 | ✅ |
+| cookiebot | VERIFIED | ✅ VERIFIED |  | rejected | 818 | ✅ |
+| cookiebot-customize | VERIFIED | ✅ VERIFIED |  | rejected | 1493 | ✅ |
+| didomi | VERIFIED | ✅ VERIFIED |  | rejected | 844 | ✅ |
+| usercentrics | VERIFIED | ✅ VERIFIED |  | rejected | 666 | ✅ |
+| quantcast | VERIFIED | ✅ VERIFIED |  | rejected | 759 | ✅ |
+| googlefc | VERIFIED | ✅ VERIFIED |  | rejected | 789 | ✅ |
 | sourcepoint | VERIFIED | ✅ VERIFIED |  | rejected | 1138 | ✅ |
-| iubenda | VERIFIED | ✅ VERIFIED |  | rejected | 774 | ✅ |
-| iubenda-us | VERIFIED | ✅ VERIFIED |  | rejected | 1786 | ✅ |
-| iubenda-us-revisit | VERIFIED | ✅ VERIFIED |  | rejected | 5031 | ✅ |
-| iubenda-us-hidden | VERIFIED | ✅ VERIFIED |  | rejected | 4991 | ✅ |
-| us-no-optout-link | NEEDS_YOU | ✅ NEEDS_YOU | US_OPTOUT_NOT_FOUND | granted | 754 | – |
-| klaro | VERIFIED | ✅ VERIFIED |  | rejected | 781 | ✅ |
-| osano | VERIFIED | ✅ VERIFIED |  | rejected | 705 | ✅ |
-| complianz | VERIFIED | ✅ VERIFIED |  | rejected | 759 | ✅ |
-| cookieyes | VERIFIED | ✅ VERIFIED |  | rejected | 730 | ✅ |
-| trustarc | VERIFIED | ✅ VERIFIED |  | rejected | 754 | ✅ |
-| shopify | VERIFIED | ✅ VERIFIED |  | rejected | 680 | ✅ |
-| hubspot | CLICKED | ✅ CLICKED |  | rejected | 723 | ✅ |
-| cookienotice | CLICKED | ✅ CLICKED |  | rejected | 763 | ✅ |
-| custom-en | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 780 | ✅ |
-| custom-de | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 851 | ✅ |
-| custom-fr | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 760 | ✅ |
-| custom-es | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 787 | ✅ |
-| custom-it | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 731 | ✅ |
-| custom-nl | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 712 | ✅ |
-| custom-pt | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 773 | ✅ |
-| custom-pl | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 796 | ✅ |
-| custom-sv | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 805 | ✅ |
-| custom-fi | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 823 | ✅ |
-| custom-cs | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 855 | ✅ |
-| custom-hu | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 806 | ✅ |
-| custom-el | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 1153 | ✅ |
-| custom-ru | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 1156 | ✅ |
-| custom-uk | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 1124 | ✅ |
-| custom-tr | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 826 | ✅ |
-| custom-ja | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 1128 | ✅ |
-| custom-zh | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 1034 | ✅ |
-| custom-ko | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 1141 | ✅ |
-| custom-ar | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 1068 | ✅ |
-| custom-he | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 1125 | ✅ |
-| custom-hi | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 1116 | ✅ |
-| custom-settings | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 1531 | ✅ |
-| late-banner | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 5822 | ✅ |
-| leftover-lock | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 781 | ✅ |
-| accept-only | NEEDS_YOU | ✅ NEEDS_YOU | ACCEPT_ONLY | undecided | 487 | – |
-| pay-wall | NEEDS_YOU | ✅ NEEDS_YOU | CONSENT_OR_PAY | undecided | 511 | – |
-| sourcepoint-pay | NEEDS_YOU | ✅ NEEDS_YOU | CONSENT_OR_PAY | undecided | 700 | – |
-| mislabeled | FAILED | ✅ FAILED | OPTIONAL_STILL_GRANTED | granted | 857 | – |
+| iubenda | VERIFIED | ✅ VERIFIED |  | rejected | 817 | ✅ |
+| iubenda-us | VERIFIED | ✅ VERIFIED |  | rejected | 1767 | ✅ |
+| iubenda-us-revisit | VERIFIED | ✅ VERIFIED |  | rejected | 5191 | ✅ |
+| iubenda-us-hidden | VERIFIED | ✅ VERIFIED |  | rejected | 5052 | ✅ |
+| us-no-optout-link | NEEDS_YOU | ✅ NEEDS_YOU | US_OPTOUT_NOT_FOUND | granted | 837 | – |
+| klaro | VERIFIED | ✅ VERIFIED |  | rejected | 941 | ✅ |
+| osano | VERIFIED | ✅ VERIFIED |  | rejected | 726 | ✅ |
+| complianz | VERIFIED | ✅ VERIFIED |  | rejected | 782 | ✅ |
+| cookieyes | VERIFIED | ✅ VERIFIED |  | rejected | 859 | ✅ |
+| trustarc | VERIFIED | ✅ VERIFIED |  | rejected | 736 | ✅ |
+| shopify | VERIFIED | ✅ VERIFIED |  | rejected | 832 | ✅ |
+| hubspot | CLICKED | ✅ CLICKED |  | rejected | 750 | ✅ |
+| cookienotice | CLICKED | ✅ CLICKED |  | rejected | 714 | ✅ |
+| custom-en | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 817 | ✅ |
+| custom-de | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 909 | ✅ |
+| custom-fr | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 800 | ✅ |
+| custom-es | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 789 | ✅ |
+| custom-it | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 764 | ✅ |
+| custom-nl | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 892 | ✅ |
+| custom-pt | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 800 | ✅ |
+| custom-pl | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 827 | ✅ |
+| custom-sv | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 800 | ✅ |
+| custom-fi | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 881 | ✅ |
+| custom-cs | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 854 | ✅ |
+| custom-hu | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 817 | ✅ |
+| custom-el | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 1184 | ✅ |
+| custom-ru | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 1085 | ✅ |
+| custom-uk | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 1102 | ✅ |
+| custom-tr | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 877 | ✅ |
+| custom-ja | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 1381 | ✅ |
+| custom-zh | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 1237 | ✅ |
+| custom-ko | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 1123 | ✅ |
+| custom-ar | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 1127 | ✅ |
+| custom-he | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 1022 | ✅ |
+| custom-hi | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 1076 | ✅ |
+| custom-settings | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 1529 | ✅ |
+| late-banner | VERIFIED/CLICKED | ✅ CLICKED |  | rejected | 5840 | ✅ |
+| leftover-lock | VERIFIED/CLICKED | ✅ VERIFIED |  | rejected | 830 | ✅ |
+| accept-only | NEEDS_YOU | ✅ NEEDS_YOU | ACCEPT_ONLY | undecided | 501 | – |
+| pay-wall | NEEDS_YOU | ✅ NEEDS_YOU | CONSENT_OR_PAY | undecided | 610 | – |
+| sourcepoint-pay | NEEDS_YOU | ✅ NEEDS_YOU | CONSENT_OR_PAY | undecided | 631 | – |
+| mislabeled | FAILED | ✅ FAILED | OPTIONAL_STILL_GRANTED | granted | 794 | – |
 | newsletter | NO_BANNER | ✅ NO_BANNER |  | undecided |  | ✅ |

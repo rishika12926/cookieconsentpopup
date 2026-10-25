@@ -11,21 +11,22 @@ const ROOT = path.resolve(__dirname, '..'), WEB = path.join(ROOT, 'web'), EXT = 
   for (const fx of (process.argv[2] || 'onetrust,custom-de,accept-only,mislabeled,leftover-lock,iubenda-us').split(',')) {
     const p = await ctx.newPage(); await p.setViewportSize({ width: 1200, height: 800 });
     await p.goto(`http://${fx}.localhost:8796/playground/fixtures/${fx}.html`); await p.waitForTimeout(7000);
+    if (process.env.REVISIT) { await p.reload(); await p.waitForTimeout(5500); } // second visit: "your no is remembered"
     await p.screenshot({ path: path.join(OUT, `page-${fx}.png`) });
     tabs[fx] = await sw.evaluate(async (u) => (await chrome.tabs.query({ url: u }))[0].id, p.url().split('#')[0]);
   }
   for (const [fx, tabId] of Object.entries(tabs)) {
     const pp = await ctx.newPage(); await pp.setViewportSize({ width: 372, height: 700 });
     await pp.goto(`chrome-extension://${id}/popup/popup.html?tabId=${tabId}`); await pp.waitForTimeout(2200);
-    if (fx === Object.keys(tabs)[0]) await pp.click('#status-details summary').catch(() => {});
-    await pp.screenshot({ path: path.join(OUT, `popup-${fx}${process.env.DARK ? '-dark' : ''}.png`), fullPage: true });
+    if (fx === Object.keys(tabs)[0] || process.env.REVISIT) await pp.click('#status-details summary').catch(() => {});
+    await pp.screenshot({ path: path.join(OUT, `popup-${fx}${process.env.REVISIT ? '-revisit' : ''}${process.env.DARK ? '-dark' : ''}.png`), fullPage: true });
     await pp.close();
   }
   for (const t of ['history', 'metrics', 'coverage', 'settings']) {
     const o = await ctx.newPage(); await o.setViewportSize({ width: 1280, height: 900 });
     await o.goto(`chrome-extension://${id}/options/options.html#${t}`); await o.waitForTimeout(800);
     if (t === 'history') await o.click('.entry summary').catch(() => {});
-    await o.screenshot({ path: path.join(OUT, `options-${t}${process.env.DARK ? '-dark' : ''}.png`) });
+    await o.screenshot({ path: path.join(OUT, `options-${t}${process.env.REVISIT ? '-revisit' : ''}${process.env.DARK ? '-dark' : ''}.png`) });
   }
   await ctx.close(); srv.close();
 })();

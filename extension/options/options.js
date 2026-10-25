@@ -8,6 +8,7 @@
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
 
   $('side-pip').innerHTML = window.Pip.svg('calm', 54);
+  $('side-version').textContent = `Version ${chrome.runtime.getManifest().version}`;
 
   // ------------------------------------------------------------------ tabs
   function showTab(name) {
@@ -30,8 +31,8 @@
     sum.innerHTML = '';
     const sites = new Set(history.filter(h => isRejected(h.status)).map(h => h.site));
     const stats = [
-      [history.filter(h => isRejected(h.status)).length, 'banners rejected'],
-      [sites.size, 'different sites'],
+      [history.filter(h => h.status === 'VERIFIED' || h.status === 'CLICKED').length, 'banners rejected'],
+      [sites.size, 'sites where your “no” is in place'],
       [history.filter(h => h.status === 'VERIFIED').length, 'confirmed by the site’s own record'],
       [history.filter(h => h.status === 'NEEDS_YOU' || h.status === 'FAILED').length, 'times I asked you instead of accepting']
     ];
@@ -50,7 +51,7 @@
     if (!items.length) {
       const e = el('div', 'empty-state');
       const p = el('div', 'pipbox'); p.innerHTML = window.Pip.svg('sleepy', 90);
-      e.append(p, el('p', '', history.length ? 'Nothing matches that filter.' : 'No cookie banners yet. Browse as usual — I’ll keep a record here.'));
+      e.append(p, el('p', '', history.length ? 'Nothing matches that filter.' : 'Nothing yet. Browse as usual — every site where I reject cookies, or find your “no” already in place, shows up here.'));
       list.appendChild(e);
       return;
     }

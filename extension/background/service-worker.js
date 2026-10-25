@@ -159,7 +159,7 @@ async function recordOutcome(p, tabId) {
     clicks: o.clicks || [], turnedOff: o.turnedOff || [], essentialKept: (o.essentialKept || []).slice(0, 6),
     evidence: o.evidence, stateSources: o.stateSources || [],
     bannerLang: o.bannerLang, translatedLabels: o.translatedLabels || null,
-    usOptOut: o.usOptOut || null,
+    usOptOut: o.usOptOut || null, refused: o.refused || null,
     siteType: p.siteType || 'other', ms: p.ms
   };
   history.unshift(entry);
@@ -189,6 +189,13 @@ async function recordOutcome(p, tabId) {
   mem.lastAt = entry.at;
   mem.cmpId = o.cmpId;
   mem.cmpName = o.cmpName;
+  // Where the "no" came from — shown later when the site remembers it ("Your no is remembered").
+  if (o.status === 'VERIFIED' || o.status === 'CLICKED') {
+    mem.lastRejection = {
+      at: entry.at, status: o.status, cmpName: o.cmpName, cmpId: o.cmpId, method: o.method,
+      clicks: (o.clicks || []).map(c => c.label).slice(0, 6), refused: o.refused || null, usOptOut: o.usOptOut || null
+    };
+  }
   // Only precise selectors (a tested rule's container or an element id) are used for anti-flicker.
   if ((o.status === 'VERIFIED' || o.status === 'CLICKED') && o.selector && (o.supported || o.selector.startsWith('#'))) mem.prehide = [o.selector];
   else delete mem.prehide;
@@ -357,6 +364,31 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const { siteMemory } = await chrome.storage.local.get({ siteMemory: {} });
         delete siteMemory[p.site];
         await chrome.storage.local.set({ siteMemory });
+        return { ok: true };
+      }
+
+      case 'REMEMBERED_VISIT': {
+        // A site already had a choice stored (no banner). Log it — once per site every 12 h.
+        const { history, siteMemory } = await chrome.storage.local.get({ history: [], siteMemory: {} });
+        const mem = siteMemory[p.site] || null;
+        const origin = mem && mem.lastRejection ? mem.lastRejection : null;
+        const recent = history.find(h => h.site === p.site);
+        const fresh = recent && recent.status === p.status && recent.kind === 'visit' && Date.now() - Date.parse(recent.at) < 12 * 3600 * 1000;
+        if (fresh) {
+          Object.assign(recent, { at: new Date().toISOString(), visits: (recent.visits || 1) + 1, evidence: p.evidence, refused: p.refused, allowed: p.allowed, origin });
+          history.splice(history.indexOf(recent), 1);
+          history.unshift(recent);
+        } else {
+          history.unshift({
+            id: `h_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`, kind: 'visit',
+            at: new Date().toISOString(), site: p.site, host: p.host, status: p.status,
+            cmpName: origin ? origin.cmpName : null, cmpId: origin ? origin.cmpId : null,
+            evidence: p.evidence, stateSources: p.stateSources || [], refused: p.refused || [], allowed: p.allowed || [],
+            origin, siteType: p.siteType || 'other', visits: 1, clicks: []
+          });
+          if (history.length > HISTORY_MAX) history.length = HISTORY_MAX;
+        }
+        await chrome.storage.local.set({ history });
         return { ok: true };
       }
 

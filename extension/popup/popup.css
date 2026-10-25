@@ -68,3 +68,5 @@ textarea { width: 100%; border: 1.5px solid var(--line); border-radius: 12px; pa
 .preview pre { font-size: 11px; background: var(--ice); border-radius: 10px; padding: 8px; max-height: 140px; overflow: auto; white-space: pre-wrap; }
 .share { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; margin: 8px 0; }
 .dialog-actions { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+
+.foot .ver { opacity: .6; }

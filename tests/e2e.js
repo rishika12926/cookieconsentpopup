@@ -207,8 +207,11 @@ async function functionalChecks(page, baseUrl) {
     await sleep(5000);
     const tab = await tabStatus(sw, page);
     const bannerVisible = await page.evaluate(() => !!document.querySelector('#onetrust-banner-sdk'));
-    extra.remember = { status: tab && tab.status, bannerVisible, pass: !bannerVisible && tab && tab.status === 'REMEMBERED' };
-    console.log(`${extra.remember.pass ? '✓' : '✗'} remember-choice          ${tab && tab.status}`);
+    await sleep(500);
+    const visit = (await historyFor(sw, host, 0)).find(h => h.kind === 'visit');
+    const historyOk = !!(visit && visit.status === 'REMEMBERED' && visit.origin && visit.origin.clicks.length && (visit.refused || []).length);
+    extra.remember = { status: tab && tab.status, bannerVisible, historyOk, origin: visit && visit.origin, refused: visit && visit.refused, pass: !bannerVisible && tab && tab.status === 'REMEMBERED' && historyOk };
+    console.log(`${extra.remember.pass ? '✓' : '✗'} remember-choice          ${tab && tab.status} · history: ${historyOk ? 'logged with origin + refused' : 'MISSING'}`);
   }
   {
     // Global Privacy Control: header on requests + navigator.globalPrivacyControl in the page.
@@ -293,7 +296,7 @@ async function functionalChecks(page, baseUrl) {
   md.push(`\n## Priority 2 — never silently accept\n\n| Metric | Value |\n|---|---|\n| Accept/agree buttons clicked by the extension | ${metrics.p2.acceptButtonClicks} |\n| Silent optional-consent acceptances | ${metrics.p2.silentOptionalAcceptances} |\n| False reports of successful rejection | ${metrics.p2.falseSuccessReports} |\n| Exceptions reported correctly | ${metrics.p2.exceptionsReportedCorrectly}/${metrics.p2.exceptionFixtures} |\n`);
   md.push(`## Priority 3 — don't break sites\n\n**${metrics.p3.regressionsPer100}** regressions per 100 handled visits (${metrics.p3.regressions} of ${metrics.p3.handledVisits}). Checks after handling: scrolling, form submit, sign-in survives reload, SPA navigation, link navigation.\n`);
   if (metrics.p3.failingFixtures.length) md.push(metrics.p3.failingFixtures.map(f => `- ${f.id}: ${f.failures.join(', ')}`).join('\n'));
-  md.push(`\n## Extra scenarios\n\n- Remember choice on revisit: ${extra.remember.pass ? 'pass' : 'FAIL'} (${extra.remember.status})\n- Per-site pause leaves banner alone (and sends no GPC): ${extra.pause.pass ? 'pass' : 'FAIL'} (${extra.pause.status})\n- Global Privacy Control sent (header + navigator): ${extra.gpc.pass ? 'pass' : 'FAIL'}\n`);
+  md.push(`\n## Extra scenarios\n\n- Remember choice on revisit (and log it in History with origin + what was refused): ${extra.remember.pass ? 'pass' : 'FAIL'} (${extra.remember.status})\n- Per-site pause leaves banner alone (and sends no GPC): ${extra.pause.pass ? 'pass' : 'FAIL'} (${extra.pause.status})\n- Global Privacy Control sent (header + navigator): ${extra.gpc.pass ? 'pass' : 'FAIL'}\n`);
   md.push('\n## All fixtures\n\n| Fixture | Expected | Got | Reason | Truth | ms | P3 |\n|---|---|---|---|---|---|---|');
   for (const r of results) md.push(`| ${r.id} | ${r.expected.join('/')} | ${r.correct ? '✅' : '❌'} ${r.status} | ${r.reason || ''} | ${r.truth.decided ? (r.truth.optionalGranted ? 'granted' : 'rejected') : 'undecided'} | ${r.handledMs ?? ''} | ${r.functional ? (r.regression ? '❌ ' + r.functional.failures.join(',') : '✅') : '–'} |`);
   fs.writeFileSync(path.join(OUT, 'e2e-report.md'), md.join('\n') + '\n');

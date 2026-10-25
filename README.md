@@ -17,7 +17,7 @@ A Chrome extension (Manifest V3) with a friendly penguin guide, Pip, plus a smal
 | **Remembers** | Once a site is handled, the site's own consent cookie keeps the banner away next time. CookieShield also remembers the platform so it can handle it again quietly if the site asks again. |
 | **Keeps sites working** | After handling a banner it checks scrolling, clicking, links, forms and the page itself, and repairs only what the cookie banner left behind (scroll locks, invisible overlays). |
 | **Pause per site** | One click in the pop-up turns CookieShield off for a site. *Undo page fixes* and *Report a problem* are right next to it. |
-| **History** | Every banner it met, what it did, the proof it found, filters, search and a CSV export. |
+| **History** | Every site where it rejected cookies **or found your “no” already in place**: what it did, what was refused (in plain words), where a remembered “no” came from, the proof, filters, search and a CSV export. |
 | **Any language** | Recognizes reject, accept and settings buttons in 25+ languages, and offers to translate the whole page into your language with Chrome's on-device translator (nothing leaves your computer). |
 
 ---
@@ -94,7 +94,7 @@ The end-to-end run writes `tests/results/e2e-report.md` and `.json` with all thr
 | P2: accept buttons clicked / silent acceptances / false success reports | **0 / 0 / 0** |
 | P2: exceptions correctly reported to the user | **5 / 5** (accept-only, pay-or-consent ×2, mislabeled reject, US opt-out with no opt-out link) |
 | P3: regressions per 100 handled visits | **0** |
-| Remember choice on revisit / per-site pause / Global Privacy Control sent | pass / pass / pass |
+| Remember choice on revisit (logged in History with origin + what was refused) / per-site pause / Global Privacy Control sent | pass / pass / pass |
 
 Run a subset with `node tests/e2e.js --only=onetrust,cookiebot`. Add `--headed` to watch it run.
 

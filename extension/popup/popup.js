@@ -14,6 +14,7 @@
   const host = url && /^https?:$/.test(url.protocol) ? url.hostname : null;
   const site = host ? siteKey(host) : null;
   let settings = await send('GET_SETTINGS');
+  document.getElementById('version').textContent = `v${chrome.runtime.getManifest().version}`;
   let pageInfo = null;
   let lastReport = null;
 
@@ -37,6 +38,10 @@
     const [bg, page] = await Promise.all([send('GET_TAB_STATUS', null, { tabId: tab.id }), toPage({ type: 'GET_PAGE_STATUS' })]);
     pageInfo = page;
     const merged = { ...(page || {}), ...(bg || {}) };
+    // Where a remembered "no" came from (the rejection CookieShield made on an earlier visit).
+    const { siteMemory } = await chrome.storage.local.get({ siteMemory: {} });
+    merged.origin = (siteMemory[site] && siteMemory[site].lastRejection) || null;
+    if (page) { merged.refused = merged.refused || page.refused; merged.allowed = merged.allowed || page.allowed; }
     if (!merged.status) merged.status = page ? page.status : 'SCANNING';
     if (page && page.health && !merged.health) merged.health = page.health;
     return merged;
@@ -54,7 +59,7 @@
     $('status-what').textContent = info.what;
 
     const o = st.outcome || {};
-    const facts = X.details({ ...o, evidence: o.evidence || st.evidence, health: st.health });
+    const facts = X.details({ ...o, status: st.status, evidence: o.evidence || st.evidence, health: st.health, refused: o.refused || st.refused, allowed: st.allowed, origin: st.origin });
     const dl = $('status-facts');
     dl.innerHTML = '';
     for (const [k, v] of facts) {

@@ -27,8 +27,8 @@
       icon: '✓', tone: 'ok', label: 'Earlier rejection still active',
       headline: 'Your “no” is remembered',
       mood: 'happy',
-      say: 'No banner today — your earlier rejection is still in effect here.',
-      what: 'This site remembered the rejection from a previous visit, so it didn’t ask again. We checked its consent record.',
+      say: 'No banner today — your earlier “no” is still in effect here.',
+      what: 'This site already has a “no” saved, so it didn’t ask again. We read its own consent record to check. Below: what is refused, and where that “no” came from.',
       kept: 'Necessary cookies stay.'
     },
     NEEDS_YOU: {
@@ -107,6 +107,40 @@
     us_optout: 'Opened the site’s “Your Privacy Choices” panel, switched everything off and saved'
   };
 
+  // Consent-record codes → everyday words. Items arrive as "reader:item" from the content script.
+  const ITEM = {
+    ad_storage: 'Advertising cookies', analytics_storage: 'Analytics cookies',
+    ad_user_data: 'Sending your data to Google for ads', ad_personalization: 'Personalised ads',
+    personalization_storage: 'Personalisation cookies', functionality_storage: 'Functionality cookies',
+    C0002: 'Performance & analytics cookies', C0003: 'Functional cookies', C0004: 'Targeting & advertising cookies', C0005: 'Social media cookies',
+    preferences: 'Preference cookies', statistics: 'Statistics cookies', marketing: 'Marketing cookies',
+    'purpose 2': 'Functionality', 'purpose 3': 'Experience', 'purpose 4': 'Measurement (analytics)', 'purpose 5': 'Marketing',
+    sale: 'Sale of your personal information', sharing: 'Sharing of your personal information',
+    'targeted advertising': 'Targeted advertising', 'sensitive data': 'Use of sensitive data'
+  };
+  function humanize(list) {
+    const out = [];
+    let tcf = 0;
+    for (const raw of list || []) {
+      const i = String(raw).indexOf(':');
+      const item = (i >= 0 ? String(raw).slice(i + 1) : String(raw)).replace(/ \(us[a-z]*\)$/, '');
+      if (/^Purpose \d+$/.test(item)) { tcf++; continue; }
+      if (/^V2STACK|^STACK|^ISF|^ISP/i.test(item)) continue;
+      const label = ITEM[item] || ITEM[item.toLowerCase()] || item.replace(/_/g, ' ');
+      if (!out.includes(label)) out.push(label);
+    }
+    if (tcf) out.push(`${tcf} ad-industry (IAB TCF) purpose${tcf > 1 ? 's' : ''}`);
+    return out;
+  }
+
+  /** Where a remembered "no" came from. */
+  function originText(o) {
+    if (!o) return 'It was already saved on this site before CookieShield handled it here — by you, by the site’s own settings, or by another tool.';
+    const when = new Date(o.at).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const how = o.clicks && o.clicks.length ? `clicked ${o.clicks.map(c => `“${c}”`).join(' → ')}` : (METHOD[o.method] || 'rejected the banner').replace(/^./, c => c.toLowerCase());
+    return `CookieShield, on ${when}: ${how}${o.cmpName ? ` on the ${o.cmpName} banner` : ''}.`;
+  }
+
   function langName(code) {
     if (!code || code === 'und') return null;
     try { return new Intl.DisplayNames(['en'], { type: 'language' }).of(code); } catch (e) { return code; }
@@ -124,11 +158,22 @@
   /** Bullet list of facts for a history entry / page status. */
   function details(e) {
     const out = [];
+    if (e.status === 'REMEMBERED' || e.status === 'PREVIOUSLY_ACCEPTED') {
+      if (e.status === 'REMEMBERED') out.push(['Where this “no” came from', originText(e.origin)]);
+      const r = humanize(e.refused);
+      if (r.length) out.push(['Refused', r.join(', ')]);
+      const a = humanize(e.allowed);
+      if (a.length) out.push(['Still allowed', a.join(', ')]);
+      if (e.visits > 1) out.push(['Visits', `${e.visits} visits in the last 12 hours`]);
+      if (e.evidence) out.push(['Proof', e.evidence]);
+      return out;
+    }
     if (e.cmpName) out.push(['Banner type', e.supported === false || e.cmpId === 'generic' ? 'Custom banner (recognised by its wording)' : e.cmpName]);
     if (e.method && METHOD[e.method]) out.push(['What we did', METHOD[e.method]]);
     if (e.clicks && e.clicks.length) out.push(['Buttons clicked', e.clicks.map(c => `“${c.label}”`).join(' → ')]);
     if (e.turnedOff && e.turnedOff.length) out.push(['Switched off', e.turnedOff.slice(0, 8).join(', ')]);
     if (e.usOptOut && e.usOptOut.length) out.push(['US privacy opt-out', `Turned off: ${e.usOptOut.join(', ').replace(/, ([^,]*)$/, ' and $1')} of your personal information`]);
+    if ((e.status === 'VERIFIED' || e.status === 'CLICKED') && e.refused && e.refused.length) out.push(['Refused', humanize(e.refused).join(', ')]);
     if (e.reason && REASON[e.reason]) out.push(['Why we stopped', REASON[e.reason]]);
     if (e.evidence) out.push(['Proof', e.evidence]);
     const ln = langName(e.bannerLang);
@@ -140,5 +185,5 @@
     return out;
   }
 
-  window.CSExplain = { STATUS, REASON, METHOD, details, timeAgo, langName };
+  window.CSExplain = { STATUS, REASON, METHOD, details, timeAgo, langName, humanize, originText };
 })();

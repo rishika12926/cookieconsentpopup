@@ -226,7 +226,18 @@
     else if (state.decided && state.anyGranted) pageStatus.status = 'PREVIOUSLY_ACCEPTED';
     else pageStatus.status = 'NO_BANNER';
     pageStatus.evidence = state.summary || null;
+    pageStatus.refused = state.refused || [];
+    pageStatus.allowed = state.allowed || [];
     send('STATUS', { ...pageStatus });
+    // Keep a record of sites where a "no" (or an old "yes") is already in place, so History
+    // shows every site — not only the ones where a banner appeared today.
+    if (pageStatus.status === 'REMEMBERED' || pageStatus.status === 'PREVIOUSLY_ACCEPTED') {
+      send('REMEMBERED_VISIT', {
+        site, host: location.hostname, siteType: pageStatus.siteType, status: pageStatus.status,
+        evidence: pageStatus.evidence, refused: pageStatus.refused, allowed: pageStatus.allowed,
+        stateSources: state.sources.filter(s => s.decided).map(s => s.source)
+      });
+    }
   }
 
   function startObserving() {

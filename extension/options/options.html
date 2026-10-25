@@ -15,6 +15,7 @@
         <div>
           <div class="name">CookieShield</div>
           <div class="tag">Rejects optional cookies. Never accepts for you.</div>
+          <div class="tag" id="side-version"></div>
         </div>
       </div>
       <nav class="nav" aria-label="Dashboard sections">
@@ -34,7 +35,7 @@
         <header class="tab-head">
           <div>
             <h1 id="h-history">History</h1>
-            <p class="lead">Every cookie banner CookieShield met, what it did and how sure it is.</p>
+            <p class="lead">Every site where CookieShield rejected cookies or found your “no” already in place: what it did, what was refused, and how sure it is.</p>
           </div>
           <div class="head-actions">
             <button class="btn" id="export-csv">Export CSV</button>
@@ -46,7 +47,7 @@
           <input type="search" id="history-search" placeholder="Search sites or platforms…" aria-label="Search history">
           <div class="chips" role="group" aria-label="Filter">
             <button class="chip active" data-filter="all">All</button>
-            <button class="chip" data-filter="rejected">Rejected</button>
+            <button class="chip" data-filter="rejected">Rejected &amp; remembered</button>
             <button class="chip" data-filter="needs">Needed you</button>
             <button class="chip" data-filter="problem">Problems</button>
           </div>
