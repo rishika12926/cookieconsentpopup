@@ -99,6 +99,7 @@ footer.site .wrap { display: flex; gap: 16px; flex-wrap: wrap; justify-content: 
 .fx:hover { transform: translateY(-2px); }
 .fx b { font-size: 15.5px; }
 .fx .d { font-size: 13px; color: var(--muted); flex: 1; }
+.fx .pill { white-space: normal; max-width: 100%; align-self: flex-start; border-radius: 12px; line-height: 1.35; padding: 4px 10px; }
 
 /* Forms */
 .form { display: grid; gap: 12px; max-width: 620px; }

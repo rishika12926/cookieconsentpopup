@@ -43,6 +43,7 @@
 
   <script>
     const LABEL = { VERIFIED: ['ok', '✓ Rejected · confirmed'], CLICKED: ['ok', '✓ Rejected'], NEEDS_YOU: ['warn', '! Needs you'], FAILED: ['bad', '! Reports the site'], NO_BANNER: ['calm', 'Left alone'] };
+    const REASON = { US_OPTOUT_NOT_FOUND: 'no US opt-out to switch off', ACCEPT_ONLY: 'only an “Accept” button', CONSENT_OR_PAY: 'pay-or-accept wall', OPTIONAL_STILL_GRANTED: 'site still allows extras' };
     const GROUPS = { platform: 'Consent platforms', language: 'Custom banners in 22 languages', generic: 'Tricky layouts', exception: 'Must NOT accept (Priority 2)', negative: 'Not a cookie banner' };
     fetch('/playground/fixtures.json').then(r => r.json()).then(list => {
       const root = document.getElementById('groups'); root.innerHTML = '';
@@ -56,7 +57,7 @@
           const b = document.createElement('b'); b.textContent = f.title;
           const d = document.createElement('span'); d.className = 'd'; d.textContent = f.description || '';
           const [tone, text] = LABEL[f.expect[0]] || ['calm', f.expect[0]];
-          const p = document.createElement('span'); p.className = `pill ${tone}`; p.textContent = `Expect: ${text}${f.reason ? ' · ' + f.reason.toLowerCase().replace(/_/g, ' ') : ''}`;
+          const p = document.createElement('span'); p.className = `pill ${tone}`; p.textContent = `Expect: ${text}${f.reason ? ' · ' + (REASON[f.reason] || f.reason.toLowerCase().replace(/_/g, ' ')) : ''}`;
           a.append(b, d, p);
           grid.appendChild(a);
         }
