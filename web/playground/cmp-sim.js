@@ -736,6 +736,50 @@
     SimSite.lockPage();
   };
 
+  /**
+   * stepstone.de (Oct 2026), reproduced: on page load the site tells Google Consent Mode
+   * "granted" before anyone chooses. Layer 1 only has "Einstellungen oder ablehnen" (settings OR
+   * reject) and "Alles akzeptieren". Layer 2: "Alle ablehnen" switches everything off but the
+   * banner stays open until "Auswahl speichern" is clicked.
+   */
+  SIMS.stepstone = function () {
+    window.dataLayer = window.dataLayer || [];
+    const gtag = (...a) => window.dataLayer.push(a);
+    const stored = getCookie('sim_ss');
+    gtag('consent', 'default', { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'denied' });
+    if (stored) {
+      const g = stored === 'all' ? 'granted' : 'denied';
+      gtag('consent', 'update', { ad_storage: g, ad_user_data: g, ad_personalization: g, analytics_storage: g });
+      decide('stepstone', stored === 'all', 'stored');
+      return;
+    }
+    gtag('consent', 'update', { ad_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'granted', analytics_storage: 'granted' }); // pre-decision!
+    Object.assign(T(), { cmp: 'stepstone', decided: false, optionalGranted: null });
+    const purposes = [['p1', 'Informationen auf einem Gerät speichern und/oder abrufen'], ['p2', 'Personalisierte Anzeigen und Inhalte, Anzeigen- und Inhaltsmessungen'], ['p3', 'Fremdinhalte anzeigen (Soziale Netzwerke, Videos)']];
+    const el = $(`<div id="ss-consent" role="dialog" aria-modal="true" style="position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.45);z-index:2147483001">
+      <div class="ss-box" style="background:#fff;padding:24px;border-radius:16px;width:min(720px,95vw)">
+        <h2>Wir verwenden Cookies</h2>
+        <p>Wir übermitteln personenbezogene Daten an Drittanbieter, die uns helfen, unser Webangebot zu verbessern. Hierfür benötigen wir Ihre Einwilligung. Indem Sie "Alle akzeptieren" klicken, stimmen Sie diesen zu. Unter "Einstellungen oder ablehnen" können Sie Ihre Einstellungen ändern oder die Datenverarbeitung ablehnen.</p>
+        <div class="l1"><button class="ss-settings">Einstellungen oder ablehnen</button> <button class="ss-accept">Alles akzeptieren</button></div>
+        <div class="l2" style="display:none">
+          ${purposes.map(([id, n]) => `<div><label><input type="checkbox" id="${id}" checked> ${n}</label></div>`).join('')}
+          <button class="ss-reject">Alle ablehnen</button> <button class="ss-save">Auswahl speichern</button> <button class="ss-accept2">Alles akzeptieren</button>
+        </div></div></div>`);
+    const finish = (all, choice) => {
+      setCookie('sim_ss', all ? 'all' : 'none');
+      const g = all ? 'granted' : 'denied';
+      gtag('consent', 'update', { ad_storage: g, ad_user_data: g, ad_personalization: g, analytics_storage: g });
+      decide('stepstone', all, choice); el.remove(); SimSite.unlockPage();
+    };
+    el.querySelector('.ss-settings').onclick = () => { log('settings'); el.querySelector('.l1').style.display = 'none'; el.querySelector('.l2').style.display = 'block'; };
+    el.querySelector('.ss-accept').onclick = () => { log('accept'); finish(true, 'accept'); };
+    el.querySelector('.ss-accept2').onclick = () => { log('accept'); finish(true, 'accept'); };
+    el.querySelector('.ss-reject').onclick = () => { log('reject (not saved yet)'); for (const [id] of purposes) el.querySelector('#' + id).checked = false; };
+    el.querySelector('.ss-save').onclick = () => { const any = purposes.some(([id]) => el.querySelector('#' + id).checked); log('save'); finish(any, 'save'); };
+    document.body.appendChild(el);
+    SimSite.lockPage();
+  };
+
   /** Not a cookie banner at all. Expected: untouched. */
   SIMS.newsletter = () => {
     const el = $(`<div id="newsletter" role="dialog" aria-modal="true" style="position:fixed;inset:auto 20px 20px auto;width:360px;background:#fff;padding:18px;z-index:99999;box-shadow:0 10px 30px rgba(0,0,0,.25)">

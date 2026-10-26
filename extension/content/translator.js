@@ -43,8 +43,14 @@
 
   async function availability(target) {
     if (!apiAvailable() || !state.pageLang || state.pageLang === 'und') return 'unsupported';
-    try { return await Translator.availability({ sourceLanguage: state.pageLang, targetLanguage: target }); }
-    catch (e) { return 'unsupported'; }
+    // Some Chrome builds never answer this call; treat a hang as "not available" so we fall
+    // back to pointing at Chrome's own Translate instead of stalling silently.
+    try {
+      return await Promise.race([
+        Translator.availability({ sourceLanguage: state.pageLang, targetLanguage: target }),
+        new Promise(r => setTimeout(() => r('unsupported'), 4000))
+      ]);
+    } catch (e) { return 'unsupported'; }
   }
 
   function collectTextNodes(root) {
@@ -122,11 +128,46 @@
       bar('done');
       return { ok: true, count: state.count };
     } catch (e) {
-      bar(String(e && e.name) === 'NotAllowedError' ? 'needs-click' : 'unsupported');
-      return { ok: false, reason: String(e && e.message || e) };
+      const notAllowed = String(e && e.name) === 'NotAllowedError';
+      if (!notAllowed) bar('unsupported');
+      return { ok: false, reason: notAllowed ? 'needs-gesture' : String(e && e.message || e) };
     } finally {
       state.busy = false;
     }
+  }
+
+  /**
+   * Translate without asking. If the language pack is already on this computer it starts right
+   * away. Chrome only allows the one-time pack download after a user action, so in that case we
+   * start on your first click / key press anywhere on the page — no "Translate?" prompt.
+   */
+  async function autoTranslate(target = state.targetLang) {
+    state.targetLang = target;
+    if (!state.pageLang) await detectPageLanguage();
+    const avail = await availability(target);
+    if (avail === 'unsupported' || avail === 'unavailable') {
+      // Say it once per site and browsing session, not on every page.
+      let told = false;
+      try { told = sessionStorage.getItem('cookieshield-tr-unsupported') === '1'; sessionStorage.setItem('cookieshield-tr-unsupported', '1'); } catch (e) { /* ignore */ }
+      if (!told) bar('unsupported');
+      return { ok: false, reason: 'unsupported' };
+    }
+    if (avail === 'available') return translatePage(target);
+    // 'downloadable' / 'downloading': try straight away (works if Chrome allows it), else wait for a gesture.
+    try {
+      const r = await translatePage(target);
+      if (r && r.ok) return r;
+    } catch (e) { /* fall through */ }
+    bar('auto-pending');
+    const go = (e) => {
+      if (!e.isTrusted) return;
+      document.removeEventListener('pointerdown', go, true);
+      document.removeEventListener('keydown', go, true);
+      translatePage(target);
+    };
+    document.addEventListener('pointerdown', go, true);
+    document.addEventListener('keydown', go, true);
+    return { ok: false, reason: 'waiting-for-first-click' };
   }
 
   function showOriginal() {
@@ -181,6 +222,10 @@
       msg.innerHTML = `🐧 This page is in <b></b>. Read it in <b></b>?`;
       msg.querySelectorAll('b')[0].textContent = from; msg.querySelectorAll('b')[1].textContent = to;
       b.append(msg, btn('Translate', () => translatePage()), close);
+    } else if (mode === 'auto-pending') {
+      msg.innerHTML = `🐧 Translating <b></b> → <b></b> starts with your first click on the page (one-time language download, stays on your computer).`;
+      msg.querySelectorAll('b')[0].textContent = from; msg.querySelectorAll('b')[1].textContent = to;
+      b.append(msg, close);
     } else if (mode === 'needs-click' || mode === 'downloading') {
       msg.textContent = mode === 'downloading' ? `Downloading the ${from} → ${to} language pack…` : `One click to download the ${from} language pack (stays on your computer).`;
       b.append(msg);
@@ -215,5 +260,5 @@
     return { pageLang: state.pageLang, pageLangName: state.pageLang ? langName(state.pageLang) : null, translated: state.translated, count: state.count, apiAvailable: apiAvailable(), targetLang: state.targetLang };
   }
 
-  window.CookieShieldTranslator = { detectPageLanguage, translatePage, showOriginal, bar, status, langName, availability, state };
+  window.CookieShieldTranslator = { detectPageLanguage, translatePage, autoTranslate, showOriginal, bar, status, langName, availability, state };
 })();

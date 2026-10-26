@@ -244,6 +244,18 @@
   "description": "Unknown site with “Allow …” / “Do not sell or share …” and a Save button. Recognised by wording."
  },
  {
+  "id": "settings-or-reject",
+  "title": "Custom banner — “settings or reject”, early “granted”",
+  "sim": "stepstone",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "generic",
+  "description": "Same pattern as stepstone.de, without a known consent tool: Google is told “granted” before you choose; layer 1 has only “Einstellungen oder ablehnen”; layer 2 needs “Alle ablehnen” then “Auswahl speichern”. Must not report a false failure."
+ },
+ {
   "id": "us-no-optout-link",
   "title": "US opt-outs on, no way to opt out",
   "sim": "iubendaUS",

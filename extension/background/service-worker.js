@@ -8,7 +8,7 @@ const DEFAULT_SETTINGS = {
   enabled: true,
   pausedSites: [],
   showSuccess: false,
-  translateMode: 'offer',          // 'off' | 'offer' | 'auto'
+  translateMode: 'auto',           // 'off' | 'offer' | 'auto' (auto by default since 2.7)
   targetLang: 'en',
   translateNeverSites: [],
   shareReports: false,             // opt-in: send anonymized reports to the project server
@@ -78,6 +78,8 @@ chrome.storage.onChanged.addListener((changes, area) => { if (area === 'sync' &&
 chrome.runtime.onInstalled.addListener(async () => {
   const cur = await getSettings();
   delete cur.sendGPC;                       // 2.1 default-on value: drop it, GPC is now opt-in
+  // 2.7: translate automatically by default (asked for by the person). Applied once on update.
+  if (!cur.autoTranslateDefault) { cur.translateMode = 'auto'; cur.autoTranslateDefault = true; }
   await chrome.storage.sync.set({ settings: cur });
   await syncGPC();
   const local = await chrome.storage.local.get({ history: null, metrics: null, siteMemory: null, reports: null });

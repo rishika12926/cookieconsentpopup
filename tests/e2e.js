@@ -136,7 +136,7 @@ async function functionalChecks(page, baseUrl) {
     args: [`--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`]
   });
   const sw = await getSW(ctx);
-  await sw.evaluate(() => chrome.storage.sync.set({ settings: { enabled: true, pausedSites: [], translateMode: 'offer', showSuccess: false } }));
+  await sw.evaluate(() => chrome.storage.sync.set({ settings: { enabled: true, pausedSites: [], translateMode: 'auto', showSuccess: false } }));
 
   const results = [];
   const page = await ctx.newPage();

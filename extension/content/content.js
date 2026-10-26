@@ -58,7 +58,7 @@
   async function loadAll() {
     const sync = await chrome.storage.sync.get({ settings: {} });
     settings = Object.assign({
-      enabled: true, pausedSites: [], showSuccess: false, translateMode: 'offer', targetLang: 'en', translateNeverSites: []
+      enabled: true, pausedSites: [], showSuccess: false, translateMode: 'auto', targetLang: 'en', translateNeverSites: []
     }, sync.settings || {});
     const local = await chrome.storage.local.get({ siteMemory: {} });
     // Rules come from the background (bundled + optional remote updates, data only).
@@ -397,9 +397,7 @@
         if (lang && lang !== 'und' && lang !== target && !(settings.translateNeverSites || []).includes(site)) {
           window.CookieShieldTranslator.state.targetLang = target;
           if (settings.translateMode === 'auto') {
-            const avail = await window.CookieShieldTranslator.availability(target);
-            if (avail === 'available') window.CookieShieldTranslator.translatePage(target);
-            else window.CookieShieldTranslator.bar('offer');
+            window.CookieShieldTranslator.autoTranslate(target);
           } else if (settings.translateMode === 'offer') {
             window.CookieShieldTranslator.bar('offer');
           }

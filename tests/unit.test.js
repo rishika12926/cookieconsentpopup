@@ -24,6 +24,8 @@ const mustReject = ['Reject all', 'Reject All', 'Decline', 'Deny', 'Do not conse
 for (const s of mustReject) ok(L.classify(s).type === 'REJECT', `"${s}" should be REJECT, got ${L.classify(s).type}`);
 
 for (const s of ['Cookie Settings', 'Manage options', 'Einstellungen', 'Paramétrer', 'Personalizar', 'Customise', 'More options']) ok(L.classify(s).type === 'SETTINGS', `"${s}" settings`);
+for (const s of ['Einstellungen oder ablehnen', 'Settings or reject', 'Paramétrer ou refuser', 'Configurar o rechazar']) ok(L.classify(s).type === 'SETTINGS', `"${s}" opens settings, it is not a reject`);
+for (const s of ['Ablehnen', 'Alle ablehnen', 'Reject all', 'Nur notwendige']) ok(L.classify(s).type === 'REJECT', `"${s}" still rejects`);
 for (const s of ['Save & Exit', 'Confirm My Choices', 'Auswahl speichern', 'Enregistrer']) ok(L.classify(s).type === 'SAVE', `"${s}" save`);
 ok(L.classify('Necessary').type !== 'REJECT', 'a bare category name is not a reject button');
 for (const t of ['Einstellungen oder ablehnen', 'Settings or reject', 'Paramétrer ou refuser', 'Configurar o rechazar']) ok(L.classify(t).type === 'SETTINGS', `"${t}" opens settings, it is not a reject button`);

@@ -45,7 +45,12 @@
     // The banner's "reject" worked, but US state-law opt-outs (sale / sharing / targeted ads)
     // are still on — common with iubenda and OneTrust in the US. Those need a second step.
     if (state.anyGranted && state.usGranted && !state.otherGranted) return { status: 'US_PENDING', gone: !!gone, state };
-    if (state.anyGranted) return { status: 'FAILED', reason: 'OPTIONAL_STILL_GRANTED', gone: !!gone, state };
+    // While the banner is still open, nothing has been decided yet. Some sites announce
+    // "granted" to Google before you choose anything (stepstone.de does on page load), so a
+    // "granted" reading now isn't the site ignoring our "no" — keep going (settings, toggles,
+    // save) and judge once the banner has closed.
+    if (state.anyGranted && !gone) return { status: 'PENDING', gone: false, state };
+    if (state.anyGranted) return { status: 'FAILED', reason: 'OPTIONAL_STILL_GRANTED', gone: true, state };
     if (state.allDenied && gone) return { status: 'VERIFIED', gone: true, state };
     if (state.allDenied && !gone) return { status: 'PENDING', gone: false, state };
     if (gone) return { status: 'CLICKED', gone: true, state };

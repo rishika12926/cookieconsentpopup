@@ -19,7 +19,7 @@ A Chrome extension (Manifest V3) with a friendly penguin guide, Pip, plus a smal
 | **Keeps sites working** | After handling a banner it checks scrolling, clicking, links, forms and the page itself, and repairs only what the cookie banner left behind (scroll locks, invisible overlays). |
 | **Pause per site** | One click in the pop-up turns CookieShield off for a site. *Undo page fixes* and *Report a problem* are right next to it. |
 | **History** | Every site where it rejected cookies **or found your “no” already in place**: what it did, what was refused (in plain words), where a remembered “no” came from, the proof, filters, search and a CSV export. |
-| **Any language** | Recognizes reject, accept and settings buttons in 25+ languages, and offers to translate the whole page into your language with Chrome's on-device translator (nothing leaves your computer). |
+| **Any language** | Recognizes reject, accept and settings buttons in 25+ languages, and **translates the whole page into your language automatically** with Chrome's on-device translator (nothing leaves your computer). The first page in a new language starts translating on your first click, because Chrome needs one user action to download each language pack. After that it's instant. You can switch to “Ask me first” in Settings. |
 
 ---
 
@@ -110,7 +110,7 @@ Use a fresh Chrome profile, or clear a site's cookies first. Then visit a few si
 | Site type | Try | What to check |
 |---|---|---|
 | News (OneTrust, Sourcepoint) | a large EU news site | banner disappears; pop-up shows *Rejected · confirmed* |
-| German or French site | spiegel.de, lemonde.fr | rejects in the local language; Pip offers to translate the page |
+| German or French site | spiegel.de, lemonde.fr | rejects in the local language; the page is translated into your language automatically |
 | Shopping | an EU retailer | add to basket and checkout still work |
 | Accept-only banner | any site with only "OK" | pop-up says *Needs your choice*, and nothing was accepted |
 | Sign-in site | a site you log into | stay signed in after reloading |
