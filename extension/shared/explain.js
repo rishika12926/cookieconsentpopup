@@ -117,6 +117,7 @@
     C0002: 'Performance & analytics cookies', C0003: 'Functional cookies', C0004: 'Targeting & advertising cookies', C0005: 'Social media cookies',
     preferences: 'Preference cookies', statistics: 'Statistics cookies', marketing: 'Marketing cookies',
     'purpose 2': 'Functionality', 'purpose 3': 'Experience', 'purpose 4': 'Measurement (analytics)', 'purpose 5': 'Marketing',
+    analytics: 'Analytics', affiliates: 'Affiliate tracking', display_ads: 'Display advertising', search: 'Search ads', email: 'Email marketing', personalization: 'Personalisation', social: 'Social media', big_data: 'Big-data profiling', cookiematch: 'Cookie matching', cdp: 'Customer data platform', mobile: 'Mobile tracking', engagement: 'Engagement tracking', monitoring: 'Monitoring', crm: 'CRM matching',
     SSPD_BG: 'Sale or sharing of your personal data', SPD_BG: 'Sale of your personal data', STDF: 'Targeted advertising', 'SSPD': 'Sale or sharing of your personal data',
     sale: 'Sale of your personal information', sharing: 'Sharing of your personal information',
     'targeted advertising': 'Targeted advertising', 'sensitive data': 'Use of sensitive data'
@@ -178,6 +179,7 @@
     if (e.usOptOut && e.usOptOut.length) out.push(['US privacy opt-out', `Turned off: ${e.usOptOut.join(', ').replace(/, ([^,]*)$/, ' and $1')}`]);
     if ((e.status === 'VERIFIED' || e.status === 'CLICKED') && e.refused && e.refused.length) out.push(['Refused', humanize(e.refused).join(', ')]);
     if (e.reason && REASON[e.reason]) out.push(['Why we stopped', REASON[e.reason]]);
+    if (e.siteSignalConflict) out.push(['Heads-up', 'The site’s consent record has your “no”, but the site still tells Google tags that ads and analytics are allowed (it did that before you chose, too). That’s how the site is set up; CookieShield can’t change it. Site signal: ' + e.siteSignalConflict]);
     if (e.evidence) out.push(['Proof', e.evidence]);
     const ln = langName(e.bannerLang);
     if (ln && e.bannerLang !== 'en') out.push(['Banner language', ln]);

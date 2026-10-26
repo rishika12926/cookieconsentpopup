@@ -280,6 +280,8 @@
    * Classify a button label.
    * @returns {{type:string, matched:string|null, label:string}}
    */
+  const OR_WORD = / (or|oder|ou|o|of|eller|tai|lub|nebo|alebo|vagy|sau|ili|или|або|veya|ya da|ή|或|또는|または|أو|או|या) /;
+
   function classify(label) {
     const norm = normalize(label);
     if (!norm || norm.length > 90) return { type: 'UNKNOWN', matched: null, label: norm };
@@ -300,6 +302,12 @@
     if (accept && reject) {
       // e.g. "Accept or reject" — never guess.
       return { type: 'AMBIGUOUS', matched: `${accept} / ${reject}`, label: norm };
+    }
+    // "Einstellungen oder ablehnen" / "Settings or reject" / "Paramétrer ou refuser": this opens a
+    // settings screen where you can reject — it is not itself a reject button.
+    if (reject && OR_WORD.test(` ${norm} `)) {
+      const set = firstMatch(norm, C.SETTINGS);
+      if (set) return { type: 'SETTINGS', matched: `${set} / ${reject}`, label: norm };
     }
     if (acceptAll) return { type: 'ACCEPT_ALL', matched: acceptAll, label: norm };
     if (accept) return { type: 'ACCEPT', matched: accept, label: norm };

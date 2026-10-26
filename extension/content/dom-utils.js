@@ -134,12 +134,20 @@
     if (!el) return false;
     if (!allowNavigation && navigatesAway(el)) return false;
     try {
-      const opts = { bubbles: true, cancelable: true, composed: true, view: window };
-      el.dispatchEvent(new PointerEvent('pointerdown', opts));
-      el.dispatchEvent(new MouseEvent('mousedown', opts));
-      el.dispatchEvent(new PointerEvent('pointerup', opts));
-      el.dispatchEvent(new MouseEvent('mouseup', opts));
-      el.click();
+      // Same sequence and position a real mouse produces. Some banners (e.g. Tealium on
+      // stepstone.de) ignore presses without screen coordinates.
+      const r = el.getBoundingClientRect ? el.getBoundingClientRect() : { left: 0, top: 0, width: 0, height: 0 };
+      const x = r.left + r.width / 2, y = r.top + r.height / 2;
+      const base = { bubbles: true, cancelable: true, composed: true, view: window, clientX: x, clientY: y, screenX: x, screenY: y, button: 0 };
+      const ptr = { ...base, pointerId: 1, pointerType: 'mouse', isPrimary: true };
+      el.dispatchEvent(new PointerEvent('pointerover', ptr));
+      el.dispatchEvent(new MouseEvent('mouseover', base));
+      el.dispatchEvent(new PointerEvent('pointerdown', { ...ptr, buttons: 1 }));
+      el.dispatchEvent(new MouseEvent('mousedown', { ...base, buttons: 1 }));
+      if (typeof el.focus === 'function') { try { el.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
+      el.dispatchEvent(new PointerEvent('pointerup', ptr));
+      el.dispatchEvent(new MouseEvent('mouseup', base));
+      el.dispatchEvent(new MouseEvent('click', { ...base, detail: 1 }));
       return true;
     } catch (e) {
       return false;

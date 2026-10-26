@@ -154,6 +154,18 @@
   "description": "Buttons inside a cross-origin iframe."
  },
  {
+  "id": "tealium-stepstone",
+  "title": "Tealium (German) — “Settings or reject”",
+  "sim": "tealium",
+  "opts": {},
+  "expect": [
+   "VERIFIED"
+  ],
+  "reason": null,
+  "group": "platform",
+  "description": "Copied from stepstone.de: “Einstellungen oder ablehnen” opens a second screen, “Speichern und Beenden” saves. The site’s Google signal says “granted” regardless, which is shown as a heads-up."
+ },
+ {
   "id": "iubenda",
   "title": "iubenda",
   "sim": "iubenda",

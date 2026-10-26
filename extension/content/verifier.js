@@ -143,7 +143,18 @@
     const page = await requestPageState(only);
     const cookies = readCookieStates();
     const all = [...page, ...cookies];
-    const decided = all.filter(r => r.decided && r.optionalGranted !== null);
+    let decided = all.filter(r => r.decided && r.optionalGranted !== null);
+    // Google Consent Mode is a signal the SITE sends to Google, not the consent record itself.
+    // When the consent platform's own record says "no" but the site's Google tags still say
+    // "granted" (stepstone.de does this before and after any choice), the record decides the
+    // result and the contradiction is shown to the person as a heads-up — never hidden.
+    let siteSignalConflict = null;
+    const cm = decided.find(r => r.key === 'consentmode');
+    const records = decided.filter(r => r.key !== 'consentmode' && r.regime !== 'us');
+    if (cm && cm.optionalGranted && records.length && records.every(r => r.optionalGranted === false)) {
+      siteSignalConflict = `${cm.evidence}`;
+      decided = decided.filter(r => r !== cm);
+    }
     const us = decided.filter(r => r.regime === 'us');
     const other = decided.filter(r => r.regime !== 'us');
     return {
@@ -156,6 +167,7 @@
       otherGranted: other.some(r => r.optionalGranted === true),
       otherDecided: other.length > 0,
       // What the site's own records say is refused / still allowed, as "reader:item" (humanised in the UI)
+      siteSignalConflict,
       refused: [...new Set(decided.flatMap(r => (r.denied || []).map(d => `${r.key}:${d}`)))],
       allowed: [...new Set(decided.flatMap(r => (r.optionalGranted ? r.granted || [] : []).map(g => `${r.key}:${g}`)))],
       summary: decided.map(r => `${r.source}: ${r.evidence}`).join(' · ')

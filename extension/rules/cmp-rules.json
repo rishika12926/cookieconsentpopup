@@ -249,6 +249,55 @@
    "frameDetect": []
   },
   {
+   "id": "tealium",
+   "name": "Tealium Consent Manager",
+   "type": "enterprise",
+   "detect": [
+    ".cm-consent-prompt.privacy-prompt",
+    "#__tealiumGDPRecModal",
+    "#__tealiumGDPRcpPrefs"
+   ],
+   "container": [
+    ".cm-consent-prompt",
+    ".privacy-prompt",
+    "#__tealiumGDPRecModal",
+    "#__tealiumGDPRcpPrefs"
+   ],
+   "reject": [
+    "#ccmgt_explicit_reject button",
+    "#ccmgt_explicit_reject",
+    "#consent_prompt_decline"
+   ],
+   "settings": [
+    "#ccmgt_explicit_preferences button",
+    "#ccmgt_explicit_preferences",
+    "#consent_prompt_preferences"
+   ],
+   "settingsReject": [],
+   "toggles": ".privacy-prompt input[type=checkbox][id^=\"cc-\"], #__tealiumGDPRcpPrefs input[type=checkbox]",
+   "save": [
+    "#ccmgt_preferences_reject button",
+    "#ccmgt_preferences_reject",
+    "#preferences_prompt_submit"
+   ],
+   "state": [
+    "tealium",
+    "consentmode",
+    "tcf",
+    "gpp",
+    "usp"
+   ],
+   "lockClasses": [],
+   "backdrops": [],
+   "fixture": "tealium-stepstone",
+   "frameHosts": [],
+   "shadow": false,
+   "delegatesToFrame": false,
+   "tested": true,
+   "frameDetect": [],
+   "notes": "stepstone.de (Oct 2026): 'Einstellungen oder ablehnen' opens a 2nd screen with every category off; 'Speichern und Beenden' (#ccmgt_preferences_reject) saves. Record: utag.gdpr.getConsentState() / CONSENTMGR cookie. The site's Google Consent Mode says 'granted' regardless."
+  },
+  {
    "id": "googlefc",
    "name": "Google Funding Choices",
    "type": "platform",

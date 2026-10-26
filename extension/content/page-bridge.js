@@ -252,7 +252,24 @@
     }), 1000);
   }
 
-  const READERS = { tcf: readTCF, onetrust: readOneTrust, cookiebot: readCookiebot, didomi: readDidomi, usercentrics: readUsercentrics, osano: readOsano, klaro: readKlaro, consentmode: readConsentMode, gpp: readGPP, usp: readUSP };
+  /** Tealium Consent Manager (utag.gdpr) — e.g. stepstone.de. */
+  function readTealium() {
+    const g = window.utag && window.utag.gdpr;
+    if (!g || typeof g.getConsentState !== 'function') return Promise.resolve(null);
+    let st;
+    try { st = g.getConsentState(); } catch (e) { return Promise.resolve(null); }
+    if (st === 0 || st === '0' || st == null) return Promise.resolve({ source: 'Tealium Consent Manager', decided: false, optionalGranted: null, granted: [], denied: [], evidence: 'No choice saved yet' });
+    if (st === 1 || st === -1) return Promise.resolve({ source: 'Tealium Consent Manager', decided: true, optionalGranted: st === 1, granted: st === 1 ? ['all'] : [], denied: st === -1 ? ['all'] : [], evidence: st === 1 ? 'consent: all categories' : 'consent declined' });
+    if (!Array.isArray(st)) return Promise.resolve(null);
+    // "misc" is Tealium's always-on bucket for tags the site needs to work.
+    const ALWAYS = /^(misc|necessary|essential|strictly|required|functional_required)$/i;
+    const opt = st.filter(c => !ALWAYS.test(c.name || ''));
+    const granted = opt.filter(c => String(c.ct) === '1').map(c => c.name);
+    const denied = opt.filter(c => String(c.ct) !== '1').map(c => c.name);
+    return Promise.resolve({ source: 'Tealium Consent Manager', decided: true, optionalGranted: granted.length > 0, granted, denied, evidence: granted.length ? `allowed: ${granted.join(', ')}` : `${denied.length} optional categories off` });
+  }
+
+  const READERS = { tcf: readTCF, onetrust: readOneTrust, cookiebot: readCookiebot, didomi: readDidomi, usercentrics: readUsercentrics, osano: readOsano, klaro: readKlaro, consentmode: readConsentMode, gpp: readGPP, usp: readUSP, tealium: readTealium };
 
   // --- Open a platform's own privacy-settings panel through its public API. Used when the
   //     "Your Privacy Choices" link isn't on the page (iubenda only draws it in some states).

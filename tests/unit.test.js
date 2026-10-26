@@ -26,6 +26,7 @@ for (const s of mustReject) ok(L.classify(s).type === 'REJECT', `"${s}" should b
 for (const s of ['Cookie Settings', 'Manage options', 'Einstellungen', 'Paramétrer', 'Personalizar', 'Customise', 'More options']) ok(L.classify(s).type === 'SETTINGS', `"${s}" settings`);
 for (const s of ['Save & Exit', 'Confirm My Choices', 'Auswahl speichern', 'Enregistrer']) ok(L.classify(s).type === 'SAVE', `"${s}" save`);
 ok(L.classify('Necessary').type !== 'REJECT', 'a bare category name is not a reject button');
+for (const t of ['Einstellungen oder ablehnen', 'Settings or reject', 'Paramétrer ou refuser', 'Configurar o rechazar']) ok(L.classify(t).type === 'SETTINGS', `"${t}" opens settings, it is not a reject button`);
 ok(L.cookieMention('Wir verwenden Cookies') && L.cookieMention('당사는 쿠키를 사용합니다') && !L.cookieMention('Get the Polar Weekly newsletter'), 'cookie context');
 ok(L.isEssentialLabel('Strictly Necessary Cookies') && L.isEssentialLabel('Unbedingt erforderlich') && !L.isEssentialLabel('Marketing cookies'), 'essential labels');
 

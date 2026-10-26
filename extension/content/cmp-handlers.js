@@ -41,6 +41,7 @@
     ctx.evidence = state.summary || ctx.evidence;
     ctx.stateSources = state.sources.map(s => s.source);
     ctx.refused = state.refused;
+    ctx.siteSignalConflict = state.siteSignalConflict;
     // The banner's "reject" worked, but US state-law opt-outs (sale / sharing / targeted ads)
     // are still on — common with iubenda and OneTrust in the US. Those need a second step.
     if (state.anyGranted && state.usGranted && !state.otherGranted) return { status: 'US_PENDING', gone: !!gone, state };
@@ -71,7 +72,8 @@
       bannerLang: ctx.bannerLang || null,
       translatedLabels: ctx.translatedLabels || null,
       usOptOut: ctx.usOptOut || null,
-      refused: ctx.refused || null
+      refused: ctx.refused || null,
+      siteSignalConflict: ctx.siteSignalConflict || null
     };
   }
 

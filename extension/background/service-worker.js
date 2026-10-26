@@ -164,7 +164,7 @@ async function recordOutcome(p, tabId) {
     clicks: o.clicks || [], turnedOff: o.turnedOff || [], essentialKept: (o.essentialKept || []).slice(0, 6),
     evidence: o.evidence, stateSources: o.stateSources || [],
     bannerLang: o.bannerLang, translatedLabels: o.translatedLabels || null,
-    usOptOut: o.usOptOut || null, refused: o.refused || null,
+    usOptOut: o.usOptOut || null, refused: o.refused || null, siteSignalConflict: o.siteSignalConflict || null,
     siteType: p.siteType || 'other', ms: p.ms
   };
   history.unshift(entry);

@@ -684,6 +684,58 @@
     document.body.prepend(el);
   };
 
+  /**
+   * Tealium Consent Manager — reproduced from stepstone.de (Oct 2026).
+   *  • Layer 1: "Einstellungen oder ablehnen" (settings OR reject) and "Alles akzeptieren". The
+   *    handler sits on the wrapper div and only reacts to a mouse press with screen coordinates.
+   *  • Layer 2: every category is OFF by default; "Speichern und Beenden" (#ccmgt_preferences_reject)
+   *    saves. Record: utag.gdpr.getConsentState() and the CONSENTMGR cookie.
+   *  • The site's Google Consent Mode says "granted" at load and after any choice (site setup).
+   */
+  SIMS.tealium = function () {
+    const CATS = ['analytics', 'affiliates', 'display_ads', 'search', 'email', 'personalization', 'social', 'big_data', 'misc', 'cookiematch'];
+    const read = () => { const c = getCookie('CONSENTMGR'); if (!c) return null; const m = {}; for (const kv of c.split('|')) { const [k, v] = kv.split(':'); m[k] = v; } return m; };
+    window.utag = { gdpr: { getConsentState: () => { const m = read(); return m ? CATS.map((n, i) => ({ ct: m['c' + (i + 1)], name: n })) : 0; } } };
+    window.dataLayer = window.dataLayer || [];
+    const gtag = function () { window.dataLayer.push(arguments); };
+    const siteSignal = () => { gtag('consent', 'default', { ad_storage: 'denied', analytics_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' }); gtag('consent', 'update', { ad_storage: 'granted', analytics_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'granted' }); };
+    siteSignal();
+    const truth = () => { const m = read(); Object.assign(T(), { cmp: 'tealium', decided: !!m, optionalGranted: m ? CATS.some((n, i) => n !== 'misc' && m['c' + (i + 1)] === '1') : null }); };
+    truth();
+    if (read()) { T().choice = 'stored'; return; }
+    const save = (on, choice) => {
+      setCookie('CONSENTMGR', CATS.map((n, i) => `c${i + 1}:${n === 'misc' || on.includes(n) ? 1 : 0}`).join('|') + `|ts:${Date.now()}|consent:true`);
+      el.remove(); SimSite.unlockPage(); truth(); T().choice = choice; siteSignal();
+    };
+    // Only a real-looking press (with coordinates) counts, like the live site.
+    const press = (node, fn) => node.addEventListener('mouseup', (e) => { if (e.clientX || e.clientY) fn(); });
+    const el = $(`<div class="cm-consent-prompt privacy-prompt" style="position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.45);z-index:2147483001">
+      <section id="explicit_consent" class="prompt-container" style="background:#fff;padding:24px;border-radius:16px;width:min(760px,95vw)">
+        <h2>Wir verwenden Cookies</h2>
+        <div id="scrollableContent" class="privacy-prompt-panel-content"><p>Wir übermitteln personenbezogene Daten an Drittanbieter, die uns helfen, unser Webangebot zu verbessern. Indem Sie "Alle akzeptieren" klicken, stimmen Sie diesen zu. Unter "Einstellungen oder ablehnen" können Sie Ihre Einstellungen ändern oder die Datenverarbeitung ablehnen.</p></div>
+        <div class="layer1">
+          <div id="ccmgt_explicit_preferences" class="privacy-prompt-button second"><button class="button-container">Einstellungen oder ablehnen</button></div>
+          <div id="ccmgt_explicit_accept" class="privacy-prompt-button primary-button"><button class="button-container">Alles akzeptieren</button></div>
+        </div>
+        <div class="layer2" style="display:none">
+          ${['Informationen auf einem Gerät speichern und/oder abrufen', 'Personalisierte Anzeigen und Inhalte', 'Fremdinhalte anzeigen (Soziale Netzwerke, Videos)'].map((t, i) =>
+            `<div class="row"><label for="cc-ec-stk-${i + 1}">${t}</label> <span>0/1 akzeptiert</span><input type="checkbox" id="cc-ec-stk-${i + 1}" style="position:absolute;opacity:0;width:1px;height:1px"></div>`).join('')}
+          <div id="ccmgt_preferences_reject" class="privacy-prompt-button secondary-button"><button>Speichern und Beenden</button></div>
+          <div id="ccmgt_preferences_accept" class="privacy-prompt-button primary-button"><button>Alles akzeptieren</button></div>
+        </div>
+      </section></div>`);
+    press(el.querySelector('#ccmgt_explicit_preferences'), () => { log('settings'); el.querySelector('.layer1').style.display = 'none'; el.querySelector('.layer2').style.display = 'block'; });
+    press(el.querySelector('#ccmgt_explicit_accept'), () => { log('accept'); save(CATS, 'accept'); });
+    press(el.querySelector('#ccmgt_preferences_accept'), () => { log('accept'); save(CATS, 'accept'); });
+    press(el.querySelector('#ccmgt_preferences_reject'), () => {
+      log('save');
+      const stacks = [1, 2, 3].map(i => el.querySelector('#cc-ec-stk-' + i).checked);
+      save(stacks.some(Boolean) ? CATS : [], 'save');
+    });
+    document.body.appendChild(el);
+    SimSite.lockPage();
+  };
+
   /** Not a cookie banner at all. Expected: untouched. */
   SIMS.newsletter = () => {
     const el = $(`<div id="newsletter" role="dialog" aria-modal="true" style="position:fixed;inset:auto 20px 20px auto;width:360px;background:#fff;padding:18px;z-index:99999;box-shadow:0 10px 30px rgba(0,0,0,.25)">
