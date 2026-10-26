@@ -158,6 +158,7 @@ Then **redeploy** (Deployments → ⋯ → Redeploy) so the variables take effec
 | `/` | Landing page with the **Download** button (downloads are counted) |
 | `/admin` | **Your dashboard**: downloads, installs, active installs per day, banners, success rate, failures, manual interventions, errors, speed; opt-in sites and platforms; reported problems |
 | `/privacy` | Privacy policy (required for the Chrome Web Store) |
+| `/install` | Step-by-step install guide with pictures |
 | `/playground/` | Test bench |
 | `/api/usage`, `/api/sites`, `/api/report`, `/api/download`, `/api/stats` | The endpoints the extension and dashboard use |
 

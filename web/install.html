@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Install CookieShield</title>
+  <meta name="description" content="Install CookieShield in Chrome in about two minutes, with a picture for every click.">
+  <link rel="icon" href="/icon.png">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .guide { max-width: 860px; margin: 0 auto; padding: 36px 0 64px; }
+    .guide h1 { font-size: clamp(32px, 5vw, 48px); margin: 0 0 8px; }
+    .warn { display: none; background: var(--warn-bg); color: var(--warn); border-radius: 16px; padding: 14px 18px; font-weight: 700; margin: 18px 0 0; }
+    .warn.show { display: block; }
+    .step { scroll-margin-top: 84px; background: var(--snow); border: 1.5px solid var(--line); border-radius: 22px; padding: 22px 24px; margin-top: 16px; box-shadow: var(--shadow-sm); }
+    .step.done { border-color: var(--ok); }
+    .step-head { display: flex; align-items: center; gap: 14px; }
+    .num { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--pale); color: var(--navy); font-weight: 900; font-size: 18px; display: grid; place-items: center; }
+    .step.done .num { background: var(--ok); color: #fff; }
+    .step h2 { font-size: 21px; margin: 0; }
+    .step p, .step li { font-size: 16px; line-height: 1.55; }
+    .step .body { margin-left: 54px; }
+    @media (max-width: 560px) { .step .body { margin-left: 0; } }
+    .pic { display: block; width: 100%; max-width: 580px; border: 1.5px solid var(--line); border-radius: 14px; margin: 12px 0 4px; background: #fff; }
+    .copy { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 10px 0; }
+    .copy code { font-size: 17px; padding: 10px 14px; border-radius: 12px; background: var(--ice); border: 1.5px solid var(--line); user-select: all; }
+    .tip { font-size: 14.5px; color: var(--muted); }
+    .mark { margin-top: 10px; }
+    .mark.on { background: var(--ok); color: #fff; }
+    details.help { margin-top: 24px; }
+    details.help summary { font-weight: 800; cursor: pointer; }
+    .ok-msg { color: var(--ok); font-weight: 800; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="wrap">
+      <a class="logo" href="/"><img src="/icon.png" alt="">CookieShield</a>
+      <a class="link" href="/playground/">Test bench</a>
+      <a class="link opt" href="/report">Report a site</a>
+    </div>
+  </nav>
+
+  <main class="wrap guide">
+    <h1>Install CookieShield</h1>
+    <p class="sub">About 2 minutes. Follow the pictures and tick each step as you go.</p>
+    <p class="warn" id="warn-phone">You’re on a phone or tablet. Chrome extensions only work on a laptop or desktop, so open this page there: <b>cookieconsentpopup.vercel.app/install</b></p>
+    <p class="warn" id="warn-browser">This doesn’t look like Chrome. CookieShield works in Chrome, Edge, Brave and Arc. Open this page in one of them.</p>
+
+    <section class="step" data-step="1">
+      <div class="step-head"><span class="num">1</span><h2>Download it</h2></div>
+      <div class="body">
+        <p><a class="btn primary" id="dl" href="/api/download">Download CookieShield</a></p>
+        <p id="unzip-mac" hidden>On a Mac: open your <b>Downloads</b> folder and <b>double-click</b> <code>cookieshield-extension.zip</code>. You’ll get a folder called <code>cookieshield-extension</code>.</p>
+        <p id="unzip-win" hidden>On Windows: open your <b>Downloads</b> folder, right-click <code>cookieshield-extension.zip</code> and choose <b>Extract All</b> → <b>Extract</b>. You’ll get a folder called <code>cookieshield-extension</code>.</p>
+        <p id="unzip-any">Open your <b>Downloads</b> folder and unzip <code>cookieshield-extension.zip</code>. You’ll get a folder called <code>cookieshield-extension</code>.</p>
+        <button class="btn small mark" type="button">I have the folder ✓</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="2">
+      <div class="step-head"><span class="num">2</span><h2>Open Chrome’s extensions page</h2></div>
+      <div class="body">
+        <p>Chrome doesn’t let websites open this page for you, so copy the address, paste it into the address bar at the top, and press <b>Enter</b>:</p>
+        <div class="copy"><code id="addr">chrome://extensions</code><button class="btn small" id="copy" type="button">Copy</button><span class="ok-msg" id="copied" hidden>Copied!</span></div>
+        <p class="tip">Or use the menu: click <b>⋮</b> (top right of Chrome) → <b>Extensions</b> → <b>Manage Extensions</b>.</p>
+        <button class="btn small mark" type="button">I’m on the extensions page ✓</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="3">
+      <div class="step-head"><span class="num">3</span><h2>Switch on “Developer mode”</h2></div>
+      <div class="body">
+        <p>Look at the <b>top-right corner</b> of the extensions page. There’s a small switch called <b>Developer mode</b>. Click it so it turns blue.</p>
+        <img class="pic" src="/install/step-devmode.png" alt="The top-right corner of Chrome's extensions page, with the Developer mode switch circled" width="580" height="130">
+        <p class="tip">Don’t see it? Make the Chrome window wider; it’s always in the top-right corner. Developer mode only lets you add extensions from your computer. It doesn’t change anything else.</p>
+        <button class="btn small mark" type="button">It’s on ✓</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="4">
+      <div class="step-head"><span class="num">4</span><h2>Click “Load unpacked” and pick the folder</h2></div>
+      <div class="body">
+        <p>Three new buttons appear on the left. Click <b>Load unpacked</b>, go to your Downloads, click the <code>cookieshield-extension</code> <b>folder</b> once, and press <b>Select</b> (or <b>Open</b>).</p>
+        <img class="pic" src="/install/step-load.png" alt="The top-left of Chrome's extensions page, with the Load unpacked button circled" width="580" height="170">
+        <p class="tip">Shortcut: drag the <code>cookieshield-extension</code> folder straight onto the extensions page.</p>
+        <button class="btn small mark" type="button">CookieShield appeared ✓</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="5">
+      <div class="step-head"><span class="num">5</span><h2>Pin Pip and try it</h2></div>
+      <div class="body">
+        <p>A welcome page opens by itself. Click the <b>puzzle piece</b> at the top right of Chrome and the <b>pin</b> next to CookieShield, so Pip sits in your toolbar.</p>
+        <p>Then open any website with a cookie pop-up, or the <a href="/playground/">test bench</a>. A tick on Pip means your “no” was sent and checked.</p>
+        <button class="btn small mark" type="button">Done 🎉</button>
+      </div>
+    </section>
+
+    <details class="help">
+      <summary>Something went wrong?</summary>
+      <ul>
+        <li><b>“Manifest file is missing or unreadable”</b>: you picked the wrong folder. Pick the <code>cookieshield-extension</code> folder itself, the one that has <code>manifest.json</code> inside. Not the zip, and not your Downloads folder.</li>
+        <li><b>Developer mode is greyed out</b>: your work or school manages this browser and blocks it. Use a personal Chrome profile instead.</li>
+        <li><b>Nothing happens on a site</b>: reload the page once after installing. If a banner still isn’t handled, <a href="/report">report the site</a>.</li>
+      </ul>
+    </details>
+  </main>
+
+  <script>
+  (function () {
+    var ua = navigator.userAgent || '';
+    var mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(ua));
+    var chromium = /Chrome\/|Chromium\/|Edg\//.test(ua) && !/OPR\//.test(ua);
+    if (mobile) document.getElementById('warn-phone').classList.add('show');
+    else if (!chromium) document.getElementById('warn-browser').classList.add('show');
+    var mac = /Macintosh|Mac OS X/.test(ua), win = /Windows/.test(ua);
+    if (mac || win) { document.getElementById('unzip-any').hidden = true; document.getElementById(mac ? 'unzip-mac' : 'unzip-win').hidden = false; }
+
+    var KEY = 'cs-install-steps', state = {};
+    try { state = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { state = {}; }
+    function paint() {
+      document.querySelectorAll('.step').forEach(function (s) {
+        var on = !!state[s.dataset.step];
+        s.classList.toggle('done', on);
+        var b = s.querySelector('.mark'); if (b) { b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); }
+      });
+    }
+    document.querySelectorAll('.step .mark').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var s = b.closest('.step'); state[s.dataset.step] = !state[s.dataset.step];
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* private mode */ }
+        paint();
+        var next = s.nextElementSibling;
+        if (state[s.dataset.step] && next && next.classList.contains('step')) next.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+    paint();
+
+    document.getElementById('copy').addEventListener('click', function () {
+      var done = function () { var c = document.getElementById('copied'); c.hidden = false; setTimeout(function () { c.hidden = true; }, 2500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText('chrome://extensions').then(done, function () { selectAddr(); });
+      else selectAddr();
+    });
+    function selectAddr() { var r = document.createRange(); r.selectNodeContents(document.getElementById('addr')); var s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+  })();
+  </script>
+</body>
+</html>
