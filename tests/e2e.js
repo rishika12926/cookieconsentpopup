@@ -34,6 +34,13 @@ function serve(port) {
   return new Promise(resolve => {
     const srv = http.createServer((req, res) => {
       const u = new URL(req.url, 'http://x');
+      // Statistics endpoints: record exactly what the extension sends (checked at the end).
+      if (req.method === 'POST' && /^\/api\/(usage|sites|report)$/.test(u.pathname)) {
+        let raw = '';
+        req.on('data', c => { raw += c; });
+        req.on('end', () => { TELEMETRY.push({ path: u.pathname, raw }); res.writeHead(202, { 'Content-Type': 'application/json' }); res.end('{"ok":true}'); });
+        return;
+      }
       if (/\.html$/.test(u.pathname)) GPC_SEEN[req.headers.host.split(':')[0]] = req.headers['sec-gpc'] || null;
       let p = path.join(WEB, decodeURIComponent(u.pathname));
       if (!p.startsWith(WEB)) { res.writeHead(403); return res.end(); }
@@ -45,7 +52,8 @@ function serve(port) {
   });
 }
 
-const GPC_SEEN = {}; // host -> value of the Sec-GPC request header on the last page load
+const GPC_SEEN = {};
+const TELEMETRY = []; // POST bodies the extension sent to /api/usage, /api/sites, /api/report // host -> value of the Sec-GPC request header on the last page load
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 async function getSW(ctx) {
@@ -136,7 +144,7 @@ async function functionalChecks(page, baseUrl) {
     args: [`--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`]
   });
   const sw = await getSW(ctx);
-  await sw.evaluate(() => chrome.storage.sync.set({ settings: { enabled: true, pausedSites: [], translateMode: 'auto', showSuccess: false } }));
+  await sw.evaluate((server) => chrome.storage.sync.set({ settings: { enabled: true, pausedSites: [], translateMode: 'auto', showSuccess: false, usageStats: true, siteStats: false, serverUrl: server } }), `http://127.0.0.1:${PORT}`);
 
   const results = [];
   const page = await ctx.newPage();
@@ -310,6 +318,45 @@ async function functionalChecks(page, baseUrl) {
     console.log(`${extra.settingsOnce.pass ? '✓' : '✗'} settings page, once only  first visit=${first} → you chose Allow → later visit=${after} (${tab && tab.status})`);
   }
 
+  {
+    // Anonymous statistics. 1) default: usage counts only — no domains, no URLs, no IDs.
+    // (The extension's first-run setup can finish after the test's own settings were saved.)
+    await sw.evaluate(async (server) => { const { settings } = await chrome.storage.sync.get({ settings: {} }); Object.assign(settings, { usageStats: true, siteStats: false, serverUrl: server }); await chrome.storage.sync.set({ settings }); }, `http://127.0.0.1:${PORT}`);
+    const flush = () => sw.evaluate(async () => { return await Telemetry.flush({ includeToday: true }); });
+    TELEMETRY.length = 0;
+    await flush();
+    const usage = TELEMETRY.filter(t => t.path === '/api/usage').map(t => JSON.parse(t.raw));
+    const sitesBefore = TELEMETRY.filter(t => t.path === '/api/sites').length;
+    // 2) opt in to site statistics, visit one banner site, send again
+    await sw.evaluate(async () => { const { settings } = await chrome.storage.sync.get({ settings: {} }); settings.siteStats = true; await chrome.storage.sync.set({ settings }); });
+    await ctx.clearCookies();
+    await page.goto(`http://optin-site.localhost:${PORT}/playground/fixtures/onetrust.html?utm_source=secret-campaign&q=private-search`);
+    await sleep(6000);
+    TELEMETRY.length = 0;
+    await flush();
+    const sitesAfter = TELEMETRY.filter(t => t.path === '/api/sites').map(t => JSON.parse(t.raw));
+    // 3) opt out again → pending site data is deleted and nothing more is sent
+    await sw.evaluate(async () => { await chrome.runtime.sendMessage({ type: 'SET_SETTINGS', payload: { siteStats: false } }).catch(() => {}); });
+    await sw.evaluate(async () => { const { settings } = await chrome.storage.sync.get({ settings: {} }); settings.siteStats = false; await chrome.storage.sync.set({ settings }); await Telemetry.forget({ sitesOnly: true }); });
+    await ctx.clearCookies();
+    await page.goto(`http://optout-site.localhost:${PORT}/playground/fixtures/cookiebot.html`);
+    await sleep(6000);
+    TELEMETRY.length = 0;
+    await flush();
+    const sitesAfterOptOut = TELEMETRY.filter(t => t.path === '/api/sites').length;
+    const all = JSON.stringify([...usage, ...sitesAfter]);
+    const u0 = usage[0] || {};
+    const entry = (sitesAfter[0] && sitesAfter[0].entries || []).find(e => e.domain === 'optin-site.localhost');
+    const leaks = ['http', '/playground', 'utm_', 'secret-campaign', 'private-search', '.html', 'OptanonConsent', 'cookie='].filter(w => all.includes(w));
+    extra.telemetry = {
+      usageSent: usage.length, usageKeys: Object.keys(u0), banners: u0.counts && u0.counts.banners,
+      noSitesByDefault: sitesBefore === 0, optInEntry: entry || null, sentAfterOptOut: sitesAfterOptOut, leaks,
+      pass: usage.length >= 1 && JSON.stringify(Object.keys(u0).sort()) === JSON.stringify(['browser', 'counts', 'day', 'events', 'version'])
+        && u0.counts.banners > 0 && sitesBefore === 0 && !!entry && entry.cmp === 'onetrust' && sitesAfterOptOut === 0 && leaks.length === 0
+    };
+    console.log(`${extra.telemetry.pass ? '✓' : '✗'} anonymous statistics       usage summary sent (${u0.counts && u0.counts.banners} banners, fields: ${Object.keys(u0).join(',')}) · sites by default: ${sitesBefore} · opt-in entry: ${entry ? entry.domain + '/' + entry.cmp + '/' + entry.outcome : 'none'} · after opt-out: ${sitesAfterOptOut} · leaks: ${leaks.join(',') || 'none'}`);
+  }
+
   await ctx.close();
   s1.close(); s2.close();
 
@@ -368,12 +415,12 @@ async function functionalChecks(page, baseUrl) {
   md.push(`\n## Priority 2 — never silently accept\n\n| Metric | Value |\n|---|---|\n| Accept/agree buttons clicked by the extension | ${metrics.p2.acceptButtonClicks} |\n| Silent optional-consent acceptances | ${metrics.p2.silentOptionalAcceptances} |\n| False reports of successful rejection | ${metrics.p2.falseSuccessReports} |\n| Exceptions reported correctly | ${metrics.p2.exceptionsReportedCorrectly}/${metrics.p2.exceptionFixtures} |\n`);
   md.push(`## Priority 3 — don't break sites\n\n**${metrics.p3.regressionsPer100}** regressions per 100 handled visits (${metrics.p3.regressions} of ${metrics.p3.handledVisits}). Checks after handling: scrolling, form submit, sign-in survives reload, SPA navigation, link navigation.\n`);
   if (metrics.p3.failingFixtures.length) md.push(metrics.p3.failingFixtures.map(f => `- ${f.id}: ${f.failures.join(', ')}`).join('\n'));
-  md.push(`\n## Extra scenarios\n\n- Remember choice on revisit (and log it in History with origin + what was refused): ${extra.remember.pass ? 'pass' : 'FAIL'} (${extra.remember.status})\n- Per-site pause leaves banner alone (and sends no GPC): ${extra.pause.pass ? 'pass' : 'FAIL'} (${extra.pause.status})\n- Global Privacy Control off by default, sent only when enabled: ${extra.gpc.pass ? 'pass' : 'FAIL'}\n- A toggle you switch back on yourself is left alone: ${extra.respectYes.pass ? 'pass' : 'FAIL'}\n- Privacy settings pages (e.g. Amazon) are opted out once, then your own choice is left alone: ${extra.settingsOnce.pass ? 'pass' : 'FAIL'}\n- Opt-out happens without the panel flashing, and a panel you open yourself is left alone: ${extra.userOpened.pass ? 'pass' : 'FAIL'}\n`);
+  md.push(`\n## Extra scenarios\n\n- Remember choice on revisit (and log it in History with origin + what was refused): ${extra.remember.pass ? 'pass' : 'FAIL'} (${extra.remember.status})\n- Per-site pause leaves banner alone (and sends no GPC): ${extra.pause.pass ? 'pass' : 'FAIL'} (${extra.pause.status})\n- Global Privacy Control off by default, sent only when enabled: ${extra.gpc.pass ? 'pass' : 'FAIL'}\n- A toggle you switch back on yourself is left alone: ${extra.respectYes.pass ? 'pass' : 'FAIL'}\n- Privacy settings pages (e.g. Amazon) are opted out once, then your own choice is left alone: ${extra.settingsOnce.pass ? 'pass' : 'FAIL'}\n- Anonymous statistics: counts only by default; website names only after opting in; nothing after opting out; no URLs, paths, query strings or IDs: ${extra.telemetry.pass ? 'pass' : 'FAIL'}\n- Opt-out happens without the panel flashing, and a panel you open yourself is left alone: ${extra.userOpened.pass ? 'pass' : 'FAIL'}\n`);
   md.push('\n## All fixtures\n\n| Fixture | Expected | Got | Reason | Truth | ms | P3 |\n|---|---|---|---|---|---|---|');
   for (const r of results) md.push(`| ${r.id} | ${r.expected.join('/')} | ${r.correct ? '✅' : '❌'} ${r.status} | ${r.reason || ''} | ${r.truth.decided ? (r.truth.optionalGranted ? 'granted' : 'rejected') : 'undecided'} | ${r.handledMs ?? ''} | ${r.functional ? (r.regression ? '❌ ' + r.functional.failures.join(',') : '✅') : '–'} |`);
   fs.writeFileSync(path.join(OUT, 'e2e-report.md'), md.join('\n') + '\n');
 
   console.log('\n' + JSON.stringify({ p1: { pct: metrics.p1.correctlyHandledPct, correct: metrics.p1.correct, total: metrics.p1.total }, p2: metrics.p2, p3: { per100: metrics.p3.regressionsPer100, regressions } }, null, 1));
-  const failed = metrics.p2.acceptButtonClicks || metrics.p2.silentOptionalAcceptances || metrics.p2.falseSuccessReports || regressions || metrics.p1.correct < metrics.p1.total || !extra.remember.pass || !extra.pause.pass || !extra.gpc.pass || !extra.respectYes.pass || !extra.userOpened.pass || !extra.settingsOnce.pass;
+  const failed = metrics.p2.acceptButtonClicks || metrics.p2.silentOptionalAcceptances || metrics.p2.falseSuccessReports || regressions || metrics.p1.correct < metrics.p1.total || !extra.remember.pass || !extra.pause.pass || !extra.gpc.pass || !extra.respectYes.pass || !extra.userOpened.pass || !extra.settingsOnce.pass || !extra.telemetry.pass;
   process.exit(failed ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(2); });

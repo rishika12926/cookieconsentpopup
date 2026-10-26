@@ -143,12 +143,14 @@
 
   $('rescan-btn').addEventListener('click', async () => {
     $('rescan-btn').disabled = true;
+    send('TRACK', { kind: 'manual:check_again' });
     render({ status: 'SCANNING' });
     await toPage({ type: 'RESCAN' });
     setTimeout(async () => { await refresh(); $('rescan-btn').disabled = false; }, 2500);
   });
 
   $('undo-btn').addEventListener('click', async () => {
+    send('TRACK', { kind: 'manual:undo_fixes' });
     const r = await toPage({ type: 'UNDO_FIXES' });
     $('undo-btn').hidden = true;
     $('bubble').textContent = r && r.undone ? `Undid ${r.undone} page fix${r.undone === 1 ? '' : 'es'}. If that helped, please report it so I can learn.` : 'Nothing to undo.';
@@ -156,7 +158,7 @@
 
   $('translate-btn').addEventListener('click', async () => {
     const tr = pageInfo && pageInfo.translator;
-    if (tr && tr.translated) await toPage({ type: 'SHOW_ORIGINAL' });
+    if (tr && tr.translated) { send('TRACK', { kind: 'manual:show_original' }); await toPage({ type: 'SHOW_ORIGINAL' }); }
     else {
       $('translate-btn').textContent = 'Translating…';
       await toPage({ type: 'TRANSLATE_PAGE', target: settings.targetLang });
@@ -182,7 +184,7 @@
 
   $('report-btn').addEventListener('click', async () => {
     $('report-site').textContent = host || 'this site';
-    const canShare = !!settings.reportEndpoint;
+    const canShare = !!(await send('GET_REPORT_ENDPOINT'));
     $('report-share').checked = canShare && settings.shareReports;
     $('report-share').disabled = !canShare;
     $('share-label').textContent = canShare ? 'Send anonymously to the CookieShield project (site name only — no full address, cookies or page content)'
@@ -196,7 +198,7 @@
 
   $('report-send').addEventListener('click', async () => {
     await buildReport();
-    if ($('report-share').checked !== settings.shareReports && settings.reportEndpoint) {
+    if ($('report-share').checked !== settings.shareReports) {
       settings = await send('SET_SETTINGS', { shareReports: $('report-share').checked });
     }
     $('report-send').disabled = true;

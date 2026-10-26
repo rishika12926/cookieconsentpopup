@@ -10,6 +10,7 @@
  * Privacy: only whitelisted fields are kept. No IP addresses are stored or forwarded.
  */
 'use strict';
+const db = require('../lib/db');
 
 const ISSUE_TYPES = new Set(['banner_not_handled', 'wrong_choice', 'site_broken', 'translation', 'other']);
 const recent = new Map(); // best-effort, per warm instance: ip-hash -> timestamps
@@ -65,9 +66,23 @@ module.exports = async (req, res) => {
   }
 
   const token = process.env.GITHUB_TOKEN, repo = process.env.GITHUB_REPO;
-  if (!token || !repo) {
-    return res.status(503).json({ error: 'Report server not configured (set GITHUB_TOKEN and GITHUB_REPO on Vercel)' });
+  const hasDb = !!(process.env.DATABASE_URL || process.env.POSTGRES_URL || db.injected());
+  if (!hasDb && (!token || !repo)) {
+    return res.status(503).json({ error: 'Report server not configured (add Neon from the Vercel Marketplace, and/or set GITHUB_TOKEN and GITHUB_REPO)' });
   }
+  // 1. Save to the database (shown on the /admin dashboard).
+  let saved = false;
+  if (hasDb) {
+    try {
+      await db.query(`INSERT INTO reports (site, issue_type, cmp, status, reason, method, buttons, banner_lang, page_lang, site_type, health, comment, version, browser)
+        VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9,$10,$11::jsonb,$12,$13,$14)`,
+        [report.site, report.issueType, report.cmpId, report.status, report.reason, report.method, JSON.stringify(report.buttons),
+         report.bannerLang, report.pageLang, report.siteType, JSON.stringify(report.health || []), report.comment, report.extensionVersion, report.browser]);
+      saved = true;
+    } catch (e) { console.error('report insert failed', e.message); }
+  }
+  // 2. Optionally also file it as a GitHub issue.
+  if (!token || !repo) return saved ? res.status(201).json({ ok: true, saved }) : res.status(500).json({ error: 'Could not save the report' });
 
   const title = `[${report.issueType.replace(/_/g, ' ')}] ${report.site}${report.cmpId ? ` (${report.cmpId})` : ''}`;
   const lines = [
@@ -89,10 +104,11 @@ module.exports = async (req, res) => {
       headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json', 'User-Agent': 'cookieshield-report' },
       body: JSON.stringify({ title, body: lines, labels: ['site-report', report.issueType] })
     });
-    if (!gh.ok) return res.status(502).json({ error: `GitHub answered ${gh.status}` });
+    if (!gh.ok) return saved ? res.status(201).json({ ok: true, saved, github: `GitHub answered ${gh.status}` }) : res.status(502).json({ error: `GitHub answered ${gh.status}` });
     const issue = await gh.json();
-    return res.status(201).json({ ok: true, issueUrl: issue.html_url });
+    if (saved) { try { await db.query(`UPDATE reports SET github_url = $1 WHERE id = (SELECT max(id) FROM reports WHERE site = $2)`, [issue.html_url, report.site]); } catch (e) { /* ignore */ } }
+    return res.status(201).json({ ok: true, saved, issueUrl: issue.html_url });
   } catch (e) {
-    return res.status(502).json({ error: 'Could not reach GitHub' });
+    return saved ? res.status(201).json({ ok: true, saved, github: 'Could not reach GitHub' }) : res.status(502).json({ error: 'Could not reach GitHub' });
   }
 };

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Welcome to CookieShield</title>
+  <link rel="stylesheet" href="../shared/theme.css">
+  <style>
+    body { margin: 0; background: var(--ice); color: var(--ink); font-family: var(--font); }
+    main { max-width: 720px; margin: 40px auto; padding: 0 16px; }
+    .hero { display: flex; gap: 18px; align-items: center; }
+    h1 { font-size: 30px; margin: 0 0 6px; }
+    .lead { color: var(--muted); margin: 0; }
+    .card { padding: 22px 24px; margin-top: 18px; }
+    h2 { font-size: 18px; margin: 0 0 10px; }
+    .row { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; }
+    .row + .row { margin-top: 16px; padding-top: 16px; border-top: 1.5px solid var(--line); }
+    ul { margin: 8px 0 0; padding-left: 20px; } li { margin: 3px 0; }
+    .small { font-size: 13px; color: var(--muted); }
+    .never { background: var(--calm-bg); border-radius: 14px; padding: 12px 16px; margin-top: 14px; }
+    .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
+    a { color: var(--sky-deep); }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="hero"><div id="pip" aria-hidden="true"></div>
+      <div><h1>Hi, I’m Pip. Cookie pop-ups are my job now.</h1>
+        <p class="lead">I reject optional cookies for you, check the site really recorded your “no”, and tell you when I can’t. I never click “Accept”.</p></div></div>
+
+    <section class="card" aria-labelledby="h-data">
+      <h2 id="h-data">What I share with the person who makes me</h2>
+      <div class="row">
+        <div><b>Anonymous usage counts</b> <span class="small">(on — you can switch it off)</span>
+          <p class="small">Once a day: how many cookie banners I met, how many I rejected, how many I couldn’t, how often you stepped in (paused a site, reported a problem…), errors, how long it took, and the CookieShield and Chrome version. <b>Just numbers — no website names, no addresses, no ID that could tell you apart from anyone else.</b></p></div>
+        <label class="switch"><input type="checkbox" id="usage" checked><span></span></label>
+      </div>
+      <div class="row">
+        <div><b>Which websites show cookie banners</b> <span class="small">(off — only if you want to help)</span>
+          <p class="small">Once a day: the <b>website names only</b> (like “example.com”) where a cookie banner appeared, which consent tool it used and whether I managed. It helps fix the sites that don’t work yet. Website names can say something about you, so this stays off unless you turn it on, and you can turn it off again any time — anything not yet sent is deleted.</p></div>
+        <label class="switch"><input type="checkbox" id="sites"><span></span></label>
+      </div>
+      <div class="never small"><b>Never sent:</b> full web addresses, page titles, searches, anything you type, cookies, sign-ins, page content, or your browsing history. Problem reports are only sent when you press “Report a problem” and choose to share.</div>
+      <p class="small">You can see exactly what was sent, and change these choices, in <b>Dashboard → Settings → Privacy &amp; data</b>. <a id="privacy-link" href="#" target="_blank" rel="noopener">Privacy policy</a></p>
+      <div class="actions"><button class="btn primary" id="done">Save and start browsing</button></div>
+      <p class="small" id="saved" role="status"></p>
+    </section>
+  </main>
+  <script src="../shared/pip.js"></script>
+  <script src="welcome.js"></script>
+</body>
+</html>

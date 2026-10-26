@@ -269,17 +269,21 @@
       if (!input) continue;
       if (input.type === 'checkbox') input.checked = !!v; else input.value = v;
     }
+    // Transparency: the exact statistics payloads (today's draft and the last ones sent).
+    const pv = await send('TELEMETRY_PREVIEW');
+    $('sent-today').textContent = pv && Object.keys(pv.today || {}).length ? JSON.stringify(pv.today, null, 2) : (pv && !pv.prefs.usage && !pv.prefs.sites ? 'Sharing is off — nothing is collected.' : 'Nothing yet today.');
+    $('sent-last').textContent = pv && pv.lastSent && pv.lastSent.length ? JSON.stringify(pv.lastSent, null, 2) : (pv && pv.prefs.server ? 'Nothing sent yet.' : 'No server built into this copy, so nothing is ever sent.');
   }
   $('settings-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const f = e.target;
     const patch = {};
-    for (const k of ['enabled', 'showSuccess', 'shareReports', 'gpcSignal']) patch[k] = f.elements[k].checked;
-    for (const k of ['translateMode', 'targetLang', 'reportEndpoint', 'rulesEndpoint', 'repoUrl']) patch[k] = f.elements[k].value.trim();
-    for (const k of ['reportEndpoint', 'rulesEndpoint', 'repoUrl']) {
+    for (const k of ['enabled', 'showSuccess', 'shareReports', 'gpcSignal', 'usageStats', 'siteStats']) patch[k] = f.elements[k].checked;
+    for (const k of ['translateMode', 'targetLang', 'reportEndpoint', 'rulesEndpoint', 'repoUrl', 'serverUrl']) patch[k] = f.elements[k].value.trim();
+    for (const k of ['reportEndpoint', 'rulesEndpoint', 'repoUrl', 'serverUrl']) {
       if (patch[k] && !/^https:\/\//.test(patch[k])) { $('settings-saved').textContent = `${k}: please use an https:// address.`; return; }
     }
-    if (patch.shareReports && !patch.reportEndpoint) { $('settings-saved').textContent = 'Add a report server address to share reports.'; return; }
+    if (patch.shareReports && !patch.reportEndpoint && !(await send('GET_REPORT_ENDPOINT'))) { $('settings-saved').textContent = 'Add a report server address to share reports.'; return; }
     await send('SET_SETTINGS', patch);
     $('settings-saved').textContent = 'Saved ✓';
     setTimeout(() => { $('settings-saved').textContent = ''; }, 2500);

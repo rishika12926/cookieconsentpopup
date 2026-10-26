@@ -95,3 +95,8 @@ body { background: var(--ice); }
   .summary-row, .kpis, .grid2, .grid3 { grid-template-columns: 1fr; }
   .content { padding: 20px 16px; }
 }
+
+/* Privacy & data: "see exactly what is sent" */
+#sent-details { margin: 6px 0 14px; }
+#sent-details summary { cursor: pointer; font-weight: 700; color: var(--sky-deep); }
+#sent-details pre { background: var(--calm-bg); border-radius: 12px; padding: 10px 12px; max-height: 240px; overflow: auto; font-size: 12px; white-space: pre-wrap; word-break: break-word; }

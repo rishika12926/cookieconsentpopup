@@ -142,13 +142,28 @@
             <div><b>My language</b></div>
             <select name="targetLang" id="target-lang" aria-label="Target language"></select>
           </div>
+          <h2>Privacy &amp; data</h2>
+          <div class="row">
+            <div><b>Share anonymous usage counts</b><p class="small muted">Once a day, numbers only: banners met, rejected, not rejected, times you stepped in, errors, speed, versions. No website names, no addresses, no ID.</p></div>
+            <label class="switch"><input type="checkbox" name="usageStats"><span></span></label>
+          </div>
+          <div class="row">
+            <div><b>Share which websites show cookie banners</b><p class="small muted">Off unless you choose it. Once a day: website names only (like “example.com”), the consent tool and whether it worked. Turning it off deletes anything not yet sent.</p></div>
+            <label class="switch"><input type="checkbox" name="siteStats"><span></span></label>
+          </div>
+          <details class="small" id="sent-details"><summary>See exactly what is sent</summary>
+            <p class="muted">Today so far (sent tomorrow):</p><pre id="sent-today"></pre>
+            <p class="muted">Last sent:</p><pre id="sent-last"></pre>
+          </details>
+          <label class="field">Statistics &amp; report server <input name="serverUrl" placeholder="Built in — leave empty" inputmode="url"></label>
+
           <h2>Helping CookieShield learn new sites</h2>
           <div class="row">
             <div><b>Share anonymized problem reports</b><p class="small muted">Off by default. Only when you press “Report”. Sends the site name (no full address), the platform, button labels and what went wrong — never cookies, page content or anything about you.</p></div>
             <label class="switch"><input type="checkbox" name="shareReports"><span></span></label>
           </div>
-          <label class="field">Report server <input name="reportEndpoint" placeholder="https://your-project.vercel.app/api/report" inputmode="url"></label>
-          <label class="field">Rule updates <input name="rulesEndpoint" placeholder="https://your-project.vercel.app/rules/cmp-rules.json" inputmode="url"></label>
+          <label class="field">Report server <input name="reportEndpoint" placeholder="Built in — leave empty" inputmode="url"></label>
+          <label class="field">Rule updates <input name="rulesEndpoint" placeholder="Optional — e.g. https://your-site.vercel.app/rules/cmp-rules.json" inputmode="url"></label>
           <label class="field">GitHub repository (for “open as issue”) <input name="repoUrl" placeholder="https://github.com/you/cookieshield" inputmode="url"></label>
           <div class="save-row"><button class="btn primary" type="submit">Save settings</button><span id="settings-saved" class="small muted" role="status"></span></div>
         </form>

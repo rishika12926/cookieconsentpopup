@@ -4,6 +4,8 @@
  * opt-in anonymized reports and opt-in rule updates.
  */
 
+importScripts('telemetry.js');
+
 const DEFAULT_SETTINGS = {
   enabled: true,
   pausedSites: [],
@@ -18,7 +20,11 @@ const DEFAULT_SETTINGS = {
   // Global Privacy Control. OFF by default: sites that honour it (e.g. iubenda) lock their
   // sale/sharing toggles OFF so you can't switch them back on from the site. Opt-in only.
   // (Renamed from sendGPC, which was on by default in 2.1 — that old value is ignored.)
-  gpcSignal: false
+  gpcSignal: false,
+  // Anonymous statistics (see background/telemetry.js and the privacy policy).
+  usageStats: true,                // A: daily counts only — on by default, disclosed on install
+  siteStats: false,                // B: which domains show banners — opt-in only
+  serverUrl: ''                    // empty = the address built into this copy (config.json)
 };
 
 const HISTORY_MAX = 1000;
@@ -75,8 +81,13 @@ async function syncGPC() {
 chrome.runtime.onStartup.addListener(syncGPC);
 chrome.storage.onChanged.addListener((changes, area) => { if (area === 'sync' && changes.settings) syncGPC(); });
 
-chrome.runtime.onInstalled.addListener(async () => {
+chrome.runtime.onInstalled.addListener(async (details) => {
   const cur = await getSettings();
+  if (details && details.reason === 'install') {
+    Telemetry.count('installs');
+    // Tell people up front what CookieShield does and what it sends (Chrome Web Store policy).
+    chrome.tabs.create({ url: chrome.runtime.getURL('welcome/welcome.html') }).catch(() => {});
+  } else if (details && details.reason === 'update') Telemetry.count('updates');
   delete cur.sendGPC;                       // 2.1 default-on value: drop it, GPC is now opt-in
   // 2.7: translate automatically by default (asked for by the person). Applied once on update.
   if (!cur.autoTranslateDefault) { cur.translateMode = 'auto'; cur.autoTranslateDefault = true; }
@@ -90,6 +101,7 @@ chrome.runtime.onInstalled.addListener(async () => {
   if (!local.reports) init.reports = [];
   await chrome.storage.local.set(init);
   chrome.alarms.create('rules-refresh', { periodInMinutes: 24 * 60, delayInMinutes: 1 });
+  chrome.alarms.create('telemetry-flush', { periodInMinutes: 60, delayInMinutes: 2 });
 });
 
 function emptyMetrics() {
@@ -209,6 +221,7 @@ async function recordOutcome(p, tabId) {
   siteMemory[p.site] = mem;
 
   await chrome.storage.local.set({ history, metrics, siteMemory });
+  Telemetry.onOutcome(o, p);
   entry.tabId = tabId;
   return entry;
 }
@@ -227,6 +240,14 @@ async function updateLastHistory(site, patch) {
 
 // ------------------------------------------------------------------------------------------
 // Reports (opt-in, anonymized). Hostname only — never full URLs, cookies, or page content.
+/** Where reports go: the Settings value, else <server>/api/report for the built-in server. */
+async function reportEndpoint(s) {
+  if (s.reportEndpoint) return s.reportEndpoint;
+  if (s.serverUrl) return `${String(s.serverUrl).replace(/\/+$/, '')}/api/report`;
+  try { const c = await (await fetch(chrome.runtime.getURL('config.json'))).json(); return c.server ? `${c.server.replace(/\/+$/, '')}/api/report` : ''; }
+  catch (e) { return ''; }
+}
+
 async function submitReport(report, sender) {
   const s = await getSettings();
   const clean = {
@@ -246,10 +267,12 @@ async function submitReport(report, sender) {
   if (/broken|regression|scroll|login|form|navigation/.test(clean.issueType)) await bumpMetric(m => { m.userRegressions++; });
   if (clean.issueType === 'wrong_choice') await bumpMetric(m => { m.falseSuccessReports++; });
 
+  Telemetry.event('manual:reported');
   let sent = false, error = null;
-  if (s.shareReports && s.reportEndpoint) {
+  const endpoint = await reportEndpoint(s);
+  if (s.shareReports && endpoint) {
     try {
-      const res = await fetch(s.reportEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(clean) });
+      const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(clean) });
       sent = res.ok;
       if (!res.ok) error = `Server answered ${res.status}`;
       else { try { const j = await res.json(); clean.issueUrl = j.issueUrl || null; } catch (e) { /* ignore */ } }
@@ -287,7 +310,13 @@ async function refreshRules() {
     return { ok: false, reason: String(e.message || e) };
   }
 }
-chrome.alarms.onAlarm.addListener(a => { if (a.name === 'rules-refresh') refreshRules(); });
+chrome.alarms.onAlarm.addListener(a => {
+  if (a.name === 'rules-refresh') refreshRules();
+  if (a.name === 'telemetry-flush') Telemetry.flush();
+});
+chrome.runtime.onStartup.addListener(() => { chrome.alarms.create('telemetry-flush', { periodInMinutes: 60, delayInMinutes: 2 }); Telemetry.flush(); });
+self.addEventListener('error', () => Telemetry.event('error:background'));
+self.addEventListener('unhandledrejection', () => Telemetry.event('error:background'));
 
 let bundledRules = null;
 async function getPageRules() {
@@ -347,6 +376,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         return { ok: true };
 
       case 'FALSE_SUCCESS':
+        Telemetry.count('false_success');
         if (tabId != null) updateTab(tabId, frameId, { status: p.outcome.status, outcome: p.outcome });
         await bumpMetric(m => {
           m.falseSuccessReports++;
@@ -362,6 +392,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         siteMemory[p.site] = mem;
         await chrome.storage.local.set({ siteMemory });
         if (tabId != null) updateTab(tabId, 0, { status: 'HIDDEN_BY_YOU' });
+        Telemetry.event('manual:hid_banner');
         await updateLastHistory(p.site, { userHid: true, hideAlways: !!p.always });
         return { ok: true };
       }
@@ -370,11 +401,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const s = await getSettings();
         const set = new Set(s.pausedSites);
         if (p.paused) set.add(p.site); else set.delete(p.site);
+        Telemetry.event(p.paused ? 'manual:paused' : 'manual:resumed');
         await setSettings({ pausedSites: [...set] });
         return { ok: true, paused: !!p.paused };
       }
 
       case 'FORGET_SITE': {
+        Telemetry.event('manual:forgot_site');
         const { siteMemory } = await chrome.storage.local.get({ siteMemory: {} });
         delete siteMemory[p.site];
         await chrome.storage.local.set({ siteMemory });
@@ -385,6 +418,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         // A site already had a choice stored (no banner). Log it — once per site every 12 h.
         const { history, siteMemory } = await chrome.storage.local.get({ history: [], siteMemory: {} });
         const mem = siteMemory[p.site] || null;
+        Telemetry.onRemembered({ ...p, cmpId: (mem && mem.cmpId) || null });
         const origin = mem && mem.lastRejection ? mem.lastRejection : null;
         const recent = history.find(h => h.site === p.site);
         const fresh = recent && recent.status === p.status && recent.kind === 'visit' && Date.now() - Date.parse(recent.at) < 12 * 3600 * 1000;
@@ -443,11 +477,34 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       case 'REFRESH_RULES':
         return refreshRules();
 
+      case 'GET_REPORT_ENDPOINT':
+        return reportEndpoint(await getSettings());
+
       case 'GET_SETTINGS':
         return getSettings();
 
-      case 'SET_SETTINGS':
+      case 'SET_SETTINGS': {
+        // Withdrawing consent deletes anything not yet sent.
+        if (p.usageStats === false && p.siteStats !== true) await Telemetry.forget();
+        else if (p.siteStats === false) await Telemetry.forget({ sitesOnly: true });
         return setSettings(p);
+      }
+
+      case 'TRACK':
+        // Manual interventions from the popup / pages, and translated pages.
+        if (p.kind === 'translated') Telemetry.count('translated');
+        else if (/^manual:/.test(p.kind || '')) Telemetry.event(p.kind);
+        return { ok: true };
+
+      case 'TRACK_ERROR':
+        Telemetry.event(`error:${String(p.kind || 'unknown').replace(/[^\w.-]/g, '_').slice(0, 40)}`);
+        return { ok: true };
+
+      case 'TELEMETRY_PREVIEW':
+        return Telemetry.preview();
+
+      case 'TELEMETRY_FLUSH':
+        return Telemetry.flush({ includeToday: !!p.includeToday });
 
       case 'RESET_METRICS':
         await chrome.storage.local.set({ metrics: emptyMetrics() });

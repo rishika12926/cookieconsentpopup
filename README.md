@@ -84,7 +84,7 @@ Requires Chrome 120 or later. Page translation uses Chrome's built-in on-device 
 ```bash
 npm install                          # installs Playwright
 npx playwright install chromium      # first time only
-npm test                             # unit tests: 362 lexicon/rule checks + report API
+npm test                             # unit, report API, translator and real-Postgres server tests
 npm run test:e2e                     # real Chromium with the extension loaded, 59 scenarios
 ```
 The end-to-end run writes `tests/results/e2e-report.md` and `.json` with all three metrics. Latest run:
@@ -132,28 +132,57 @@ git push -u origin main
 ```
 GitHub Actions (`.github/workflows/ci.yml`) then runs the unit and end-to-end tests on every push. Pushing a tag (`git tag v2.0.0 && git push --tags`) creates a GitHub Release with the extension zip attached.
 
-## Host on Vercel
+## Host on Vercel (production)
 
-1. Go to **https://vercel.com/new** and sign in with GitHub.
-2. **Import** your `cookieshield` repo. Vercel reads `vercel.json`, so keep the defaults (no framework, build command `node scripts/build-web.js`, output directory `public`).
-3. Click **Deploy**. You get a site like `https://cookieshield-<you>.vercel.app` with:
-   - `/`: the landing page and the **Download the extension** button (the zip is built from `extension/` on every deploy)
-   - `/playground/`: the test bench
-   - `/report`: the problem-report form
-   - `/rules/cmp-rules.json`: the rule-update feed
-   - `/api/report`: the endpoint for anonymized reports
-4. *(Optional: turn reports into GitHub issues.)* In Vercel, open **Project → Settings → Environment Variables** and add:
-   - `GITHUB_TOKEN`: a fine-grained token with **Issues: Read and write** on this repo only
-   - `GITHUB_REPO`: `<your-username>/cookieshield`
+You need a **database**, because Vercel functions keep nothing between requests and the statistics, reports and download counts have to be stored somewhere. CookieShield uses **Postgres on Neon**. You add it from Vercel's Marketplace in two clicks, it has a free plan (no card needed), and it connects itself to your project.
 
-   Redeploy. Without these variables, reports are still accepted and logged, but no issue is created.
-5. In the extension, open **Dashboard → Settings → Helping CookieShield learn new sites**. Set **Report server** to `https://<your-site>/api/report` and turn on sharing (opt-in).
+### 1. Deploy the site
+1. Go to **https://vercel.com/new**, sign in with GitHub and **Import** `cookieconsentpopup`.
+2. Keep the defaults. `vercel.json` already sets the build (`node scripts/build-web.js`), the output folder (`public`) and the install step.
+3. Click **Deploy**.
 
-Every push to `main` redeploys automatically.
+### 2. Add the database
+1. In your Vercel project, open **Storage → Create Database → Neon (Postgres)**, choose the free plan and a region near your users, and connect it to the project.
+2. Vercel adds `DATABASE_URL` for you. The tables are created automatically on the first request. There's nothing to run.
 
-Using the CLI instead: `npm i -g vercel && vercel` from this folder, then `vercel --prod`.
+### 3. Set your owner password
+In **Project → Settings → Environment Variables**, add:
+- `ADMIN_TOKEN`: a long random password (16+ characters). It unlocks your dashboard at `https://<your-site>/admin`.
+- *(optional)* `GITHUB_TOKEN` (fine-grained, **Issues: Read and write** on this repo only) and `GITHUB_REPO` = `rishika12926/cookieconsentpopup`. With these, every problem report also becomes a GitHub issue.
 
----
+Then **redeploy** (Deployments → ⋯ → Redeploy) so the variables take effect.
+
+### 4. What you get
+| Address | What it is |
+|---|---|
+| `/` | Landing page with the **Download** button (downloads are counted) |
+| `/admin` | **Your dashboard**: downloads, installs, active installs per day, banners, success rate, failures, manual interventions, errors, speed; opt-in sites and platforms; reported problems |
+| `/privacy` | Privacy policy (required for the Chrome Web Store) |
+| `/playground/` | Test bench |
+| `/api/usage`, `/api/sites`, `/api/report`, `/api/download`, `/api/stats` | The endpoints the extension and dashboard use |
+
+The extension zip built on Vercel has your site's address baked in (`config.json`), so installed copies know where to send statistics. A copy loaded from the repo folder sends nothing unless you set a server under **Settings → Privacy & data**.
+
+### 5. Publish on the Chrome Web Store (recommended for real users)
+1. Register at the [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole) (one-time fee).
+2. Upload `cookieshield-extension.zip` from your Vercel site (`/download/cookieshield-extension.zip`).
+3. Under **Privacy**, fill in:
+   - **Single purpose:** "Rejects optional cookies on cookie consent pop-ups."
+   - **Permissions:** `<all_urls>` to find banners on any site; `declarativeNetRequest`/`scripting` for the optional Global Privacy Control signal.
+   - **Data usage:** tick *Website content* only if you count the opt-in site names, and certify the Limited Use statement.
+   - **Privacy policy URL:** `https://<your-site>/privacy`.
+4. The Web Store dashboard then also shows official install and uninstall counts next to your `/admin` numbers.
+
+## What the owner can see (and what nobody can)
+
+| | Collected? | How |
+|---|---|---|
+| **A. Usage counts:** installed/active, banners met, rejections, failures or uncertain outcomes, manual interventions, errors, handling time | **On by default**, shown on the welcome page, can be switched off | One summary per day: numbers, extension version and Chrome major version only. No install ID: the server only adds numbers up. |
+| **B. Website stats:** domains with banners, consent platform, repeated failures, remembered on the next visit | **Opt-in only**, can be withdrawn any time (pending data is deleted) | One summary per day: domain names only (`example.com`), platform and outcome counts. |
+| **Problem reports** | When the person presses **Send** | Site name, problem type, comment, platform, result, button labels and versions, all previewed first. |
+| **C. Never:** full URLs, page titles, search terms, query strings, unrelated browsing history, cookies, tokens, page content, persistent identifiers | Never | Enforced in the extension, and again by the server, which rejects anything else. Tested end to end. |
+
+Users can see exactly what was sent under **Dashboard → Settings → Privacy & data → See exactly what is sent**.
 
 ## Project layout
 
@@ -161,6 +190,8 @@ Using the CLI instead: `npm i -g vercel && vercel` from this folder, then `verce
 extension/                 the Chrome extension (load this folder)
   manifest.json
   background/service-worker.js   history, per-site memory, badge, stats, reports, rule updates
+  background/telemetry.js        anonymous daily statistics (A on by default, B opt-in)
+  welcome/                 first-run page: what CookieShield does and shares
   content/
     page-bridge.js         reads consent platforms' own APIs (__tcfapi, OneTrust, Cookiebot…) for verification
     lexicon.js             25+ language vocabulary for reject / accept / settings / save / pay
@@ -174,16 +205,17 @@ extension/                 the Chrome extension (load this folder)
     content.js             orchestrator
   popup/  options/  shared/      Pip, the pop-up, dashboard (history, stats, sites, platforms, reports, settings)
   rules/cmp-rules.json     support matrix (data only)
-web/                       landing page, test bench (playground/) and report form
-api/report.js              Vercel serverless function for reports → GitHub issues
+web/                       landing page, owner dashboard (admin), privacy policy, test bench (playground/), report form
+api/                       Vercel functions: usage, sites, report, download, stats (owner dashboard)
+lib/                       database (Neon Postgres) and request helpers
 scripts/build-web.js       builds public/ (site + extension zip + rules feed)
 tests/                     unit tests, API tests, end-to-end suite, UI screenshots
 ```
 
 ## Privacy
-- Everything runs on your computer. History, settings and site memory are stored in Chrome's extension storage.
-- No analytics, no tracking, and no network calls unless you turn on reports or rule updates.
-- Reports contain the hostname, platform, button labels and result only.
+- History, settings and site memory stay in Chrome's extension storage on your computer.
+- Anonymous daily usage counts are sent by default (switch off in Settings). Website names are sent only if you opt in. See the table above and `/privacy`.
+- Reports contain the hostname, platform, button labels and result only, and are sent only when you choose to.
 - Translation uses Chrome's on-device model, so page text never leaves your computer.
 
 ## Limits worth knowing

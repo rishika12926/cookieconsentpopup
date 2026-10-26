@@ -8,7 +8,20 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
+    services:
+      postgres:            # real Postgres for tests/server.test.js (same SQL as Neon in production)
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_PG_HOST: localhost
+      TEST_PG_PORT: '5432'
+      TEST_PG_USER: postgres
+      TEST_PG_PASSWORD: postgres
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -16,7 +29,7 @@ jobs:
           node-version: 22
       - run: npm install
       - run: npx playwright install --with-deps chromium
-      - name: Unit tests (lexicon safety, rules, report API)
+      - name: Unit, API, translator and database tests
         run: npm test
       - name: End-to-end tests (real Chromium + extension, measures P1/P2/P3)
         run: npm run test:e2e

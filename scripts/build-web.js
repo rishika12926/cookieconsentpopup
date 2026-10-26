@@ -35,13 +35,13 @@ function listFiles(dir, base = dir) {
 const CRC_TABLE = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
 function crc32(buf) { let c = 0xffffffff; for (let i = 0; i < buf.length; i++) c = CRC_TABLE[(c ^ buf[i]) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; }
 
-function zip(dir, prefix) {
+function zip(dir, prefix, overrides = {}) {
   const files = listFiles(dir);
   const chunks = [], central = [];
   let offset = 0;
   const dosTime = 0, dosDate = (2026 - 1980) << 9 | 10 << 5 | 24;
   for (const rel of files) {
-    const data = fs.readFileSync(path.join(dir, rel));
+    const data = overrides[rel] ? Buffer.from(overrides[rel]) : fs.readFileSync(path.join(dir, rel));
     const comp = zlib.deflateRawSync(data, { level: 9 });
     const name = Buffer.from(`${prefix}/${rel}`);
     const crc = crc32(data);
@@ -69,7 +69,12 @@ copyDir(path.join(ROOT, 'web'), OUT);
 copyDir(path.join(ROOT, 'extension', 'rules'), path.join(OUT, 'rules'));
 fs.mkdirSync(path.join(OUT, 'download'), { recursive: true });
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'extension', 'manifest.json'), 'utf8'));
-fs.writeFileSync(path.join(OUT, 'download', 'cookieshield-extension.zip'), zip(path.join(ROOT, 'extension'), 'cookieshield-extension'));
+// The statistics/report server built into the downloadable extension: your production site on
+// Vercel (VERCEL_PROJECT_PRODUCTION_URL), or CS_SERVER_URL to override. Empty = never sends.
+const prodHost = process.env.CS_SERVER_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : '');
+const configJson = JSON.stringify({ server: prodHost.replace(/\/+$/, '') }, null, 2) + '\n';
+fs.writeFileSync(path.join(OUT, 'download', 'cookieshield-extension.zip'), zip(path.join(ROOT, 'extension'), 'cookieshield-extension', { 'config.json': configJson }));
+console.log(`Extension zip: statistics server = ${prodHost || '(none — this zip never sends anything)'}`);
 fs.writeFileSync(path.join(OUT, 'version.json'), JSON.stringify({ version: manifest.version, builtAt: new Date().toISOString() }, null, 2));
 fs.copyFileSync(path.join(ROOT, 'extension', 'icons', 'icon128.png'), path.join(OUT, 'icon.png'));
 // Latest automated test metrics (committed by `npm run test:e2e`), shown on the landing page.

@@ -39,6 +39,9 @@
     return { code: state.pageLang, name: langName(state.pageLang), declared: attr || null, detected, reliable };
   }
 
+  // Anonymous counters (see background/telemetry.js): only "a page was translated" or an error kind.
+  function track(type, payload) { try { chrome.runtime.sendMessage({ type, payload }).catch(() => {}); } catch (e) { /* tests / no extension */ } }
+
   function apiAvailable() { return typeof Translator !== 'undefined'; }
 
   async function availability(target) {
@@ -213,15 +216,17 @@
           : 'no text to translate';
         console.warn('[CookieShield] translation produced no changes', { why, lastError, sample: state.sample, firstTry: state.firstTry, pageLang: state.pageLang, target });
         bar('failed', why);
+        track('TRACK_ERROR', { kind: lastError ? `translate_${String(lastError.name || 'error').slice(0, 20)}` : 'translate_no_change' });
         return { ok: false, reason: why };
       }
       state.translated = true;
       bar('done');
+      track('TRACK', { kind: 'translated' });
       return { ok: true, count: state.count, failed: state.failed, engine: state.engine };
     } catch (e) {
       stopObserver();
       const notAllowed = String(e && e.name) === 'NotAllowedError';
-      if (!notAllowed) { console.warn('[CookieShield] translation failed', e); bar('failed', String(e && e.name || e)); }
+      if (!notAllowed) { console.warn('[CookieShield] translation failed', e); bar('failed', String(e && e.name || e)); track('TRACK_ERROR', { kind: `translate_${String(e && e.name || 'error').slice(0, 20)}` }); }
       return { ok: false, reason: notAllowed ? 'needs-gesture' : String(e && e.message || e) };
     } finally {
       state.busy = false;

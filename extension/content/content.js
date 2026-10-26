@@ -149,6 +149,7 @@
       await finish(outcome, det);
     } catch (e) {
       console.warn('[CookieShield] scan error', e);
+      send('TRACK_ERROR', { kind: 'scan' });
     } finally {
       busy = false;
     }
@@ -257,7 +258,7 @@
         // If there is no opt-out link at all, tell the popup but don't interrupt the page.
         outcome.quiet = v.status === 'NEEDS_YOU' && v.reason === 'US_OPTOUT_NOT_FOUND';
         await finish(outcome, null);
-      } catch (e) { console.warn('[CookieShield] US opt-out error', e); }
+      } catch (e) { console.warn('[CookieShield] US opt-out error', e); send('TRACK_ERROR', { kind: 'us_optout' }); }
       finally { busy = false; }
       return;
     }
@@ -420,7 +421,7 @@
             await finish(r, null);
           }
         }
-      } catch (e) { console.warn('[CookieShield] settings page error', e); }
+      } catch (e) { console.warn('[CookieShield] settings page error', e); send('TRACK_ERROR', { kind: 'settings_page' }); }
     })();                       // runs alongside banner handling; never delays it
     scan();
     startObserving();
