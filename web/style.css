@@ -115,3 +115,15 @@ footer.site .wrap { display: flex; gap: 16px; flex-wrap: wrap; justify-content: 
 .is-mobile .mobile-only { display: inline-flex !important; }
 .is-mobile .desktop-only { display: none !important; }
 .empty { color: var(--muted); font-size: 15px; padding: 12px 0; }
+
+/* "What you'll see" screenshots */
+.shots { display: grid; gap: 16px; margin-top: 18px; }
+.shots.pop { grid-template-columns: repeat(4, 1fr); align-items: start; }
+.shots.wide { grid-template-columns: repeat(3, 1fr); }
+.shots figure { margin: 0; background: var(--snow); border: 1.5px solid var(--line); border-radius: 18px; padding: 12px; box-shadow: var(--shadow-sm); }
+.shots.pop figure img { width: 100%; height: 420px; object-fit: cover; object-position: top; border-radius: 12px; display: block; }
+.shots.wide figure img { width: 100%; height: auto; border-radius: 10px; display: block; }
+.shots figcaption { font-size: 14px; color: var(--muted); margin-top: 10px; line-height: 1.45; }
+.shots figcaption b { display: block; color: var(--ink); font-size: 15.5px; }
+@media (max-width: 900px) { .shots.pop { grid-template-columns: repeat(2, 1fr); } .shots.wide { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .shots.pop figure img { height: 320px; } }
