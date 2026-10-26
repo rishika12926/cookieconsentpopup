@@ -66,7 +66,7 @@ module.exports = async (req, res) => {
   }
 
   const token = process.env.GITHUB_TOKEN, repo = process.env.GITHUB_REPO;
-  const hasDb = !!(process.env.DATABASE_URL || process.env.POSTGRES_URL || db.injected());
+  const hasDb = !!(process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.STORAGE_URL || process.env.NEON_DATABASE_URL || db.injected());
   if (!hasDb && (!token || !repo)) {
     return res.status(503).json({ error: 'Report server not configured (add Neon from the Vercel Marketplace, and/or set GITHUB_TOKEN and GITHUB_REPO)' });
   }
