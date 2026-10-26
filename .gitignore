@@ -6,3 +6,4 @@ Thumbs.db
 *.log
 tests/results/screens/
 extension/_metadata/
+store/*.zip

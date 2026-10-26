@@ -164,14 +164,10 @@ Then **redeploy** (Deployments → ⋯ → Redeploy) so the variables take effec
 The extension zip built on Vercel has your site's address baked in (`config.json`), so installed copies know where to send statistics. A copy loaded from the repo folder sends nothing unless you set a server under **Settings → Privacy & data**.
 
 ### 5. Publish on the Chrome Web Store (recommended for real users)
-1. Register at the [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole) (one-time fee).
-2. Upload `cookieshield-extension.zip` from your Vercel site (`/download/cookieshield-extension.zip`).
-3. Under **Privacy**, fill in:
-   - **Single purpose:** "Rejects optional cookies on cookie consent pop-ups."
-   - **Permissions:** `<all_urls>` to find banners on any site; `declarativeNetRequest`/`scripting` for the optional Global Privacy Control signal.
-   - **Data usage:** tick *Website content* only if you count the opt-in site names, and certify the Limited Use statement.
-   - **Privacy policy URL:** `https://<your-site>/privacy`.
-4. The Web Store dashboard then also shows official install and uninstall counts next to your `/admin` numbers.
+1. Run `npm run build:store`. It writes `store/cookieshield-store-v<version>.zip` with `manifest.json` at the zip root (the store's format) and your production server baked in.
+2. Register at the [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole) (one-time fee), click **New item** and upload that zip.
+3. Copy the listing text, permission justifications and privacy answers from [`store/LISTING.md`](store/LISTING.md), and upload the images in `store/assets/` (re-render them with `npm run screens && node scripts/store-images.js`).
+4. Submit for review. Once approved, point the website's download buttons at the store link. The dashboard then also shows official install and uninstall counts next to your `/admin` numbers.
 
 ## What the owner can see (and what nobody can)
 
