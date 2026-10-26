@@ -94,6 +94,17 @@ const ok = (c, m) => { if (!c) { failures++; console.log('✗', m); } else conso
     ok(r.ok && r.engine === 'page' && /Your role/.test(text) && !/Jouw rol/.test(text), 'when the extension translator hands text back unchanged, the page’s on-device translator is used (ridder.com)');
     await page.close();
   }
+  // 7: ridder.com marks the whole page "do not translate" — translate anyway; keep marked bits
+  {
+    const page = await browser.newPage();
+    await page.setContent(HTML.replace('<html lang="nl">', '<html lang="nl" translate="no"><head><meta name="google" content="notranslate"></head>').replace('<h2>Jouw rol</h2>', '<h2>Jouw rol</h2><span translate="no">Over ons</span>'));
+    await setup(page); await page.addScriptTag({ content: SRC });
+    const r = await page.evaluate(() => window.CookieShieldTranslator.translatePage('en'));
+    const kept = await page.evaluate(() => document.querySelector('span[translate="no"]').textContent);
+    const text = await page.evaluate(() => document.body.innerText);
+    ok(r.ok && /Your role/.test(text) && kept === 'Over ons', 'a site-wide “do not translate” flag (ridder.com) is ignored; parts marked individually stay as they are');
+    await page.close();
+  }
   await browser.close();
   console.log(failures ? `translator: ${failures} FAILED` : 'translator: all checks passed');
   process.exit(failures ? 1 : 0);

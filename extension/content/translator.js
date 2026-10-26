@@ -53,12 +53,27 @@
     } catch (e) { return 'unsupported'; }
   }
 
+  /**
+   * Respect "don't translate" marks on specific parts of a page (brand names, code, addresses),
+   * but NOT a site-wide <html translate="no"> / <meta name="google" content="notranslate">:
+   * sites such as ridder.com set that to block Google Translate, and you asked for translation.
+   */
+  function keepOriginal(el) {
+    for (let n = el; n && n !== document.body && n !== document.documentElement; n = n.parentElement) {
+      const t = n.getAttribute && n.getAttribute('translate');
+      if (t === 'yes') return false;
+      if (t === 'no' || (n.classList && n.classList.contains('notranslate'))) return true;
+    }
+    return false;
+  }
+
   function collectTextNodes(root) {
     const out = [];
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
       acceptNode(n) {
         const p = n.parentElement;
-        if (!p || SKIP.has(p.tagName) || p.closest('[contenteditable=""], [contenteditable="true"], #cookieshield-ui-host, #cookieshield-translate-host, [translate="no"], .notranslate')) return NodeFilter.FILTER_REJECT;
+        if (!p || SKIP.has(p.tagName) || p.closest('[contenteditable=""], [contenteditable="true"], #cookieshield-ui-host, #cookieshield-translate-host')) return NodeFilter.FILTER_REJECT;
+        if (keepOriginal(p)) return NodeFilter.FILTER_REJECT;
         const t = n.nodeValue;
         if (!t || t.trim().length < 2 || !/\p{L}/u.test(t)) return NodeFilter.FILTER_REJECT;
         if (state.originals.has(n)) return NodeFilter.FILTER_REJECT;
