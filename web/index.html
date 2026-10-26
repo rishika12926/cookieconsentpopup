@@ -9,26 +9,29 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+  <div class="mobile-banner" role="note">CookieShield works only on a <b>laptop or desktop</b> (Chrome, Edge, Brave or Arc). It can’t be installed on phones or iPads.</div>
   <nav class="nav">
     <div class="wrap">
       <a class="logo" href="/"><img src="/icon.png" alt="">CookieShield</a>
       <a class="link opt" href="#promises">How it works</a>
       <a class="link" href="/playground/">Test bench</a>
       <a class="link opt" href="/report">Report a site</a>
-      <a class="btn small primary" href="/install">Install</a>
+      <a class="btn small primary desktop-only" href="/install">Install</a>
     </div>
   </nav>
 
   <header class="hero">
     <div class="wrap">
       <div>
-        <span class="eyebrow">Chrome extension · free &amp; open source</span>
+        <span class="eyebrow">Chrome extension for laptops &amp; desktops · free &amp; open source</span>
         <h1>Cookie pop-ups, <em>politely declined.</em></h1>
         <p class="lead">CookieShield clicks “Reject” for you, checks that the site actually recorded your “no”, and tells you when it can’t. It never clicks “Accept” just to make a banner go away.</p>
         <div class="cta">
-          <a class="btn primary" href="/install">Install CookieShield</a>
+          <a class="btn primary desktop-only" href="/install">Install CookieShield</a>
+          <button class="btn primary mobile-only" type="button" data-share-install>Send the link to my laptop</button>
           <a class="btn" href="/playground/">Try the test bench</a>
         </div>
+        <p class="platform-note">💻 Laptop &amp; desktop only · Chrome, Edge, Brave or Arc · not available on phones or iPads</p>
       </div>
       <div class="hero-art">
         <div class="floe"></div>
@@ -119,7 +122,9 @@
       <div>
         <h2>Install in two minutes</h2>
         <p class="sub">CookieShield isn’t in the Chrome Web Store yet, so you add it yourself. The install guide shows exactly where to click, with a picture for every step. It also works in Edge, Brave, Arc and other Chromium browsers.</p>
-        <a class="btn primary" href="/install">Open the step-by-step guide</a>
+        <a class="btn primary desktop-only" href="/install">Open the step-by-step guide</a>
+        <button class="btn primary mobile-only" type="button" data-share-install>Send the link to my laptop</button>
+        <p class="platform-note">💻 Laptop &amp; desktop only · Chrome, Edge, Brave or Arc · not available on phones or iPads</p>
       </div>
       <ol class="steps">
         <li>Unzip the download. You’ll get a folder called <code>cookieshield-extension</code>.</li>
@@ -146,6 +151,7 @@
     </div>
   </footer>
 
+  <script src="/platform.js"></script>
   <script src="/pip.js"></script>
   <script>
     document.getElementById('hero-pip').innerHTML = PipArt('happy');

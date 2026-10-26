@@ -105,3 +105,11 @@ footer.site .wrap { display: flex; gap: 16px; flex-wrap: wrap; justify-content: 
 .form label { display: grid; gap: 4px; font-weight: 800; font-size: 14px; }
 .form input, .form select, .form textarea { font: inherit; padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--ice); color: var(--ink); }
 .note { font-size: 13.5px; color: var(--muted); }
+
+/* Laptop/desktop only: always-visible note, plus a stronger banner and swapped buttons on phones and tablets */
+.platform-note { display: inline-flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 700; color: var(--ink); background: var(--snow); border: 1.5px solid var(--line); border-radius: 14px; padding: 10px 14px; margin: 14px 0 0; }
+.mobile-banner { display: none; background: #fff1e2; color: #7a3e06; border-bottom: 1.5px solid #f4c9a0; padding: 12px 16px; font-weight: 700; font-size: 15px; text-align: center; line-height: 1.45; }
+.mobile-only { display: none !important; }
+.is-mobile .mobile-banner { display: block; }
+.is-mobile .mobile-only { display: inline-flex !important; }
+.is-mobile .desktop-only { display: none !important; }

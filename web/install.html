@@ -14,6 +14,7 @@
     .warn.show { display: block; }
     .step { scroll-margin-top: 84px; background: var(--snow); border: 1.5px solid var(--line); border-radius: 22px; padding: 22px 24px; margin-top: 16px; box-shadow: var(--shadow-sm); }
     .step.done { border-color: var(--ok); }
+    .is-mobile .step { opacity: .55; }
     .step-head { display: flex; align-items: center; gap: 14px; }
     .num { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--pale); color: var(--navy); font-weight: 900; font-size: 18px; display: grid; place-items: center; }
     .step.done .num { background: var(--ok); color: #fff; }
@@ -33,6 +34,7 @@
   </style>
 </head>
 <body>
+  <div class="mobile-banner" role="note">CookieShield works only on a <b>laptop or desktop</b> (Chrome, Edge, Brave or Arc). It can’t be installed on phones or iPads.</div>
   <nav class="nav">
     <div class="wrap">
       <a class="logo" href="/"><img src="/icon.png" alt="">CookieShield</a>
@@ -44,13 +46,14 @@
   <main class="wrap guide">
     <h1>Install CookieShield</h1>
     <p class="sub">About 2 minutes. Follow the pictures and tick each step as you go.</p>
-    <p class="warn" id="warn-phone">You’re on a phone or tablet. Chrome extensions only work on a laptop or desktop, so open this page there: <b>cookieconsentpopup.vercel.app/install</b></p>
+    <p class="platform-note">💻 Laptop &amp; desktop only · Chrome, Edge, Brave or Arc · not available on phones or iPads</p>
+    <div class="warn" id="warn-phone"><p style="margin:0 0 10px">You’re on a phone or tablet. CookieShield <b>can’t be installed on phones or iPads</b>: Chrome extensions only work on a laptop or desktop. Open this page there: <b>cookieconsentpopup.vercel.app/install</b></p><button class="btn primary mobile-only" type="button" data-share-install>Send the link to my laptop</button></div>
     <p class="warn" id="warn-browser">This doesn’t look like Chrome. CookieShield works in Chrome, Edge, Brave and Arc. Open this page in one of them.</p>
 
     <section class="step" data-step="1">
       <div class="step-head"><span class="num">1</span><h2>Download it</h2></div>
       <div class="body">
-        <p><a class="btn primary" id="dl" href="/api/download">Download CookieShield</a></p>
+        <p><a class="btn primary desktop-only" id="dl" href="/api/download">Download CookieShield</a><b class="mobile-only">Download on your laptop. This won’t work on a phone or iPad.</b></p>
         <p id="unzip-mac" hidden>On a Mac: open your <b>Downloads</b> folder and <b>double-click</b> <code>cookieshield-extension.zip</code>. You’ll get a folder called <code>cookieshield-extension</code>.</p>
         <p id="unzip-win" hidden>On Windows: open your <b>Downloads</b> folder, right-click <code>cookieshield-extension.zip</code> and choose <b>Extract All</b> → <b>Extract</b>. You’ll get a folder called <code>cookieshield-extension</code>.</p>
         <p id="unzip-any">Open your <b>Downloads</b> folder and unzip <code>cookieshield-extension.zip</code>. You’ll get a folder called <code>cookieshield-extension</code>.</p>
@@ -107,10 +110,11 @@
     </details>
   </main>
 
+  <script src="/platform.js"></script>
   <script>
   (function () {
     var ua = navigator.userAgent || '';
-    var mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(ua));
+    var mobile = !!window.CS_IS_MOBILE;
     var chromium = /Chrome\/|Chromium\/|Edg\//.test(ua) && !/OPR\//.test(ua);
     if (mobile) document.getElementById('warn-phone').classList.add('show');
     else if (!chromium) document.getElementById('warn-browser').classList.add('show');
