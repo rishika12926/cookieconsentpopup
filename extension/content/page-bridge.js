@@ -289,6 +289,26 @@
     document.dispatchEvent(new CustomEvent('cookieshield:open-prefs-response', { detail: JSON.stringify({ id: req.id, ok }) }));
   });
 
+  // --- On-device translation through the PAGE's own Translator (where Chrome officially supports
+  //     the API). Used when the extension-side translator hands text back unchanged.
+  //     Text stays on the computer either way: this is Chrome's local model, not a web service.
+  const translators = new Map();   // "nl>en" -> Promise<Translator>
+  document.addEventListener('cookieshield:tr-request', async (ev) => {
+    let req = {};
+    try { req = JSON.parse(ev.detail || '{}'); } catch (e) { return; }
+    const reply = (o) => document.dispatchEvent(new CustomEvent('cookieshield:tr-response', { detail: JSON.stringify({ id: req.id, ...o }) }));
+    try {
+      if (typeof window.Translator === 'undefined') return reply({ error: 'NoTranslatorInPage' });
+      const key = `${req.src}>${req.tgt}`;
+      if (!translators.has(key)) translators.set(key, window.Translator.create({ sourceLanguage: req.src, targetLanguage: req.tgt }));
+      let t;
+      try { t = await translators.get(key); } catch (e) { translators.delete(key); throw e; }
+      const out = [];
+      for (const text of req.texts || []) out.push(await t.translate(text));
+      reply({ out });
+    } catch (e) { reply({ error: String((e && e.name) || e), message: String((e && e.message) || '') }); }
+  });
+
   document.addEventListener('cookieshield:state-request', async (ev) => {
     let req = {};
     try { req = JSON.parse(ev.detail || '{}'); } catch (e) { /* ignore */ }

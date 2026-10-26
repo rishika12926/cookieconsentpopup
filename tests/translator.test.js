@@ -18,14 +18,21 @@ const { chromium } = require('playwright');
 const SRC = fs.readFileSync(path.join(__dirname, '..', 'extension', 'content', 'translator.js'), 'utf8');
 const DICT = { 'Jouw rol': 'Your role', 'Over ons': 'About us', 'Solliciteer nu': 'Apply now', 'Als ervaren Product Manager bepaal je de koers.': 'As an experienced product manager you set the course.', 'Contactinformatie': 'Contact information', 'Nieuwe vacatures': 'New vacancies' };
 
-function setup(page, { fail = false } = {}) {
-  return page.evaluate(({ DICT, fail }) => {
+function setup(page, { fail = false, unchanged = false } = {}) {
+  return page.evaluate(({ DICT, fail, unchanged }) => {
+    // Stand-in for page-bridge.js (the page's own translator). Works unless `fail`.
+    document.addEventListener('cookieshield:tr-request', (ev) => {
+      const req = JSON.parse(ev.detail);
+      const reply = (o) => document.dispatchEvent(new CustomEvent('cookieshield:tr-response', { detail: JSON.stringify({ id: req.id, ...o }) }));
+      setTimeout(() => fail ? reply({ error: 'UnknownError', message: 'model crashed' }) : reply({ out: req.texts.map(t => DICT[t] || t) }), 10);
+    });
     window.chrome = { i18n: { detectLanguage: (t, cb) => cb({ isReliable: true, languages: [{ language: 'nl' }] }) } };
     window.Translator = {
       availability: async () => 'available',
-      create: async () => ({ translate: async (t) => { await new Promise(r => setTimeout(r, 15)); if (fail) throw new DOMException('model crashed', 'UnknownError'); return DICT[t] || t; } })
+      // `unchanged`: what we saw on ridder.com — the extension-side translator hands text back as-is.
+      create: async () => ({ translate: async (t) => { await new Promise(r => setTimeout(r, 15)); if (fail) throw new DOMException('model crashed', 'UnknownError'); return unchanged ? t : (DICT[t] || t); } })
     };
-  }, { DICT, fail });
+  }, { DICT, fail, unchanged });
 }
 
 const HTML = `<!doctype html><html lang="nl"><body><nav><a href="#">Over ons</a></nav><main id="app">
@@ -77,6 +84,14 @@ const ok = (c, m) => { if (!c) { failures++; console.log('✗', m); } else conso
     const r = await page.evaluate(() => window.CookieShieldTranslator.translatePage('en'));
     const st = await page.evaluate(() => window.CookieShieldTranslator.status());
     ok(!r.ok && !st.translated, 'when nothing could be translated it does NOT claim “Translated”');
+    await page.close();
+  }
+  // 6: extension-side translator returns the text unchanged → the page's translator is used
+  {
+    const page = await browser.newPage(); await page.setContent(HTML); await setup(page, { unchanged: true }); await page.addScriptTag({ content: SRC });
+    const r = await page.evaluate(() => window.CookieShieldTranslator.translatePage('en'));
+    const text = await page.evaluate(() => document.body.innerText);
+    ok(r.ok && r.engine === 'page' && /Your role/.test(text) && !/Jouw rol/.test(text), 'when the extension translator hands text back unchanged, the page’s on-device translator is used (ridder.com)');
     await page.close();
   }
   await browser.close();

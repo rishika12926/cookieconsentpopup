@@ -84,8 +84,9 @@
     if (out === undefined) {
       try { out = await translator.translate(key); }
       catch (e) { lastError = e; state.failed++; return false; }
-      cache.set(key, out);
-      if (out) translatedSet.add(out.trim());
+      if (!state.sample) state.sample = { input: key.slice(0, 40), output: String(out || '').slice(0, 40) };
+      if (out && out.trim() !== key) { cache.set(key, out); translatedSet.add(out.trim()); }
+      else state.unchanged++;
     }
     if (!out || out.trim() === key || !node.isConnected) return false;
     const lead = original.match(/^\s*/)[0], trail = original.match(/\s*$/)[0];
@@ -112,6 +113,45 @@
     await Promise.all(Array.from({ length: CONC }, worker));
   }
 
+  /** The page's own Translator, reached through page-bridge.js (MAIN world). */
+  let trSeq = 0;
+  function pageTranslator(src, tgt) {
+    return {
+      kind: 'page',
+      translate(text) {
+        return new Promise((resolve, reject) => {
+          const id = `tr-${Date.now()}-${++trSeq}`;
+          const onRes = (ev) => {
+            let d = {};
+            try { d = JSON.parse(ev.detail || '{}'); } catch (e) { return; }
+            if (d.id !== id) return;
+            document.removeEventListener('cookieshield:tr-response', onRes);
+            clearTimeout(timer);
+            if (d.error) { const err = new Error(d.message || d.error); err.name = d.error; reject(err); }
+            else resolve((d.out || [])[0]);
+          };
+          const timer = setTimeout(() => { document.removeEventListener('cookieshield:tr-response', onRes); const e = new Error('page translator timed out'); e.name = 'TimeoutError'; reject(e); }, 30000);
+          document.addEventListener('cookieshield:tr-response', onRes);
+          document.dispatchEvent(new CustomEvent('cookieshield:tr-request', { detail: JSON.stringify({ id, src, tgt, texts: [text] }) }));
+        });
+      }
+    };
+  }
+
+  /** One full pass with a given translator: watch, translate, catch up. Returns passages changed. */
+  async function runWith(translator) {
+    state.translator = translator;
+    startObserver(translator);
+    await translateNodes(translator, collectTextNodes(document.body), p => bar('working', p));
+    for (let pass = 0; pass < 3 && state.count > 0; pass++) {
+      await new Promise(r => setTimeout(r, 700));
+      const left = collectTextNodes(document.body);
+      if (!left.length) break;
+      await translateNodes(translator, left);
+    }
+    return state.count;
+  }
+
   /** Must be called from a user gesture if the language model still needs downloading. */
   async function translatePage(target = state.targetLang) {
     if (state.busy || state.translated) return { ok: state.translated };
@@ -125,34 +165,44 @@
     state.busy = true;
     state.count = 0; state.failed = 0; lastError = null;
     bar('working', 0);
+    state.unchanged = 0; state.sample = null; state.engine = null;
     try {
-      const translator = await Translator.create({
-        sourceLanguage: state.pageLang, targetLanguage: target,
-        monitor(m) { m.addEventListener('downloadprogress', e => bar('downloading', e.loaded)); }
-      });
-      state.translator = translator;
-      // Watch BEFORE translating: sites that re-draw parts of the page while we work (React,
-      // Vue, Nuxt hydration — e.g. ridder.com) would otherwise slip through untranslated.
-      startObserver(translator);
-      await translateNodes(translator, collectTextNodes(document.body), p => bar('working', p));
-      // Catch-up passes for anything that appeared or was replaced while we were working.
-      for (let pass = 0; pass < 3; pass++) {
-        await new Promise(r => setTimeout(r, 700));
-        const left = collectTextNodes(document.body);
-        if (!left.length) break;
-        await translateNodes(translator, left);
+      // 1. The extension's own translator (private: the page can't see it).
+      let ext = null, extErr = null;
+      try {
+        ext = await Translator.create({
+          sourceLanguage: state.pageLang, targetLanguage: target,
+          monitor(m) { m.addEventListener('downloadprogress', e => bar('downloading', e.loaded)); }
+        });
+      } catch (e) {
+        if (String(e && e.name) === 'NotAllowedError') throw e;
+        extErr = e;
+      }
+      if (ext) { state.engine = 'extension'; await runWith(ext); }
+      // 2. Nothing changed (the translator handed the text back as it was, as seen on
+      //    ridder.com) or it couldn't start: use the page's own on-device translator instead.
+      if (state.count === 0) {
+        stopObserver();
+        const firstTry = { sample: state.sample, unchanged: state.unchanged, failed: state.failed, error: extErr || lastError };
+        cache.clear(); state.unchanged = 0; state.failed = 0; state.sample = null; lastError = null;
+        state.engine = 'page';
+        await runWith(pageTranslator(state.pageLang, target));
+        if (state.count === 0) state.firstTry = firstTry;
       }
       // Only claim success if text actually changed on the page.
       if (state.count === 0) {
         state.translated = false;
         stopObserver();
-        console.warn('[CookieShield] translation produced no changes', lastError);
-        bar('failed', lastError ? String(lastError.name || lastError) : null);
-        return { ok: false, reason: lastError ? String(lastError.message || lastError) : 'nothing-changed' };
+        const why = lastError ? String(lastError.name || lastError)
+          : state.sample ? `translator returned “${state.sample.output}” for “${state.sample.input}”`
+          : 'no text to translate';
+        console.warn('[CookieShield] translation produced no changes', { why, lastError, sample: state.sample, firstTry: state.firstTry, pageLang: state.pageLang, target });
+        bar('failed', why);
+        return { ok: false, reason: why };
       }
       state.translated = true;
       bar('done');
-      return { ok: true, count: state.count, failed: state.failed };
+      return { ok: true, count: state.count, failed: state.failed, engine: state.engine };
     } catch (e) {
       stopObserver();
       const notAllowed = String(e && e.name) === 'NotAllowedError';
