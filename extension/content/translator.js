@@ -14,7 +14,7 @@
   const LANG_NAMES = (() => { try { return new Intl.DisplayNames(['en'], { type: 'language' }); } catch (e) { return null; } })();
 
   const state = {
-    pageLang: null, targetLang: 'en', translated: false, busy: false, originals: new Map(), observer: null, count: 0
+    pageLang: null, targetLang: 'en', translated: false, busy: false, originals: new Map(), observer: null, count: 0, failed: 0, applying: false, translator: null
   };
 
   function langName(code) {
@@ -70,23 +70,41 @@
     return out;
   }
 
+  // Same sentence → same translation, once. Also lets us re-apply a translation instantly when a
+  // site puts its original text back (frameworks that re-render after load).
+  const cache = new Map();      // original (trimmed) → translated
+  const translatedSet = new Set();  // translated strings, so we never "translate" our own output
+  let lastError = null;
+
+  async function translateOne(translator, node) {
+    const original = node.nodeValue;
+    const key = original.trim();
+    if (!key || translatedSet.has(key)) return false;
+    let out = cache.get(key);
+    if (out === undefined) {
+      try { out = await translator.translate(key); }
+      catch (e) { lastError = e; state.failed++; return false; }
+      cache.set(key, out);
+      if (out) translatedSet.add(out.trim());
+    }
+    if (!out || out.trim() === key || !node.isConnected) return false;
+    const lead = original.match(/^\s*/)[0], trail = original.match(/\s*$/)[0];
+    if (!state.originals.has(node)) state.originals.set(node, original);
+    state.applying = true;
+    node.nodeValue = lead + out + trail;
+    state.applying = false;
+    state.count++;
+    return true;
+  }
+
   async function translateNodes(translator, nodes, onProgress) {
     let done = 0;
-    const CONC = 6;
+    const CONC = 4;
     let i = 0;
     async function worker() {
       while (i < nodes.length) {
         const node = nodes[i++];
-        const original = node.nodeValue;
-        try {
-          const lead = original.match(/^\s*/)[0], trail = original.match(/\s*$/)[0];
-          const out = await translator.translate(original.trim());
-          if (out && node.isConnected) {
-            state.originals.set(node, original);
-            node.nodeValue = lead + out + trail;
-            state.count++;
-          }
-        } catch (e) { /* skip this node */ }
+        await translateOne(translator, node);
         done++;
         if (onProgress && done % 10 === 0) onProgress(done / nodes.length);
       }
@@ -105,36 +123,68 @@
       return { ok: false, reason: 'unsupported' };
     }
     state.busy = true;
+    state.count = 0; state.failed = 0; lastError = null;
     bar('working', 0);
     try {
       const translator = await Translator.create({
         sourceLanguage: state.pageLang, targetLanguage: target,
         monitor(m) { m.addEventListener('downloadprogress', e => bar('downloading', e.loaded)); }
       });
-      const nodes = collectTextNodes(document.body);
-      await translateNodes(translator, nodes, p => bar('working', p));
+      state.translator = translator;
+      // Watch BEFORE translating: sites that re-draw parts of the page while we work (React,
+      // Vue, Nuxt hydration — e.g. ridder.com) would otherwise slip through untranslated.
+      startObserver(translator);
+      await translateNodes(translator, collectTextNodes(document.body), p => bar('working', p));
+      // Catch-up passes for anything that appeared or was replaced while we were working.
+      for (let pass = 0; pass < 3; pass++) {
+        await new Promise(r => setTimeout(r, 700));
+        const left = collectTextNodes(document.body);
+        if (!left.length) break;
+        await translateNodes(translator, left);
+      }
+      // Only claim success if text actually changed on the page.
+      if (state.count === 0) {
+        state.translated = false;
+        stopObserver();
+        console.warn('[CookieShield] translation produced no changes', lastError);
+        bar('failed', lastError ? String(lastError.name || lastError) : null);
+        return { ok: false, reason: lastError ? String(lastError.message || lastError) : 'nothing-changed' };
+      }
       state.translated = true;
-      // Keep translating content that loads later (infinite scroll, SPA views).
-      state.observer = new MutationObserver(muts => {
-        if (!state.translated) return;
-        const fresh = [];
-        for (const m of muts) for (const a of m.addedNodes) {
-          if (a.nodeType === 1) fresh.push(...collectTextNodes(a));
-          else if (a.nodeType === 3 && a.parentElement) fresh.push(...collectTextNodes(a.parentElement));
-        }
-        if (fresh.length) translateNodes(translator, fresh.slice(0, 300));
-      });
-      state.observer.observe(document.body, { childList: true, subtree: true });
       bar('done');
-      return { ok: true, count: state.count };
+      return { ok: true, count: state.count, failed: state.failed };
     } catch (e) {
+      stopObserver();
       const notAllowed = String(e && e.name) === 'NotAllowedError';
-      if (!notAllowed) bar('unsupported');
+      if (!notAllowed) { console.warn('[CookieShield] translation failed', e); bar('failed', String(e && e.name || e)); }
       return { ok: false, reason: notAllowed ? 'needs-gesture' : String(e && e.message || e) };
     } finally {
       state.busy = false;
     }
   }
+
+  function startObserver(translator) {
+    stopObserver();
+    state.observer = new MutationObserver(muts => {
+      if (state.applying) return;
+      const fresh = [];
+      for (const m of muts) {
+        if (m.type === 'characterData') {
+          // The site wrote its original text back into a node we had translated: re-apply.
+          const n = m.target;
+          if (n.parentElement && !translatedSet.has((n.nodeValue || '').trim())) fresh.push(n);
+          continue;
+        }
+        for (const a of m.addedNodes) {
+          if (a.nodeType === 1) fresh.push(...collectTextNodes(a));
+          else if (a.nodeType === 3 && a.parentElement) fresh.push(...collectTextNodes(a.parentElement));
+        }
+      }
+      if (fresh.length) translateNodes(translator, [...new Set(fresh)].slice(0, 400));
+    });
+    state.observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+  function stopObserver() { if (state.observer) { state.observer.disconnect(); state.observer = null; } }
 
   /**
    * Translate without asking. If the language pack is already on this computer it starts right
@@ -174,8 +224,10 @@
   }
 
   function showOriginal() {
-    if (state.observer) { state.observer.disconnect(); state.observer = null; }
+    stopObserver();
+    state.applying = true;
     for (const [node, text] of state.originals) { try { node.nodeValue = text; } catch (e) { /* gone */ } }
+    state.applying = false;
     state.originals.clear();
     state.translated = false;
     state.count = 0;
@@ -242,25 +294,29 @@
     } else if (mode === 'done') {
       msg.innerHTML = `Translated from <b></b> on your device.`;
       msg.querySelector('b').textContent = from;
+      msg.title = `${state.count} passages translated`;
       b.append(msg, btn('Show original', showOriginal, 'ghost'), close);
     } else if (mode === 'original') {
       msg.innerHTML = `Showing the original <b></b> text.`;
       msg.querySelector('b').textContent = from;
       b.append(msg, btn(`Translate to ${to}`, () => translatePage()), close);
+    } else if (mode === 'failed') {
+      msg.textContent = `Couldn’t translate this page from ${from}${value ? ` (${value})` : ''}. Right-click the page → “Translate to ${to}” instead.`;
+      b.append(msg, btn('Try again', () => { state.translated = false; translatePage(); }, 'ghost'), close);
     } else if (mode === 'unsupported') {
       msg.textContent = `On-device translation isn’t available for ${from} in this Chrome. Right-click the page → “Translate to ${to}”.`;
       b.append(msg, close);
     }
     root.appendChild(b);
     // Offers fade away on their own so they never sit on top of the page for long.
-    if (mode === 'offer' || mode === 'done' || mode === 'original' || mode === 'unsupported') {
+    if (mode === 'offer' || mode === 'done' || mode === 'original' || mode === 'unsupported' || mode === 'failed') {
       clearTimeout(bar._t);
       bar._t = setTimeout(() => { if (host && !state.busy) { host.remove(); host = null; } }, 15000);
     }
   }
 
   function status() {
-    return { pageLang: state.pageLang, pageLangName: state.pageLang ? langName(state.pageLang) : null, translated: state.translated, count: state.count, apiAvailable: apiAvailable(), targetLang: state.targetLang };
+    return { pageLang: state.pageLang, pageLangName: state.pageLang ? langName(state.pageLang) : null, translated: state.translated, count: state.count, failed: state.failed, apiAvailable: apiAvailable(), targetLang: state.targetLang };
   }
 
   window.CookieShieldTranslator = { detectPageLanguage, translatePage, autoTranslate, showOriginal, bar, status, langName, availability, state };
