@@ -85,13 +85,13 @@ Requires Chrome 120 or later. Page translation uses Chrome's built-in on-device 
 npm install                          # installs Playwright
 npx playwright install chromium      # first time only
 npm test                             # unit tests: 362 lexicon/rule checks + report API
-npm run test:e2e                     # real Chromium with the extension loaded, 57 scenarios
+npm run test:e2e                     # real Chromium with the extension loaded, 59 scenarios
 ```
 The end-to-end run writes `tests/results/e2e-report.md` and `.json` with all three metrics. Latest run:
 
 | Metric | Result |
 |---|---|
-| P1: banners handled correctly | **56 / 56 (100%)** across 16 consent platforms (including iubenda's US privacy choices, copied from a real site), custom banners in 22 languages and edge cases |
+| P1: banners handled correctly | **58 / 58 (100%)** across 16 consent platforms (including iubenda's US privacy choices, copied from a real site), custom banners in 22 languages and edge cases |
 | P2: accept buttons clicked / silent acceptances / false success reports | **0 / 0 / 0** |
 | P2: exceptions correctly reported to the user | **5 / 5** (accept-only, pay-or-consent ×2, mislabeled reject, US opt-out with no opt-out link) |
 | P3: regressions per 100 handled visits | **0** |
