@@ -8,12 +8,13 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+  <div class="mobile-banner" role="note">CookieShield works only on a <b>laptop or desktop</b> (Chrome, Edge, Brave or Arc). It can’t be installed on phones or iPads.</div>
   <nav class="nav">
     <div class="wrap">
       <a class="logo" href="/"><img src="/icon.png" alt="">CookieShield</a>
       <a class="link" href="/playground/">Test bench</a>
       <a class="link opt" href="/report">Report a site</a>
-      <a class="btn small primary" href="/#install">Install</a>
+      <a class="btn small primary desktop-only" href="/install">Install</a>
     </div>
   </nav>
 
@@ -22,7 +23,7 @@
       <div class="bench-head">
         <div>
           <h1 style="font-size:clamp(32px,5vw,48px)">Test bench</h1>
-          <p class="sub">Each page is a small fake website with a simulated consent banner that uses the real platform’s HTML, JavaScript API and consent cookie. Open one with CookieShield installed and watch Pip handle it. The same pages run in the automated tests.</p>
+          <p class="sub">A safe place to see CookieShield work before you trust it on real sites. Below are 59 small practice websites, each with a different kind of cookie pop-up: the big consent tools (OneTrust, Cookiebot and others), banners in 22 languages, tricky layouts, and trick banners that only offer “Accept”. Open any of them with CookieShield installed and watch Pip handle it. The same pages run in my automated tests.</p>
         </div>
         <button class="btn" id="reset">Reset demo cookies</button>
       </div>
@@ -32,9 +33,9 @@
         <div class="card"><h3>2 · Check the proof</h3><p>Click the Pip icon in your toolbar → <b>What exactly happened?</b> It shows which button was clicked and the consent record it read afterwards.</p></div>
         <div class="card"><h3>3 · Check the site still works</h3><p>Scroll, sign in, send the contact form, use “About (SPA)” and “Next page”. Each page also says whether you’re signed in after a reload.</p></div>
       </div>
-      <p class="note">Tip: banners remember your choice through cookies, just like real sites. Use <b>Reset demo cookies</b> to see them again. To test “remember my choice”, reload a page after it has been handled: there’s no banner and the popup says <i>Your “no” is remembered</i>.</p>
+      <p class="note"><b>What “Reset demo cookies” does:</b> like real sites, these practice pages remember your answer in a cookie, so once a banner is handled it won’t show again. The button clears those practice cookies (only for this test bench) so every banner appears fresh. To see “remember my choice” in action, reload a page after it has been handled instead: there’s no banner and the popup says <i>Your “no” is remembered</i>.</p>
 
-      <div id="groups"></div>
+      <div id="groups"><p class="empty" id="loading">Loading the practice pages…</p></div>
     </div>
   </section>
 
@@ -43,15 +44,15 @@
   <script>
     const LABEL = { VERIFIED: ['ok', '✓ Rejected · confirmed'], CLICKED: ['ok', '✓ Rejected'], NEEDS_YOU: ['warn', '! Needs you'], FAILED: ['bad', '! Reports the site'], NO_BANNER: ['calm', 'Left alone'] };
     const GROUPS = { platform: 'Consent platforms', language: 'Custom banners in 22 languages', generic: 'Tricky layouts', exception: 'Must NOT accept (Priority 2)', negative: 'Not a cookie banner' };
-    fetch('fixtures.json').then(r => r.json()).then(list => {
-      const root = document.getElementById('groups');
+    fetch('/playground/fixtures.json').then(r => r.json()).then(list => {
+      const root = document.getElementById('groups'); root.innerHTML = '';
       for (const [g, title] of Object.entries(GROUPS)) {
         const items = list.filter(f => f.group === g);
         if (!items.length) continue;
         const h = document.createElement('h3'); h.className = 'group-title'; h.textContent = `${title} (${items.length})`;
         const grid = document.createElement('div'); grid.className = 'fx-grid';
         for (const f of items) {
-          const a = document.createElement('a'); a.className = 'fx'; a.href = `fixtures/${f.id}.html`;
+          const a = document.createElement('a'); a.className = 'fx'; a.href = `/playground/fixtures/${f.id}.html`;
           const b = document.createElement('b'); b.textContent = f.title;
           const d = document.createElement('span'); d.className = 'd'; d.textContent = f.description || '';
           const [tone, text] = LABEL[f.expect[0]] || ['calm', f.expect[0]];
@@ -61,14 +62,15 @@
         }
         root.append(h, grid);
       }
-    });
+    }).catch(() => { document.getElementById('groups').innerHTML = '<p class="empty">The practice pages couldn’t load. Reload this page.</p>'; });
     document.getElementById('reset').addEventListener('click', () => {
       for (const c of document.cookie.split(';')) {
         const name = c.split('=')[0].trim();
         if (name) document.cookie = `${name}=; path=/; max-age=0`;
       }
-      document.getElementById('reset').textContent = 'Demo cookies cleared ✓';
+      document.getElementById('reset').textContent = 'Demo cookies cleared ✓ Banners will show again';
     });
   </script>
+  <script src="/platform.js"></script>
 </body>
 </html>
