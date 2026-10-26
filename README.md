@@ -19,7 +19,7 @@ A Chrome extension (Manifest V3) with a friendly penguin guide, Pip, plus a smal
 | **Keeps sites working** | After handling a banner it checks scrolling, clicking, links, forms and the page itself, and repairs only what the cookie banner left behind (scroll locks, invisible overlays). |
 | **Pause per site** | One click in the pop-up turns CookieShield off for a site. *Undo page fixes* and *Report a problem* are right next to it. |
 | **History** | Every site where it rejected cookies **or found your “no” already in place**: what it did, what was refused (in plain words), where a remembered “no” came from, the proof, filters, search and a CSV export. |
-| **Any language** | Recognizes reject, accept and settings buttons in 25+ languages, and **translates the whole page into your language automatically** with Chrome's on-device translator (nothing leaves your computer). The first page in a new language starts translating on your first click, because Chrome needs one user action to download each language pack. After that it's instant. You can switch to “Ask me first” in Settings. |
+| **Any language** | Recognizes reject, accept and settings buttons in 25+ languages, and **translates the whole page into your language automatically** with Chrome's on-device translator (nothing leaves your computer). There's no prompt and no note. On the first page in a new language, translation starts with your first click on the page, because Chrome only downloads a language pack after a real click and refuses clicks made by extensions. After that, pages in that language translate as soon as they load. You can switch to “Ask me first” in Settings. |
 
 ---
 

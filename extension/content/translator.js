@@ -138,8 +138,9 @@
 
   /**
    * Translate without asking. If the language pack is already on this computer it starts right
-   * away. Chrome only allows the one-time pack download after a user action, so in that case we
-   * start on your first click / key press anywhere on the page — no "Translate?" prompt.
+   * away. Chrome only allows the one-time pack download after a real user action (script-made
+   * clicks don't count), so in that case we silently start on your first click / key press
+   * anywhere on the page — no prompt and no note.
    */
   async function autoTranslate(target = state.targetLang) {
     state.targetLang = target;
@@ -158,7 +159,9 @@
       const r = await translatePage(target);
       if (r && r.ok) return r;
     } catch (e) { /* fall through */ }
-    bar('auto-pending');
+    // No note, no question: wait silently for the first click or key press you make anyway
+    // while browsing, and use it to start the one-time download (Chrome refuses downloads
+    // triggered by script-made clicks, so a real one is required).
     const go = (e) => {
       if (!e.isTrusted) return;
       document.removeEventListener('pointerdown', go, true);
